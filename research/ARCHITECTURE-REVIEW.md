@@ -50,7 +50,10 @@ Phase 1 follow-through is recorded in [PHASE-1-SPIKES.md](PHASE-1-SPIKES.md). Th
 pinned package manifests name @sp/sync-core and @sp/sync-providers; registry queries for
 both returned E404 in this session. No upstream code was vendored or integrated. The
 independent durability/wrapping/transport/widget proofs do not validate an upstream build,
-production cryptography, native widgets or the full causal/migration pipeline. Adoption,
-device execution and contract review remain visible gates.
+production cryptography or the full causal/migration pipeline. On 28 October the reviewed
+choice became independent narrow ports plus vetted hash-wasm/WebCrypto primitives, with
+no upstream vendoring. A Capacitor/Kotlin bridge and isolated browser/hosted checks now
+exist. See [technical review](../docs/REVIEW-2026-10-28.md) and current verification for
+actual results; production encryption and physical-device acceptance remain later gates.
 
 The 24 follow-up answers are now accepted in [LAUNCH-DECISIONS.md](../LAUNCH-DECISIONS.md). Sync-first/optional encryption supersedes the earlier mandatory-encryption interpretation. iOS Safari/PWA and popular macOS/Linux browsers are launch targets, although device verification must still be obtained; native iOS is later. These product decisions do not change the pinned upstream findings.

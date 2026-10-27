@@ -16,5 +16,12 @@ excluded so a tooling change does not reformat the legacy product. Use small rev
 changes with meaningful failure/recovery tests for data changes. Report actual device
 coverage separately from mocks. Preserve original artwork and font/license notices.
 
-Repository publication and hosted CI are pending. Once available, ordinary reports use
-Issues. Do not place security reports or personal backups in a public issue; see SECURITY.md.
+Public source and ordinary reports use [byshriv/Sailor-LogBook](https://github.com/byshriv/Sailor-LogBook).
+Do not place security reports or personal backups in a public issue; see SECURITY.md.
+
+For isolated browser checks run `npx playwright install chromium firefox webkit`, then
+`npm run test:browser`. These use disposable headless profiles, never a personal browser.
+Linux CI runs all three engines; a Windows Firefox launch failure is documented separately.
+WebKit simulation is not actual Safari acceptance. For Android proof builds use JDK 21 /
+Android SDK 36, `npm run build:foundation`, `npm run sync:android`, then the app-scoped
+Gradle tasks in .github/workflows/ci.yml. Do not run upstream dependency instrumented suites.

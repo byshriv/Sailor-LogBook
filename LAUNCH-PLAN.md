@@ -1,6 +1,11 @@
 # Sailor Logbook — open-source 1.0 launch plan
 
-Planning baseline: 27 October 2026. Owner: **byshriv**. Intended public repository: **byshriv/sailor-logbook**. Phase 1 is now in progress at the owner's request. A local Git repository and isolated foundation/proofs exist; the public repository, hosted CI and production deployment have not been created or verified. See [Phase 1 status](docs/PHASE-1-STATUS.md) and [handoff](PHASE-HANDOFF.md). This phase does not authorize later product ports or creating accounts/granting access.
+Planning baseline: 27 October 2026; execution updated 28 October 2026. Owner: **byshriv**.
+Public repository: [byshriv/Sailor-LogBook](https://github.com/byshriv/Sailor-LogBook) (the
+owner-created spelling supersedes the earlier lowercase target). Foundation review and
+hosted CI are in PR #1. The design review is recorded; current closure evidence and admin
+gates are in [Phase 1 status](docs/PHASE-1-STATUS.md) and [handoff](PHASE-HANDOFF.md).
+No production deployment, migration or later product port is authorized by this phase.
 
 The owner has now answered all 24 follow-up questions. [LAUNCH-DECISIONS.md](LAUNCH-DECISIONS.md) is the authoritative accepted-answer register; it supersedes older proposals. Sync starts first and encryption is optional. Safari/iOS PWA, macOS and Linux browser compatibility are 1.0 targets, with actual verification status recorded separately.
 
@@ -17,7 +22,7 @@ Sailor Logbook is a minimal, polished, logbook-first calendar. Its purpose is ch
 | Scope | All demo features, plus owner-requested UI/usability improvements and bug fixes before launch. No additional feature family is assumed by “and more.” |
 | Schedule | Quality-based. No invented calendar deadline. Each milestone has an acceptance gate. |
 | Architectural direction | Super Productivity's local-first, modular, operation-log/sync patterns. The owner delegated framework choice; a full upstream fork and Angular are not required. |
-| UI stack | Proposed implementation choice: React + TypeScript + Vite, Redux Toolkit for deterministic state/actions/selectors, CSS Modules and shared design tokens. |
+| UI stack | Selected and scaffolded: React + TypeScript + Vite, Redux Toolkit for deterministic state/actions/selectors, CSS Modules and shared design tokens. |
 | Persistence | Move the canonical logbook from localStorage into IndexedDB. Sync history already uses IndexedDB in the demo; logbook data and OAuth credentials currently use localStorage. |
 | Cloud privacy | **Sync first; encryption optional**, as in the demo. When enabled, encrypt content before upload so Dropbox cannot decrypt it without the key. Unencrypted sync does not provide that guarantee. File sizes/timing/account metadata remain observable. |
 | Unlock/recovery | For optional encryption: guided passphrase + recovery file/printable code with verification. Trusted Android unlock uses platform protection; browser unlock is session-only. No compulsory biometric-on-every-open or inactivity lock by default. |
@@ -34,7 +39,7 @@ The demo remains **Demo v8**, with final cache revision `slb-v8-r3`. The final S
 | --- | --- | --- | --- |
 | 0 | Mobile HTML concept/demo: Calendar, Notebook, Reflection, onboarding, local PWA and original visual design. | Reviewable demo and preserved data examples. | Done |
 | 0.1 | Desktop demo and final v8 fixes: responsive workspaces, sidebar/decks/presets, 3-day Calendar, Planner dragging, customization, keyboard tours, Dropbox, update notice, mobile header, profile pictures and Settings toggle fix. | Complete deployment/source bundles, test results and known limits documented. | Done; owner deploys/reviews v8 |
-| 1 | Public GitHub foundation, frozen demo reference, product specification, architecture records, React/TS workspace, CI, design tokens, security/contribution docs and technical spikes. | Clean clone builds and passes CI; architecture/migration/encryption/widget contracts reviewed. | In progress; isolated foundation/proofs and local checks done; public/hosted/native/review gates open |
+| 1 | Public GitHub foundation, frozen demo reference, product specification, architecture records, React/TS workspace, CI, design tokens, security/contribution docs and technical spikes. | Clean clone builds and passes CI; architecture/migration/encryption/widget contracts reviewed. | Technical work complete; public CI/browser/emulator proofs pass; owner main-branch protection remains the closure gate |
 | 2 | Domain model, pure commands/reducers, canonical IndexedDB, durable operation pipeline, recovery checkpoints, attachment storage, timezone rules and lossless demo migration. | Migration/replay/crash tests pass; no data loss; existing demo backups/cloud copies remain recoverable. | Planned |
 | 3 | Production Calendar port with existing mobile flow and desktop Day/3-day/Week/Month behavior, lanes, quick-add, gestures and clock-derived task states. | Mouse, touch, keyboard, overlap, midnight and timezone cases pass; owner reviews Calendar before large flow changes. | Planned |
 | 4 | Notebook and Sea adventure port: writing, doodles, stroke undo, cream spread, best-thing links, send/edit behavior, bottle selection, filters and history. | Text/drawing survives saves, navigation, restart, migration and synchronization. | Planned |
@@ -228,6 +233,11 @@ The owner has answered the 16 foundational questions and all 24 follow-ups. [LAU
 
 The app is free, has no ads and has no telemetry by default. Use manual sanitized diagnostics, GitHub Issues and GitHub private vulnerability reporting after enabling them on the real repository. Start with Issues only; Discussions and real owner-provided donation links may come later. Use a small beta group, public source throughout and wider testing after migration/recovery checks. Record independent-review limits honestly.
 
-Continue Phase 1 only. The isolated React/TS preview, frozen reference, durable-write/replay and wrapping/widget contracts, local checks, ADRs and reuse assessment are recorded in [Phase 1 status](docs/PHASE-1-STATUS.md) and [spike evidence](research/PHASE-1-SPIKES.md). Public repository/hosted CI, native execution, successful browser review and architecture acceptance remain open. Do not begin Calendar or other large ports until this phase's gates are resolved.
+Continue within the current phase boundary. The isolated React/TS preview, frozen reference,
+durable-write/replay proofs, public source/CI, Argon2id candidate, native widget bridge and
+reviewed migration/encryption contracts are recorded in [Phase 1 status](docs/PHASE-1-STATUS.md),
+[review](docs/REVIEW-2026-10-28.md) and [spike evidence](research/PHASE-1-SPIKES.md). Use the
+status/handoff for actual closure evidence. Full domain/migration and large product ports
+remain later phases; CI/emulation do not establish physical-device launch acceptance.
 
 Primary external references: [pinned source review](research/ARCHITECTURE-REVIEW.md), [Redux Toolkit + TypeScript](https://redux.js.org/toolkit/usage/usage-with-typescript), [Vite](https://vite.dev/guide/), [Capacitor Android](https://capacitorjs.com/docs/android), [Android widgets](https://developer.android.com/develop/ui/views/appwidgets/overview), [Android signing](https://developer.android.com/studio/publish/app-signing), [Dropbox production guide](https://docs.dropboxapi.com/dropbox-api/docs/developer-resources/developer-guide), [Google Play personal-account test requirements](https://support.google.com/googleplay/android-developer/answer/14151465).

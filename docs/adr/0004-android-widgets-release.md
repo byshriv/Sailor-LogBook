@@ -1,9 +1,10 @@
 # ADR 0004: Android projection, links and release isolation
 
-Accepted direction; native feasibility execution pending an Android toolchain/device.
+Accepted direction; native proof implemented on 28 October 2026. See current hosted
+results in docs/VERIFICATION-PHASE-1.md. Physical-device acceptance remains Phase 10.
 
-Capacitor 8 is the candidate shared host. Registry check found 8.5.3; no native dependency
-is pinned/installed until its host can be generated and compiled. Official v8 setup requires
+Capacitor core/android 8.5.3 is pinned. CLI 8.4.3 avoids the unused iOS xcode/uuid advisory
+chain introduced by CLI 8.5.x and successfully synchronizes this host. Official v8 setup requires
 Node 22+ and Android Studio 2025.2.1+. Product minimum remains Android 12/API 31 and 4 GB
 recommended, independently of Capacitor's minimum. Native iOS remains later.
 
@@ -24,11 +25,15 @@ still user data and belongs in private app storage with appropriate backup exclu
 Use explicit immutable PendingIntents targeting this app's activity. Route only
 sailorlogbook://widget/quick-log and /today, reject arbitrary paths/query payloads. Quick
 log waits for initialization/unlock and then opens the sheet; never logs content directly.
-The TypeScript validator is tested. Kotlin plugin, manifest, layouts, process-death and
-device-unlock behavior are not implemented/compiled yet.
+The TypeScript validator and Kotlin projection/plugin/providers/layouts are implemented.
+The proof bridge handles cold/warm launch events, private text policy, atomic file writes,
+revision rejection, explicit clear and date/timezone refresh. Instrumentation targets an
+isolated Android 12 emulator. Full process-death/Keystore/device-unlock and real launcher
+acceptance remain Phase 10; this scaffold never claims production widgets already exist.
 
 Package local web assets in the APK. App ID/signing certificate/versionCode must be stable
-before first signed release; exact app ID remains unassigned. Release keys stay with the
+before first signed release. Proof ID work.shriv.sailorlogbook.proof is disposable;
+the production ID remains unassigned. Release keys stay with the
 maintainer/protected CI secrets, never chat. No signing/deployment job in Phase 1 PR CI.
 
 Production web release promotes a reviewed immutable artifact with checksum through a

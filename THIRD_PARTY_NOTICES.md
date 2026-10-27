@@ -29,5 +29,7 @@ See docs/dependency-inventory.json (regenerate with `npm run licenses`) for lock
 versions and declared licenses, including development and platform-specific optional entries.
 This is metadata inventory, not a completed legal/source audit. Retain applicable package
 license files when distributing bundles. React/React DOM and Redux Toolkit declare MIT.
-No Super Productivity implementation was copied/vendored; research records architectural
+Runtime/font notices are copied into each foundation build by scripts/foundation-notices.cjs.
+The generated Android host comes from Capacitor's MIT template; runtime notices include
+Capacitor and hash-wasm. No Super Productivity implementation was copied/vendored; research records architectural
 observations from the pinned MIT repository. Original owner artwork remains preserved.

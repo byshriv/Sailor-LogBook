@@ -19,6 +19,7 @@ class ProjectionStore(private val context: Context) {
 
     fun publish(input: JSONObject): Boolean = synchronized(LOCK) {
         require(input.getInt("schema") == 1)
+        require(input.get("schema") is Number && input.getDouble("schema") == 1.0)
         val revision = input.getLong("revision")
         require(revision >= 0 && revision <= 9007199254740991L)
         val day = LocalDate.parse(input.getString("wallDate")).toString()

@@ -2,6 +2,11 @@
 
 ## 0.1.0 foundation (unreleased)
 
+- Publish source/review in byshriv/Sailor-LogBook; verify clean hosted web, three-engine
+  headless, Android 12 emulator and foundation CodeQL checks. Preserve all demo runtime.
+- Add the reviewed Argon2id candidate, Kotlin projection/widget-launch proof and migration/
+  recovery contracts; enable private reporting. Main protection requires the owner action.
+
 - Preserve Demo v8 / slb-v8-r3 in a 37-file hash-verified reference.
 - Add isolated React/TypeScript/Redux/Vite preview, IndexedDB durability proof,
   operation replay, single-editor Web Lock and framework-neutral package boundaries.

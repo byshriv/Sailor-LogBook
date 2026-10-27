@@ -1,5 +1,23 @@
 # Phase 1 feasibility results
 
+## 28 October continuation (supersedes the earlier open implementation choices)
+
+The reviewed decision is to keep independent narrow sync/provider ports and reuse pinned
+public primitives, not to vendor an unbuilt upstream subset. hash-wasm 4.12.0 Argon2id
+is integrated as a feasibility candidate. Its salt-separated/deterministic output passes
+Node tests; Chromium and WebKit synthetic browser checks observed 106 ms and 105 ms on
+this Windows host. Those timings are not mobile budgets. Linux CI covers Firefox separately.
+
+The native Capacitor/Kotlin proof now exists in platforms/android, with projection privacy,
+revision guards, immutable widget intents, cold/warm launch routing and date refresh. App
+and test APKs compile in hosted CI. The initial broad Gradle task also assembled dependency
+test APKs and failed their duplicate Kotlin dependency check; CI was corrected to app-scoped
+tasks. Emulator outcome/current revision is recorded in docs/VERIFICATION-PHASE-1.md.
+
+Public source: https://github.com/byshriv/Sailor-LogBook; review PR #1. Private vulnerability
+reporting is enabled and verified. docs/REVIEW-2026-10-28.md resolves the technical design
+questions. The sections below preserve the first batch's findings and execution history.
+
 27 October 2026. These are scoped experiments, not production readiness or a security audit.
 
 ## Sync package reuse

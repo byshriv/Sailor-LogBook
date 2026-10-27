@@ -1,58 +1,82 @@
-# Phase handoff — continue Phase 1
+# Phase handoff — Phase 1 technical work complete
 
-Updated 27 October 2026. **Phase 1 is in progress; its exit gate is not met.** This batch implemented an isolated local foundation and feasibility proofs. Do not start Phase 2 or deploy the preview over the demo.
+Updated 28 October 2026. Technical foundation and feasibility work are complete. **Full Phase 1
+closure still needs the owner's Protect Main policy enabled and required checks configured.**
+Do not start Phase 2 merely because the code is published. No production deployment occurred.
 
 ## Read first
 
-1. [LAUNCH-DECISIONS.md](LAUNCH-DECISIONS.md): authoritative accepted product decisions.
-2. [docs/PHASE-1-STATUS.md](docs/PHASE-1-STATUS.md): deliverables, open decisions and owners.
-3. [LAUNCH-PLAN.md](LAUNCH-PLAN.md), [ROADMAP.md](ROADMAP.md): phase boundaries and gates.
-4. [research/ARCHITECTURE-REVIEW.md](research/ARCHITECTURE-REVIEW.md) and [research/PHASE-1-SPIKES.md](research/PHASE-1-SPIKES.md): pinned review and reuse evidence.
-5. [ADRs](docs/adr/0001-foundation.md) 0001–0004: architecture, migration/protocol, optional encryption/recovery, Android/widget/release.
-6. [docs/VERIFICATION-PHASE-1.md](docs/VERIFICATION-PHASE-1.md): actual results and limits.
+- [Phase status](docs/PHASE-1-STATUS.md), [verification](docs/VERIFICATION-PHASE-1.md) and [repository settings](docs/REPOSITORY-SETTINGS.md).
+- [Technical review](docs/REVIEW-2026-10-28.md), four ADRs, [v8 cutover contract](docs/migrations/V8-CUTOVER-CONTRACT.md).
+- LAUNCH-DECISIONS.md remains authoritative; LAUNCH-QUESTIONS.md is answered historical material.
+- LAUNCH-PLAN.md / ROADMAP.md retain later phase boundaries. Pinned architecture review and research/PHASE-1-SPIKES.md explain the reuse choice.
 
-LAUNCH-QUESTIONS.md is historical and answered. Do not repeat the 24 settled questions.
+## Published work
 
-## Current state
+Public repository: https://github.com/byshriv/Sailor-LogBook (owner-created spelling).
+Review: https://github.com/byshriv/Sailor-LogBook/pull/1, branch phase-1-foundation.
+Source was published through the connected GitHub tools; terminal Git credentials were
+unavailable and no desktop login/control was attempted. The PR is attached to this chat.
 
-- Workspace: C:/Users/swast/Downloads/SailorLogbook. Local Git initialized on main. **No commit, remote, push, hosted CI, public repo or tag was created.** Files remain untracked; inspect all source before initial publication. No GitHub CLI/connector was available. Public target remains byshriv/sailor-logbook, MIT.
-- Root source and existing deploy folder/ZIPs remain Demo v8, cache slb-v8-r3. No demo runtime files or user data changed. reference/demo-v8 freezes 37 runtime/assets/license files with a SHA-256 manifest. ZIPs/dist are ignored.
-- The root app still uses localStorage for canonical data/OAuth and IndexedDB for sync history. The proof does not read slb1, old credentials/databases or Dropbox.
-- The source defines **seven** achievements, audited in docs/PRODUCT-SPEC.md. The earlier count of eight was incorrect.
+Implemented: isolated React/TS/Redux/Vite preview; canonical-store/operation atomic-write
+proof with input snapshots, duplicate retry, abort/recovery and replay guards; Web Locks;
+revision-checked fake transport; dual optional-encryption key wrappers; hash-wasm Argon2id
+candidate; Capacitor/Kotlin private widget projection, immutable intents and cold/warm launch
+routing; CI/headless browser/emulator/CodeQL checks; specification, ADRs, security/contribution
+material, notices/inventory, migration/recovery contracts and public release-gate issues.
 
-## Implemented
+Root product remains Demo v8, slb-v8-r3. Its runtime and original artwork were preserved.
+reference/demo-v8 contains 37 byte-preserved hashed files; Git attributes preserve them across
+checkouts. The source has seven achievements, not eight. No actual migration, cloud connection,
+full-domain port or production encryption/native release is implemented by these proofs.
 
-- React 19.3.1, Redux Toolkit 2.13.0, Vite 8.3.5, TypeScript 7.0.2; pinned Node 24.22.0/npm 11.19.1, lockfile, formatter and package-boundary checks.
-- Separate apps/web preview and domain/persistence/sync-core/sync-providers/platform/crypto packages. Original font/token direction, one synthetic sample form, local saved/unsaved copy and Web Locks single-editor ownership.
-- Atomic IndexedDB state/sequence/operation proof, idempotent duplicates, input snapshots, transaction-completion notifications, abort rollback/retry and replay mismatch guards. Its local sequence is **not a causal clock**. No full domain model, checkpoints, remote replay, compaction or migration.
-- Revision compare-and-swap fake, downgrade guard, dual passphrase/recovery wrapping experiment and private widget/deep-link contracts. No Dropbox connection, content encryption/rotation, or native widgets.
-- ADRs/specification/changelog, contribution/conduct/security docs, issue/PR templates, read-only CI artifact workflow, Dependabot, narrow secret scan and lockfile license inventory.
+## Evidence
 
-## Verification
+- Existing workspace: 85 demo tests pass; nine foundation tests pass.
+- Actual fresh Git clone installs/builds/type-checks and verifies all 37 reference hashes.
+- Hosted clean Linux: 12 browser tests pass across Chromium, Firefox and WebKit.
+- Android app/test APKs compile; two API31 emulator instrumentation tests pass.
+- check, android-proof and codeql passed in run 40564791258; final PR revision must remain green.
+- Artifact IDs/digests, failure history and real-device limitations are in the verification doc.
+- Private vulnerability reporting is enabled and verified. Root public host returns HTTPS 200
+  through Cloudflare; no Cloudflare account/staging access or deployment is claimed.
 
-- Root demo check and **85/85 demo tests** pass with no skips.
-- **8/8 foundation tests**, type/import checks, formatting and Vite build pass.
-- All 37 reference hashes and the narrow credential scan pass. Inventory has 146 lockfile entries with license metadata (including optional platform packages; not a legal audit).
-- Fresh source at .local/phase1-clean-check installed with npm ci; audit summary was zero vulnerabilities. Foundation checks/build pass there. Demo tests: **84 pass, 1 expected skip**, because ignored .local/v1.html is absent. This is a clean-source check, not a Git clone/hosted CI result.
-- Actual pinned upstream package names @sp/sync-core and @sp/sync-providers returned registry E404. Cached manifests/core exports/provider contracts inspected; no upstream implementation built or vendored. Adoption remains open.
-- In-app browser timed out reaching the preview. User stopped native Computer Use with Escape before navigation/save/reopen/second-tab checks. **Browser QA is incomplete; no further browser input was sent after the stop.**
-- Android Studio at the standard path, java and adb were not found. No native build/device/Keystore/signing test was performed.
+## Remaining owner action / closure
 
-## Run
+The owner explicitly chose exact settings rather than deferral. Private reporting is done.
+Protect Main ruleset 25984549 was still disabled at last read and contained no required status
+checks. Set Enforcement Active, require pull requests and check/android-proof (optionally
+codeql), keep external approvals at zero for the solo owner, and prohibit force push/deletion.
+The connector cannot change admin settings. Verify actual policy before declaring closure.
+Then finalize/merge PR #1 after its latest checks pass. No protection bypass is authorized.
 
-Use npm ci, npm run check, npm test, npm run format:check, npm run scan:secrets, node scripts/freeze-demo.cjs and npm run verify:foundation.
+## Continue safely
 
-npm run dev:foundation serves http://127.0.0.1:5173/ with database slb-phase1-proof. Root demo uses npm run dev on port 4173. Keep origins separate. No proof service worker or production deployment job exists. Vite dev session 4473 was started; check whether it is still running before starting another. Build output build/foundation is cleared/rebuilt by the build command. Never deploy this proof to logbook.shriv.work.
+Use Node 24.22.0/npm 11.19.1; npm ci, npm run verify:foundation, npm run test:browser,
+npm run format:check, npm run scan:secrets and node scripts/freeze-demo.cjs.
+Headless browsers require npx playwright install chromium firefox webkit. No PC control.
+Local Windows Firefox launch failed; Linux Firefox passed. WebKit is not physical Safari.
 
-## Next Phase 1 work only
+Preview: npm run dev:foundation, port 5173, database slb-phase1-proof.
+Demo: npm run dev, port 4173. Keep origins separate. No foundation service worker.
+Android: build:foundation, sync:android, JDK21/SDK36, app-scoped Gradle tasks in CI.
+Proof ID work.shriv.sailorlogbook.proof must not become the production identity by accident.
+CI artifacts are seven-day debug/review artifacts with notices, not production releases.
 
-1. Obtain authenticated GitHub access without secrets in chat. Review publication contents, create/publish the intended public repo and frozen demo reference, enable private reporting/scans/protection, run hosted CI and verify actual settings. SECURITY.md advertises no unverified private contact.
-2. Review ADRs and preview. Resume actual browser save/reopen, second-tab/stale-lock and visual checks in a later turn when browser interaction is wanted. Preserve Calendar and other large flows.
-3. Resolve upstream adoption through a complete pinned/licensed source build or verified package release. The current focused cache is not a buildable vendoring artifact.
-4. Arrange Android JDK/SDK/Studio/device access. Capacitor candidate 8.5.3 is not installed. Compile a Kotlin projection publish/clear + widget launcher proof; test Quick log, private metrics, stale date/revision, process death/lock/reboot. Confirm stable app ID before a signed install. Never request signing secrets in chat.
-5. Finalize/review migration compatibility and optional-encryption contracts; select vetted KDF/serialization after device evidence. Full converter/model implementation remains Phase 2.
-6. Verify hosting/staging access and arrange real Safari/macOS/Linux and lower-memory Android coverage. Simulations/wrapping tests cannot substitute.
+Local authored commits and connector-created commits can have different hashes with identical
+trees. Before later work, inspect git status/log and fetch origin; preserve local work and
+align only after comparing trees. Do not blindly reset, pull through conflicts, or push a
+divergent local history. Ignored .local contains clone/test/publication evidence, never source.
 
-## Scope that must not drift
+## Next implementation phase after closure and a new user request
 
-Sync first, encryption optional; no mandatory full-local-database encryption or silent plaintext fallback. Three deck levels, original past wall dates, linked midnight segments, union eligible minutes, inherited exclusions, reassignment on deck deletion and reviewed rollover. Preview/recovery before merge/import; preserve best-thing overflow; Undo/30-day trash with independent tombstone retention. Default WebP with Keep original and empirical budgets. Distinct Lock/Disconnect/Erase local/Delete everywhere with honest stale-device/partial-failure behavior. Web/PWA + signed GitHub APK + both widgets required for 1.0; Google Play/native iOS later. Preserve original artwork/features, no ads/telemetry, owner UI review and real platform coverage. No real backups or secrets in chat/tests.
+Phase 2 only: complete typed domain, causal operations/checkpoints, storage/media/recovery and
+lossless synthetic-fixture migration. Follow the reviewed cutover contract and preserve source
+backups/unknown fields/IDs/original wall times. Do not port Calendar early.
+
+Real platform/media/KDF evidence is tracked in issue #2; production encryption/rotation/
+trusted Android unlock in issue #3. These are later release gates, not waived or falsely
+proven by this phase. Full signed app/widgets are Phase 10. Preserve all accepted product rules:
+sync-first optional encryption, original artwork/features, three deck levels, linked midnight
+segments, union eligible minutes, inherited exclusions, reviewed rollover, recovery/Undo/trash,
+private-by-default widgets and honest erasure. Never request real backups/keys/tokens in chat.

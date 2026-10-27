@@ -30,6 +30,8 @@ public class ProjectionTest {
         try { store.publish(sample(2).put("loggedMinutes",1441)); fail("invalid accepted"); }
         catch (IllegalArgumentException expected) { }
         assertEquals(1,store.read().getLong("revision"));
+        try { store.publish(sample(2).put("schema",1.5)); fail("fractional schema accepted"); }
+        catch (IllegalArgumentException expected) { }
         store.setTextVisibility(true); assertNull(store.read());
         assertTrue(store.publish(sample(2))); assertTrue(store.read().has("personalText"));
         store.setTextVisibility(false); assertNull(store.read());

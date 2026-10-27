@@ -8,6 +8,11 @@ Phase 1 execution status and remaining technical/access inputs are tracked in
 [docs/PHASE-1-STATUS.md](docs/PHASE-1-STATUS.md). The questionnaire remains historical;
 no new product-scope question was opened by the foundation experiments.
 
+On 28 October the owner delegated the remaining technical work and requested Phase 1
+completion. The design review is in docs/REVIEW-2026-10-28.md. The owner chose to enable
+admin settings using docs/REPOSITORY-SETTINGS.md; private reporting is verified enabled.
+This does not reopen the questionnaire.
+
 - Public MIT project: **byshriv/sailor-logbook**; product **Sailor Logbook**, installed name **Logbook**; preserve original artwork.
 - Web/PWA, Android APK and native widgets are all required for 1.0. Google Play is later.
 - All demo features stay. “More” means UI/usability improvements and bug fixes. Quality-based launch, no fixed date.

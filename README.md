@@ -2,7 +2,7 @@
 
 A personal book for the little things you do in the day. A local-first, dark, logbook-first calendar, with optional Dropbox sync. The application source is open source under the [MIT license](LICENSE). Fonts retain their SIL Open Font Licenses in `fonts/`.
 
-## Phase 1 foundation (in progress)
+## Phase 1 foundation
 
 The production foundation is isolated in `apps/web` and `packages`. The root app below
 remains Demo v8. Use Node **24.22.0** / npm **11.19.1**, then:
@@ -17,8 +17,14 @@ The proof preview uses port 5173 and its own IndexedDB database. It does not imp
 data or connect Dropbox. `build/foundation` is a review artifact, not a production release.
 See [Phase 1 status](docs/PHASE-1-STATUS.md), [ADRs](docs/adr/0001-foundation.md),
 [spike evidence](research/PHASE-1-SPIKES.md) and [handoff](PHASE-HANDOFF.md).
-Phase 1 remains open pending public repository/hosted CI, architecture review and native/
-browser feasibility evidence. Run demo and proof on separate origins.
+Public source and hosted checks are in [byshriv/Sailor-LogBook](https://github.com/byshriv/Sailor-LogBook)
+and [PR #1](https://github.com/byshriv/Sailor-LogBook/pull/1). The design review is in
+[docs/REVIEW-2026-10-28.md](docs/REVIEW-2026-10-28.md). Run demo and proof on separate origins.
+
+`npm run test:browser` uses isolated headless Chromium/Firefox/WebKit profiles. Android
+source in platforms/android is a disposable bridge/widget feasibility host with its own
+app ID; it is not the signed 1.0 app. Hosted artifacts include runtime/font license notices.
+See [current evidence and remaining gates](docs/PHASE-1-STATUS.md) before continuing work.
 
 ## Run and check the demo
 

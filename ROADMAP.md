@@ -4,7 +4,7 @@
 | ----- | ---- | ------ |
 | 0 | Mobile v1 demo: calendar, notebook, reflection, onboarding and local PWA | done |
 | 0.1 | Desktop demo, Dropbox, shortcuts/tours, responsive UI, update notice and final v8 Settings fix | done; demo v8, cache slb-v8-r3; 85 tests pass; physical-device limits documented |
-| 1 | Public GitHub foundation: tooling, CI, MIT/docs, tokens, architecture decisions and storage/sync/encryption/widget feasibility spikes | in progress; local foundation/proofs/checks complete for this batch; public repo/hosted CI, native and browser/review gates open; see docs/PHASE-1-STATUS.md |
+| 1 | Public GitHub foundation: tooling, CI, MIT/docs, tokens, architecture decisions and storage/sync/encryption/widget feasibility spikes | technical work complete: public source, clean CI/browser/Android emulator proofs and reviewed contracts; owner Protect Main policy is the remaining closure gate; see docs/PHASE-1-STATUS.md |
 | 2 | Shared TypeScript domain, React/state architecture, canonical IndexedDB, durable operations, linked-day/overlap rules, Undo/30-day recovery, WebP media and safe demo migration | planned |
 | 3 | Calendar port: views, +deck quick-add, drag and resize | planned |
 | 4 | Notebook port: text, drawing, bottles and Sea adventure | planned |

@@ -1,6 +1,8 @@
 # ADR 0003: optional encryption, recovery and rotation
 
-Accepted contract; production KDF, format and device budgets remain open.
+Accepted contract; hash-wasm 4.12.0 Argon2id is the selected feasibility candidate as of
+28 October 2026. See docs/REVIEW-2026-10-28.md. Production format/device budgets remain open
+for the encryption phase; this is not an enabled encrypted-sync implementation.
 
 Ordinary new sync works in plain mode without key setup. Existing encrypted logbooks
 require their key. Persist encryption-required policy separately from the in-memory key;
