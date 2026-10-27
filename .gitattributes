@@ -1,0 +1,13 @@
+* text=auto eol=lf
+*.bat text eol=crlf
+*.js -text
+*.css -text
+*.html -text
+*.png -text
+*.woff2 -text
+*.jar -text
+fonts/** -text
+fonts/*-OFL.txt -whitespace
+icons/** -text
+reference/** -text -whitespace
+"svg icons and animations/**" -text

@@ -1,0 +1,96 @@
+@font-face {
+  font-family: Rethink;
+  src: url('../../../fonts/rethink-sans-500.woff2');
+  font-weight: 500;
+  font-display: swap;
+}
+@font-face {
+  font-family: Rethink;
+  src: url('../../../fonts/rethink-sans-800.woff2');
+  font-weight: 800;
+  font-display: swap;
+}
+:root {
+  color-scheme: dark;
+  --background: #121010;
+  --cream: #f7f5e4;
+  --card: #1c1a19;
+  --raised: #2a2725;
+  --muted: #9b978b;
+  --accent: #226192;
+  --danger: #e5484d;
+  --ease: cubic-bezier(0.1, 0.7, 0.5, 1);
+  font-family: Rethink, system-ui, sans-serif;
+  font-weight: 500;
+  color: var(--cream);
+  background: var(--background);
+}
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+}
+main {
+  max-width: 740px;
+  padding: 48px 24px;
+  margin: auto;
+}
+h1 {
+  font-size: clamp(30px, 6vw, 48px);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+p {
+  line-height: 1.6;
+  color: var(--muted);
+}
+section {
+  margin: 24px 0;
+  padding: 24px;
+  border-radius: 24px;
+  background: var(--card);
+}
+label {
+  display: block;
+  margin-bottom: 8px;
+}
+input {
+  width: 100%;
+  padding: 14px;
+  border: 1px solid var(--muted);
+  border-radius: 12px;
+  font: inherit;
+  background: var(--raised);
+  color: var(--cream);
+}
+button {
+  margin-top: 16px;
+  border: 0;
+  border-radius: 16px;
+  padding: 14px 20px;
+  font: inherit;
+  background: var(--cream);
+  color: var(--background);
+  cursor: pointer;
+}
+button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 4px;
+}
+li {
+  padding: 10px 0;
+}
+small {
+  color: var(--muted);
+}
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation: none !important;
+    transition: none !important;
+  }
+}

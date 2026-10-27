@@ -1,0 +1,2 @@
+/* Remove OAuth parameters before the app creates browser-history entries. */
+(function(){const url=new URL(location.href);if(!url.searchParams.has('code')&&!url.searchParams.has('error'))return;window.LogbookOAuthLanding={url:url.href};for(const key of ['code','state','error','error_description'])url.searchParams.delete(key);history.replaceState(history.state,'',url.pathname+url.search+url.hash);})();

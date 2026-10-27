@@ -1,0 +1,166 @@
+<svg width="1080" height="1080" viewBox="0 0 1080 1080" fill="none" xmlns="http://www.w3.org/2000/svg">
+<style>
+@keyframes kf_Group_5_transform_0 {
+  0% {
+    transform: translateX(577px) translateY(548px) translateX(400px) translateY(400px);
+  }
+  7.47% {
+    animation-timing-function: cubic-bezier(0.1, 0.7, 0.5, 1);
+    transform: translateX(577px) translateY(548px) translateX(400px) translateY(400px);
+  }
+  53.63% {
+    transform: translateX(577px) translateY(548px) translateX(0px) translateY(0px);
+  }
+  100% {
+    transform: translateX(577px) translateY(548px) translateX(0px) translateY(0px);
+  }
+}
+#Group_5 {
+  transform-origin: 0 0;
+  animation: kf_Group_5_transform_0 2.59946s linear infinite;
+}
+@keyframes kf_Group_16_transform_0 {
+  0% {
+    transform: translateX(503px) translateY(532px) translateX(-400px) translateY(-400px) rotate(3.142rad) skewX(0rad);
+  }
+  7.46% {
+    animation-timing-function: cubic-bezier(0.1, 0.7, 0.5, 1);
+    transform: translateX(503px) translateY(532px) translateX(-400px) translateY(-400px) rotate(3.142rad) skewX(0rad);
+  }
+  53.63% {
+    transform: translateX(503px) translateY(532px) translateX(0px) translateY(0px) rotate(3.142rad) skewX(0rad);
+  }
+  100% {
+    transform: translateX(503px) translateY(532px) translateX(0px) translateY(0px) rotate(3.142rad) skewX(0rad);
+  }
+}
+#Group_16 {
+  transform-origin: 0 0;
+  animation: kf_Group_16_transform_0 2.59946s linear infinite;
+}
+@keyframes kf_Group_17_transform_0 {
+  0% {
+    transform: translateX(548px) translateY(503px) translateX(400px) translateY(-400px) rotate(-1.571rad) skewX(0rad);
+  }
+  7.46% {
+    animation-timing-function: cubic-bezier(0.1, 0.7, 0.5, 1);
+    transform: translateX(548px) translateY(503px) translateX(400px) translateY(-400px) rotate(-1.571rad) skewX(0rad);
+  }
+  53.63% {
+    transform: translateX(548px) translateY(503px) translateX(0px) translateY(0px) rotate(-1.571rad) skewX(0rad);
+  }
+  100% {
+    transform: translateX(548px) translateY(503px) translateX(0px) translateY(0px) rotate(-1.571rad) skewX(0rad);
+  }
+}
+#Group_17 {
+  transform-origin: 0 0;
+  animation: kf_Group_17_transform_0 2.59946s linear infinite;
+}
+@keyframes kf_Group_15_transform_0 {
+  0% {
+    transform: translateX(532px) translateY(577px) translateX(-400px) translateY(400px) rotate(1.571rad) skewX(0rad);
+  }
+  7.47% {
+    animation-timing-function: cubic-bezier(0.1, 0.7, 0.5, 1);
+    transform: translateX(532px) translateY(577px) translateX(-400px) translateY(400px) rotate(1.571rad) skewX(0rad);
+  }
+  53.63% {
+    transform: translateX(532px) translateY(577px) translateX(0px) translateY(0px) rotate(1.571rad) skewX(0rad);
+  }
+  100% {
+    transform: translateX(532px) translateY(577px) translateX(0px) translateY(0px) rotate(1.571rad) skewX(0rad);
+  }
+}
+#Group_15 {
+  transform-origin: 0 0;
+  animation: kf_Group_15_transform_0 2.59946s linear infinite;
+}
+@keyframes kf_Group_6_transform_0 {
+  0% {
+    transform: translateX(516.5px) translateY(949px) translateX(0px) translateY(400px);
+  }
+  23.08% {
+    animation-timing-function: ease-out;
+    transform: translateX(516.5px) translateY(949px) translateX(0px) translateY(400px);
+  }
+  92.33% {
+    transform: translateX(516.5px) translateY(949px) translateX(0px) translateY(0px);
+  }
+  100% {
+    transform: translateX(516.5px) translateY(949px) translateX(0px) translateY(0px);
+  }
+}
+#Group_6 {
+  transform-origin: 0 0;
+  animation: kf_Group_6_transform_0 2.59946s linear infinite;
+}
+@keyframes kf_Group_14_transform_0 {
+  0% {
+    transform: translateX(563.5px) translateY(131px) translateX(0px) translateY(-400px) rotate(3.142rad) skewX(0rad);
+  }
+  23.08% {
+    animation-timing-function: ease-out;
+    transform: translateX(563.5px) translateY(131px) translateX(0px) translateY(-400px) rotate(3.142rad) skewX(0rad);
+  }
+  92.33% {
+    transform: translateX(563.5px) translateY(131px) translateX(0px) translateY(0px) rotate(3.142rad) skewX(0rad);
+  }
+  100% {
+    transform: translateX(563.5px) translateY(131px) translateX(0px) translateY(0px) rotate(3.142rad) skewX(0rad);
+  }
+}
+#Group_14 {
+  transform-origin: 0 0;
+  animation: kf_Group_14_transform_0 2.59946s linear infinite;
+}
+</style>
+<g id="sailor_logbook_logo">
+<g clip-path="url(#clip0_46_140)">
+<rect width="1080" height="1080" rx="240" id="sailor_logbook_logo_bg_0" fill="#F7F5E4">
+</rect>
+<g id="Frame_1" filter="url(#filter0_f_46_140)" transform="translate(-15.7946 76.1276) rotate(-2)">
+<line id="Line_11" y1="-2" x2="1080" y2="-2" stroke="#226192" stroke-opacity="0.7" stroke-width="4"/>
+<line id="Line_10" transform="translate(0 84)" y1="-2" x2="1080" y2="-2" stroke="#226192" stroke-opacity="0.7" stroke-width="4"/>
+<line id="Line_9" transform="translate(0 168)" y1="-2" x2="1080" y2="-2" stroke="#226192" stroke-opacity="0.7" stroke-width="4"/>
+<line id="Line_8" transform="translate(0 252)" y1="-2" x2="1080" y2="-2" stroke="#226192" stroke-opacity="0.7" stroke-width="4"/>
+<line id="Line_7" transform="translate(0 336)" y1="-2" x2="1080" y2="-2" stroke="#226192" stroke-opacity="0.7" stroke-width="4"/>
+<line id="Line_6" transform="translate(0 420)" y1="-2" x2="1080" y2="-2" stroke="#226192" stroke-opacity="0.7" stroke-width="4"/>
+<line id="Line_5" transform="translate(0 504)" y1="-2" x2="1080" y2="-2" stroke="#226192" stroke-opacity="0.7" stroke-width="4"/>
+<line id="Line_4" transform="translate(0 588)" y1="-2" x2="1080" y2="-2" stroke="#226192" stroke-opacity="0.7" stroke-width="4"/>
+<line id="Line_3" transform="translate(0 672)" y1="-2" x2="1080" y2="-2" stroke="#226192" stroke-opacity="0.7" stroke-width="4"/>
+<line id="Line_1" transform="translate(0 756)" y1="-2" x2="1080" y2="-2" stroke="#226192" stroke-opacity="0.7" stroke-width="4"/>
+<line id="Line_12" transform="translate(0 840)" y1="-2" x2="1080" y2="-2" stroke="#226192" stroke-opacity="0.7" stroke-width="4"/>
+<line id="Line_2" transform="translate(0 924)" y1="-2" x2="1080" y2="-2" stroke="#226192" stroke-opacity="0.7" stroke-width="4"/>
+</g>
+<g id="Group_5" transform="translate(577 548)">
+<path id="Vector_2" d="M503 292V0C503 0 231.36 11.9029 124.876 117.06C8.12149 232.36 0 532 0 532H263C395.548 532 503 424.548 503 292Z" fill="#226192"/>
+</g>
+<g id="Group_16" transform="matrix(-1 0 0 -1 503 532)">
+<path id="Vector_2_2" d="M503 292V0C503 0 231.36 11.9029 124.876 117.06C8.12149 232.36 0 532 0 532H263C395.548 532 503 424.548 503 292Z" fill="#226192"/>
+</g>
+<g id="Group_17" transform="matrix(0 -1 1 0 548 503)">
+<path id="Vector_2_3" d="M503 292V0C503 0 231.36 11.9029 124.876 117.06C8.12149 232.36 0 532 0 532H263C395.548 532 503 424.548 503 292Z" fill="#226192"/>
+</g>
+<g id="Group_15" transform="matrix(0 1 -1 0 532 577)">
+<path id="Vector_2_4" d="M503 292V0C503 0 231.36 11.9029 124.876 117.06C8.12149 232.36 0 532 0 532H263C395.548 532 503 424.548 503 292Z" fill="#226192"/>
+</g>
+<g id="Group_6" transform="translate(516.5 949)">
+<path id="Vector_6" d="M37 47C4.0111 48.0046 0 0 0 0L10.5 131H63.5L73.5 0C73.5 0 69.9889 45.9954 37 47Z" fill="#226192"/>
+</g>
+<g id="Group_14" transform="matrix(-1 0 0 -1 563.5 131)">
+<path id="Vector_6_2" d="M37 47C4.0111 48.0046 0 0 0 0L10.5 131H63.5L73.5 0C73.5 0 69.9889 45.9954 37 47Z" fill="#226192"/>
+</g>
+</g>
+</g>
+<defs>
+<filter id="filter0_f_46_140" x="-36.5042" y="-45.8056" width="1153.01" height="1011.61" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+<feFlood flood-opacity="0" result="BackgroundImageFix"/>
+<feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"/>
+<feGaussianBlur stdDeviation="2" result="effect1_foregroundBlur_46_140"/>
+</filter>
+<clipPath id="clip0_46_140">
+<rect width="1080" height="1080" rx="240" fill="white"/>
+</clipPath>
+</defs>
+</svg>
