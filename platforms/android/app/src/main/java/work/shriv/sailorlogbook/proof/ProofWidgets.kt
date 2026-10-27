@@ -35,7 +35,8 @@ object ProofWidgets {
                 value == null -> "Open Logbook · no saved projection"
                 stale -> "Last updated ${value.optString("wallDate")} · Open Logbook"
                 else -> "${value.optInt("loggedMinutes")} min · ${value.optInt("bestCount")} best things" +
-                    if (value.has("personalText")) "\n${value.optString("personalText")}" else ""
+                    (if (value.has("personalText")) "\n${value.optString("personalText")}" else "") +
+                    "\nUpdated ${value.optString("updatedAt")}" 
             }
             view.setTextViewText(R.id.widget_label, text)
             view.setOnClickPendingIntent(R.id.widget_label, launch(context, quick))
@@ -49,8 +50,16 @@ object ProofWidgets {
     }
 }
 class QuickLogWidget : AppWidgetProvider() {
+    override fun onReceive(context: Context, intent: Intent) {
+        super.onReceive(context, intent)
+        if (intent.action in listOf(Intent.ACTION_DATE_CHANGED, Intent.ACTION_TIMEZONE_CHANGED, Intent.ACTION_TIME_CHANGED)) ProofWidgets.refresh(context)
+    }
     override fun onUpdate(context: Context, manager: AppWidgetManager, ids: IntArray) = ProofWidgets.update(context, manager, ids, true)
 }
 class TodayWidget : AppWidgetProvider() {
+    override fun onReceive(context: Context, intent: Intent) {
+        super.onReceive(context, intent)
+        if (intent.action in listOf(Intent.ACTION_DATE_CHANGED, Intent.ACTION_TIMEZONE_CHANGED, Intent.ACTION_TIME_CHANGED)) ProofWidgets.refresh(context)
+    }
     override fun onUpdate(context: Context, manager: AppWidgetManager, ids: IntArray) = ProofWidgets.update(context, manager, ids, false)
 }
