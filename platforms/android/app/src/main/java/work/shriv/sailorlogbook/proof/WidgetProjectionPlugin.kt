@@ -5,9 +5,14 @@ import com.getcapacitor.Plugin
 import com.getcapacitor.PluginCall
 import com.getcapacitor.PluginMethod
 import com.getcapacitor.annotation.CapacitorPlugin
+import android.content.Intent
 
 @CapacitorPlugin(name = "WidgetProjection")
 class WidgetProjectionPlugin : Plugin() {
+    override fun handleOnNewIntent(intent: Intent) {
+        val action = ProofWidgets.action(intent.dataString) ?: return
+        notifyListeners("widgetLaunch", JSObject().put("action", action), true)
+    }
     @PluginMethod fun publish(call: PluginCall) {
         try {
             val projection = call.getObject("projection") ?: throw IllegalArgumentException("Projection required")

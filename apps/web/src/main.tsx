@@ -7,7 +7,7 @@ import type { State } from '../../../packages/domain/src/index.ts';
 import { openProofStore, WriteGateway } from '../../../packages/persistence/src/index.ts';
 import './tokens.css';
 import { benchmarkArgon } from '../../../packages/crypto/src/argon.ts';
-import { launchAction, publishWidget } from './native.ts';
+import { launchAction, listenForWidgetLaunch, publishWidget } from './native.ts';
 
 const slice = createSlice({
   name: 'proof',
@@ -26,12 +26,25 @@ function App() {
   const [benchmark, setBenchmark] = useState('Not run');
   const [widgetStatus, setWidgetStatus] = useState('');
   useEffect(() => {
-    void launchAction().then((action) => {
+    const receive = (action: string) => {
       if (action === 'quick-log') {
         document.getElementById('title')?.focus();
         setStatus('Quick log launch received · synthetic logging form ready');
       } else if (action === 'today') setStatus('Today launch received · synthetic day ready');
+    };
+    let cancelled = false;
+    let remove = () => {};
+    void launchAction().then((action) => {
+      if (!cancelled) receive(action);
     });
+    void listenForWidgetLaunch(receive).then((cleanup) => {
+      if (cancelled) cleanup();
+      else remove = cleanup;
+    });
+    return () => {
+      cancelled = true;
+      remove();
+    };
   }, []);
   return (
     <main>

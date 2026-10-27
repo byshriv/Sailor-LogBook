@@ -24,6 +24,9 @@ class ProjectionStore(private val context: Context) {
         val day = LocalDate.parse(input.getString("wallDate")).toString()
         val minutes = input.getInt("loggedMinutes")
         val count = input.getInt("bestCount")
+        require(input.get("revision") is Number && input.getDouble("revision") == revision.toDouble())
+        require(input.get("loggedMinutes") is Number && input.getDouble("loggedMinutes") == minutes.toDouble())
+        require(input.get("bestCount") is Number && input.getDouble("bestCount") == count.toDouble())
         require(minutes in 0..1440 && count in 0..4)
         val updated = Instant.parse(input.getString("updatedAt")).toString()
         if (revision <= (read()?.optLong("revision", -1) ?: -1)) return false

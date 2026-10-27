@@ -1,0 +1,8 @@
+name: Production foundation
+paths:
+  - apps/web/src
+  - packages
+paths-ignore:
+  - reference
+  - node_modules
+# Preserved demo is prototype reference; this job checks the new foundation only.
