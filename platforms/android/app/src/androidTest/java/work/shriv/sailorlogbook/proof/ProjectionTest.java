@@ -9,6 +9,11 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import java.time.LocalDate;
 import java.time.Instant;
+import android.content.Intent;
+import androidx.test.core.app.ActivityScenario;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 
 @RunWith(AndroidJUnit4.class)
 public class ProjectionTest {
@@ -44,5 +49,40 @@ public class ProjectionTest {
         assertNull(ProofWidgets.INSTANCE.action("sailorlogbook://widget/today?token=x"));
         assertNull(ProofWidgets.INSTANCE.action("sailorlogbook://widget/erase"));
         assertTrue(ProofWidgets.INSTANCE.launch(context,true).isImmutable());
+    }
+    private String evaluate(ActivityScenario<MainActivity> scenario, String script) throws Exception {
+        CountDownLatch latch = new CountDownLatch(1);
+        AtomicReference<String> value = new AtomicReference<>();
+        scenario.onActivity(activity -> activity.getBridge().getWebView().evaluateJavascript(script,
+            result -> { value.set(result); latch.countDown(); }));
+        assertTrue("WebView evaluation timed out", latch.await(5,TimeUnit.SECONDS));
+        return value.get();
+    }
+    @Test public void packagedWebViewCanCallTheKotlinBridge() throws Exception {
+        Context context = InstrumentationRegistry.getInstrumentation().getTargetContext();
+        ProjectionStore store = new ProjectionStore(context);
+        store.setTextVisibility(false);
+        Intent intent = new Intent(context,MainActivity.class)
+            .setData(android.net.Uri.parse("sailorlogbook://widget/quick-log"))
+            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        try (ActivityScenario<MainActivity> scenario = ActivityScenario.launch(intent)) {
+            String result = "";
+            for (int i=0;i<80;i++) {
+                result = evaluate(scenario,"!!(window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.WidgetProjection)");
+                if ("true".equals(result)) break;
+                Thread.sleep(250);
+            }
+            assertEquals("Packaged JavaScript bridge not ready", "true", result);
+            String input = sample(99).toString();
+            evaluate(scenario,"window.__bridgeProof='pending'; window.Capacitor.Plugins.WidgetProjection.getLaunchAction().then(a => window.Capacitor.Plugins.WidgetProjection.publish({projection:"+input+"}).then(r => { window.__bridgeProof=a.action+':'+r.written; })).catch(e => window.__bridgeProof='error:'+e.message)");
+            for (int i=0;i<80;i++) {
+                result = evaluate(scenario,"window.__bridgeProof");
+                if ("\"quick-log:true\"".equals(result)) break;
+                Thread.sleep(250);
+            }
+            assertEquals("\"quick-log:true\"",result);
+            assertEquals(99,store.read().getLong("revision"));
+            assertFalse(store.read().has("personalText"));
+        } finally { store.clear(); }
     }
 }

@@ -37,6 +37,10 @@ stripping, stale revisions, invalid input, visibility changes/clear, strict acti
 immutable PendingIntents. They do not place/visually accept widgets on a real launcher or
 verify Keystore/reboot/OS process-death behavior. Those remain Phase 10 gates.
 
+A third instrumentation case was added after that baseline: it launches the packaged
+WebView and calls getLaunchAction/publish across the JavaScript-to-Kotlin bridge. Its result
+belongs to the final PR revision, not the earlier two-test run above.
+
 Windows synthetic Argon2id candidate observations: Chromium 106 ms, WebKit 105 ms, under
 that run's load. Memory parameter 19,456 KiB, two iterations, one lane. These are observations,
 not a mobile performance budget or independent cryptographic review.
