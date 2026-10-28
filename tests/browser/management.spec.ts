@@ -352,7 +352,10 @@ test('save failure keeps profile draft, retry commits once; shared editor lock a
   await second.goto('/?phase=3');
   await expect(second.getByRole('status')).toContainText('Another logbook editor is active');
   await second.close();
-  await expect(page.locator('#capabilities')).toContainText('This review does not encrypt content');
+  await expect(page.locator('#capabilities')).toContainText(
+    'Unencrypted Dropbox content can be read by Dropbox',
+  );
+  await expect(page.locator('#capabilities')).toContainText('Browser unlock is session-only');
   await expect(page.locator('#reminders')).toContainText('Closed-app scheduling is unavailable');
   await page.getByRole('button', { name: 'Test reminder', exact: true }).click();
   await expect(page.locator('main > [role="status"]')).toContainText('How was your day?');
