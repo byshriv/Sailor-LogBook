@@ -1,6 +1,7 @@
 # ADR 0002: data, migration and cloud compatibility contracts
 
-Accepted direction; production schema/merge implementation pending Phase 2/9.
+Accepted direction. Phase 2 local schema/converter/recovery implementation is recorded in
+ADR 0005 and ../PHASE-2-STATUS.md. Production cloud merge remains Phase 9.
 
 Preserve wall date/time with timezone/offset context, linked midnight segments and stable
 activity identity. Use three deck levels, cycle rejection and inherited excludeFromStreak.

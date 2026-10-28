@@ -2,6 +2,10 @@
 
 All 24 launch questions are answered. This register records the owner's answers and the choices delegated by “your call.” **It supersedes earlier proposals wherever they differ.** Phase 1 subsequently started at the owner's request; current execution status is in [docs/PHASE-1-STATUS.md](docs/PHASE-1-STATUS.md).
 
+Phase 2 was explicitly requested on 28 October 2026. Its technical choices and remaining
+test inputs are recorded in [ADR 0005](docs/adr/0005-phase2-domain-durability.md) and
+[Phase 2 status](docs/PHASE-2-STATUS.md); no accepted product decision below was reopened.
+
 The most important correction is **sync first, encryption optional**, as in the demo. Earlier wording implying mandatory encryption for all Dropbox sync is superseded. Protection against Dropbox reading content applies when encryption is enabled.
 
 ## Records, calculations and recovery

@@ -1,7 +1,9 @@
 # v8 cutover and rollback contract
 
-Reviewed for Phase 1 on 28 October 2026. Implementation and fixture completion are Phase 2;
-real cloud activation is Phase 9. This contract does not migrate or erase user data.
+Reviewed for Phase 1 on 28 October 2026. Phase 2 now implements the synthetic unencrypted
+v8 state-backup converter/journal in packages/persistence/src/migration.ts and logbook.ts.
+See ../PHASE-2-STATUS.md and ../adr/0005-phase2-domain-durability.md for evidence and limits.
+Real cloud activation remains Phase 9. This contract does not migrate or erase user data.
 
 1. Read legacy data without mutation. Record source schema, raw-byte digest, cloud revision
    (when present), entity/attachment counts and unknown fields. Preserve raw source bytes as
@@ -37,3 +39,28 @@ repeat/interrupted conversion, unknown fields and destination/source digest mism
 
 Owner real-backup rehearsal requires their participation in a later migration phase.
 No personal backup should be committed or attached to a public issue.
+
+## Phase 2 API integration
+
+`previewV8(raw, options)` is pure with respect to storage. Its preview contains per-kind
+counts, review items, unknown top-level fields and digest-addressed attachment paths.
+Unknown nested fields remain in each legacy payload and the complete raw-source archive.
+Source/destination equality and hashes are checked again by `migrateV8`. Decode errors,
+duplicate IDs, bad relationships, missing recovery capacity and size-limit failures stop
+before activation; staged data is retained for retry rather than partially adopted.
+
+The caller must save and verify a downloadable source backup and return its digest from
+the supplied callback. Then stage source recovery and destination together; activation
+atomically installs baseline/blobs/completion in an empty destination only. Completed
+same-generation retries preserve later edits. Never supply a fake backup receipt in a
+user-facing flow; tests deliberately inject a synthetic callback. Real backup UI is later.
+
+All non-default deck exclusions need explicit review; missing deck references need an
+explicit target or null decision. Overflow days migrate with no featured moments until
+selection, retaining all text. Deleted-activity best things retain their text and original
+reference provenance while becoming unlinked. Missing original timezone/offset context
+stays unknown. Do not reinterpret it through the importing device's timezone.
+
+The reader deliberately rejects encrypted and slb-records cloud envelopes. Their later
+readers must unlock/materialize/validate them before the same preview/recovery policy.
+No legacy cloud transport, automatic live-origin migration or lossless downgrade is shipped.
