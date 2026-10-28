@@ -28,7 +28,7 @@
     "licenses": "node scripts/license-inventory.cjs"
   },
   "devDependencies": {
-    "@capacitor/cli": "8.4.3",
+    "@capacitor/cli": "8.5.3",
     "@playwright/test": "1.64.1",
     "@types/react": "19.3.0",
     "@types/react-dom": "19.3.0",
