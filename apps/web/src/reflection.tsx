@@ -838,6 +838,9 @@ function Reflection({ projection }: { projection: Projection }) {
         <a href={link('3')} onClick={navigate}>
           Calendar
         </a>
+        <a href={link('6')} onClick={navigate}>
+          Planner
+        </a>
         <a href={link('4')} onClick={navigate}>
           Notebook
         </a>
@@ -912,14 +915,17 @@ function Reflection({ projection }: { projection: Projection }) {
                 <a className={styles.primary} href={link('3')} onClick={navigate}>
                   Open calendar
                 </a>
+                <a href={link('6')} onClick={navigate}>
+                  Plan your day
+                </a>
               </div>
               <span aria-hidden="true" dangerouslySetInnerHTML={{ __html: shipArt }} />
             </div>
             {carried.length > 0 && (
               <p>
                 {carried.length} unresolved past tasks · kept on their original dates.{' '}
-                <a href={link('3', (carried[0] as Task).date)} onClick={navigate}>
-                  Review in Calendar
+                <a href={link('6', (carried[0] as Task).date)} onClick={navigate}>
+                  Review in Planner
                 </a>
               </p>
             )}
