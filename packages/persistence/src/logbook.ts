@@ -447,10 +447,15 @@ export class OperationPipeline {
     this.publish = publish;
     this.schedule = schedule;
   }
-  save(command: EditCommand, remote?: CausalOperation): Promise<DurableResult> {
+  save(
+    command: EditCommand,
+    remote?: CausalOperation,
+    attachments: { id: string; digest: string; blob: Blob }[] = [],
+  ): Promise<DurableResult> {
     const input = structuredClone(command),
-      incoming = remote && structuredClone(remote);
-    const result = this.tail.then(() => this.store.commit(input, incoming));
+      incoming = remote && structuredClone(remote),
+      media = structuredClone(attachments);
+    const result = this.tail.then(() => this.store.commit(input, incoming, media));
     this.tail = result.catch(() => {});
     return result.then((r) => {
       let effectsFailed = false;
