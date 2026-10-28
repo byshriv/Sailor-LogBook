@@ -1,5 +1,12 @@
 # Phase 6 Tasks and Planner status
 
+Acceptance follow-up — 28 October 2026: Phase 6 Tasks/Planner is accepted and complete by explicit owner instruction on
+28 October 2026. Fetched local `main == origin/main`, zero ahead/behind, at
+`9debb35a6dc0ac8f3b0bbc72d8781e7e36f4b395`, the merge of PR #15 (final head `77ecb628`).
+Phase 7 management/experience only is authorized. Phase 8 and later ports remain gated.
+
+The review-era report below is historical; current work is [Phase 7](PHASE-7-STATUS.md).
+
 28 October 2026. Branch `codex/phase-6-planner`, based on merged PR #14 at
 `5792285ded097bc16f5bf28b0f570e059d391831`. Fetched main equals origin/main, zero
 ahead/behind, with the PR merge as an ancestor. GitHub independently confirms the merge

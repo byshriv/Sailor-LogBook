@@ -22,6 +22,7 @@ export async function createLogbookProjection(db: LogbookStore, schedule: () => 
   return {
     store,
     pipeline,
+    attachment: db.attachment,
     save: (command: EditCommand, attachments: { id: string; digest: string; blob: Blob }[] = []) =>
       pipeline.save(command, undefined, attachments),
   };

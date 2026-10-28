@@ -9,8 +9,8 @@
 | 3 | Calendar port: views, +deck quick-add, drag and resize | accepted and complete by owner instruction; PR #12 merged as 327ad8d; final required jobs and 45 hosted browser checks passed; see docs/PHASE-3-STATUS.md |
 | 4 | Notebook port: text, drawing, bottles and Sea adventure | accepted and complete by owner instruction; PR #13 merged as 953205b; final workflow and CodeQL results pass with 63 Linux browser checks; see docs/PHASE-4-STATUS.md |
 | 5 | Home and Reflection port: dashboards, streaks and achievements | accepted and complete by owner instruction; PR #14 merged as 5792285; final hosted run 40682341891 passes required jobs and separate CodeQL results; see docs/PHASE-5-STATUS.md |
-| 6 | Tasks and Planner port: must-do, rollover, statuses and Voyage progress | implemented for owner review at /?phase=6 on codex/phase-6-planner; see docs/PHASE-6-STATUS.md; Phase 7+ remains gated |
-| 7 | Settings, walkthrough and reminders | planned |
+| 6 | Tasks and Planner port: must-do, rollover, statuses and Voyage progress | accepted and complete by owner instruction; PR #15 merged as 9debb35; see docs/PHASE-6-STATUS.md |
+| 7 | Settings/profile, decks/presets, onboarding/tours, reminders, search, accessibility and capability copy | implemented for review at /?phase=7; see docs/PHASE-7-STATUS.md; Phase 8+ gated |
 | 8 | PWA hardening: offline updates, backup, export and import | planned |
 | 9 | Production Dropbox sync first; optional E2EE content, passphrase/recovery key, trusted Android unlock, conflict review and cross-version safety | planned; contracts/proof begin in Phases 1–2 |
 | 10 | Signed Android APK via GitHub Actions; native lifecycle/reminders; Quick log and Today / best thing widgets | required for 1.0 |
@@ -31,3 +31,8 @@ Support targets include Android 12+ (4 GB RAM recommended, not a hard gate), iOS
 Full deliverables, exit gates, architecture, migration, encryption and GitHub-to-launch sequence: [LAUNCH-PLAN.md](LAUNCH-PLAN.md). All 24 answers: [LAUNCH-DECISIONS.md](LAUNCH-DECISIONS.md). Historical questionnaire: [LAUNCH-QUESTIONS.md](LAUNCH-QUESTIONS.md). Pinned source findings: [research/ARCHITECTURE-REVIEW.md](research/ARCHITECTURE-REVIEW.md).
 
 Accepted production refinements: midnight-linked segments; elapsed minutes counted once; inherited streak-exclusion flags; reassignment on deck deletion; reviewed rollover; preview/recovery before cloud merge and import; preserve best-thing overflow text; Undo for normal deletions plus 30-day recovery; default WebP with an optional original-file checkbox/warning. Encrypted backups are the default when a key is configured, but encryption never blocks initial ordinary sync. Separate Lock, Disconnect, Erase local and confirmed Delete logbook everywhere, including this app’s Dropbox data. Free/no ads, no telemetry by default, English/translation-ready, Issues/private security reporting and a small beta remain settled.
+
+Phase 6 Tasks/Planner is accepted and complete by explicit owner instruction on
+28 October 2026. Fetched local `main == origin/main`, zero ahead/behind, at
+`9debb35a6dc0ac8f3b0bbc72d8781e7e36f4b395`, the merge of PR #15 (final head `77ecb628`).
+Phase 7 management/experience only is authorized. Phase 8 and later ports remain gated.

@@ -22,6 +22,8 @@ import { openLogbook } from '../../../packages/persistence/src/logbook.ts';
 import { createLogbookProjection } from './logbook-store.ts';
 import logo from '../../../icons/brand-icon.svg';
 import styles from './planner.module.css';
+import { GlobalTools, ManagementMenus } from './management-ui.tsx';
+import { settings } from '../../../packages/domain/src/management.ts';
 
 type Projection = Awaited<ReturnType<typeof createLogbookProjection>>;
 const localDate = (d = new Date()) =>
@@ -104,6 +106,10 @@ function Dialog({
 }
 function Planner({ projection }: { projection: Projection }) {
   const state = useSyncExternalStore(projection.store.subscribe, projection.store.getState);
+  const clockLabel = (minutes: number) =>
+    settings(state).h24 === 0
+      ? `${Math.floor(minutes / 60) % 12 || 12}:${String(minutes % 60).padStart(2, '0')} ${minutes < 720 ? 'AM' : 'PM'}`
+      : timeText(minutes);
   const [clock, setClock] = useState(() => new Date());
   const today = localDate(clock),
     now = clock.getHours() * 60 + clock.getMinutes();
@@ -224,6 +230,16 @@ function Planner({ projection }: { projection: Projection }) {
           },
     );
   };
+  const launchHandled = useRef(false);
+  useEffect(() => {
+    if (launchHandled.current) return;
+    launchHandled.current = true;
+    const params = new URLSearchParams(location.search),
+      id = params.get('item'),
+      task = id ? state.entities['task:' + id] : null;
+    if (task?.kind === 'task') openTask(task);
+    else if (params.get('new') === 'task') openTask();
+  }, []);
   const close = () => {
     if (!saving.current) {
       setDraft(null);
@@ -346,11 +362,19 @@ function Planner({ projection }: { projection: Projection }) {
       <article
         key={t.id}
         data-task={t.id}
+        data-logbook-kind="task"
+        data-logbook-id={t.id}
+        tabIndex={0}
         className={`${styles.task} ${t.must ? styles.must : ''} ${shown === 'done' ? styles.done : ''} ${dragId === t.id ? styles.dragging : ''}`}
         style={{ borderRightColor: typeof c === 'string' ? c : 'transparent' }}
       >
         <div className={styles.taskTop}>
-          <button className={styles.taskTitle} disabled={blocked} onClick={() => openTask(t)}>
+          <button
+            data-edit-item
+            className={styles.taskTitle}
+            disabled={blocked}
+            onClick={() => openTask(t)}
+          >
             {t.title}
           </button>
           <button
@@ -368,7 +392,7 @@ function Planner({ projection }: { projection: Projection }) {
           </button>
         </div>
         <small>
-          {t.time === null ? 'Untimed' : timeText(t.time)}
+          {t.time === null ? 'Untimed' : clockLabel(t.time)}
           {t.duration !== null ? ` · ${t.duration} min` : ''}
           {deck ? ` · ${deck.name}` : ''}
         </small>
@@ -429,8 +453,24 @@ function Planner({ projection }: { projection: Projection }) {
           ))}
         </nav>
         <small>A little direction for your day.</small>
+        <ManagementMenus projection={projection} blocked={busy || blocked} />
       </aside>
       <div className={styles.workspace}>
+        <GlobalTools
+          projection={projection}
+          blocked={blocked}
+          action={(name) => {
+            if (name === 'new-task') {
+              openTask();
+              return true;
+            }
+            if (name === 'today') {
+              changeDate(today);
+              return true;
+            }
+            return false;
+          }}
+        />
         <header className={styles.toolbar}>
           <div>
             <small>{dateText(today)}</small>
@@ -609,7 +649,7 @@ function Planner({ projection }: { projection: Projection }) {
                     data-drop-minute={i * 30}
                     className={`${styles.slot} ${drop === `${anchor}/${i * 30}` ? styles.drop : ''}`}
                   >
-                    {timeText(i * 30)}
+                    {clockLabel(i * 30)}
                   </div>
                 ))}
               </div>
@@ -680,6 +720,7 @@ function Planner({ projection }: { projection: Projection }) {
                   <input
                     type="time"
                     value={timeText(draft.time)}
+                    onInput={(e) => setDraft({ ...draft, time: minute(e.currentTarget.value) })}
                     onChange={(e) => setDraft({ ...draft, time: minute(e.target.value) })}
                   />
                 </label>

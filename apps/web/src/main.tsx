@@ -179,7 +179,9 @@ async function start() {
     }
   });
 }
-if (new URLSearchParams(location.search).get('phase') === '6') {
+if (new URLSearchParams(location.search).get('phase') === '7') {
+  void import('./management.tsx').then(({ startManagement }) => startManagement(root));
+} else if (new URLSearchParams(location.search).get('phase') === '6') {
   void import('./planner.tsx').then(({ startPlanner }) => startPlanner(root));
 } else if (new URLSearchParams(location.search).get('phase') === '5') {
   void import('./reflection.tsx').then(({ startReflection }) => startReflection(root));

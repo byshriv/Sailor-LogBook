@@ -119,6 +119,24 @@ export function safeId(id: string): void {
     throw Error('Invalid ID');
 }
 export const entityKey = (e: Pick<Entity, 'kind' | 'id'>): string => `${e.kind}:${e.id}`;
+// New profile photos share the existing digest media store. Legacy data URLs stay intact.
+export function attachmentIds(e: Entity): string[] {
+  if (e.kind === 'activity' || e.kind === 'page') return e.attachments;
+  if (
+    e.kind === 'settings' &&
+    e.id === 'legacy' &&
+    e.value &&
+    typeof e.value === 'object' &&
+    !Array.isArray(e.value)
+  ) {
+    const digest = e.value.avatarDigest;
+    if (digest == null) return [];
+    if (typeof digest !== 'string' || !/^[a-f0-9]{64}$/.test(digest))
+      throw Error('Invalid profile photo digest');
+    return [digest];
+  }
+  return [];
+}
 export function wallDate(date: string): void {
   if (
     !/^\d{4}-\d{2}-\d{2}$/.test(date) ||
@@ -162,6 +180,7 @@ export function validateLogbook(s: Logbook): void {
     if (id !== null && !byId.has(id)) throw Error('Missing deck');
   };
   for (const [key, e] of Object.entries(s.entities)) {
+    attachmentIds(e);
     safeId(e.id);
     if (key !== entityKey(e)) throw Error('Entity key mismatch');
     if (e.kind === 'deck') {

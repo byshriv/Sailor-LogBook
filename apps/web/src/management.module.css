@@ -1,0 +1,330 @@
+.shell {
+  max-width: none;
+  padding: 32px 32px 100px 248px;
+  min-height: 100dvh;
+}
+.shell > header {
+  padding-right: 180px;
+}
+.sidebar {
+  position: fixed;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 216px;
+  padding: 24px 18px;
+  background: var(--card);
+  overflow: auto;
+}
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 24px;
+}
+.brand img {
+  width: 36px;
+}
+.sidebar a {
+  display: block;
+  padding: 12px;
+  color: var(--cream);
+  text-decoration: none;
+  border-radius: 12px;
+}
+.sidebar a:hover,
+.sidebar a[aria-current] {
+  background: var(--raised);
+}
+.grid {
+  display: grid;
+  align-items: start;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+  max-width: 1200px;
+}
+.grid section {
+  margin: 0;
+  min-width: 0;
+  scroll-margin-top: 24px;
+}
+.wide {
+  grid-column: 1 / -1;
+}
+.shell h2 {
+  font-size: 24px;
+  margin-top: 0;
+}
+.shell button,
+.dialog button,
+.notice button,
+.global button {
+  margin: 0;
+  padding: 10px 14px;
+  min-height: 44px;
+}
+.shell select,
+.dialog select,
+.dialog textarea {
+  width: 100%;
+  border: 1px solid var(--muted);
+  padding: 12px;
+  color: var(--cream);
+  background: var(--raised);
+  border-radius: 12px;
+  font: inherit;
+}
+.shell label,
+.dialog label {
+  margin: 14px 0;
+}
+.shell input[type='checkbox'],
+.dialog input[type='checkbox'] {
+  width: 20px;
+  height: 20px;
+  vertical-align: middle;
+  margin-right: 10px;
+}
+.row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin: 10px 0;
+}
+.row > span {
+  flex: 1;
+  overflow-wrap: anywhere;
+}
+.row small,
+.results small {
+  display: block;
+}
+.actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  margin-top: 20px;
+}
+.dialog {
+  border: 1px solid #ffffff26;
+  border-radius: 28px;
+  padding: 28px;
+  color: var(--cream);
+  background: var(--card);
+  width: min(680px, calc(100% - 24px));
+  max-height: calc(100dvh - 24px);
+  overflow: auto;
+}
+.dialog::backdrop {
+  background: #000a;
+}
+.dialog header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+.dialog h2 {
+  margin: 0;
+  font-size: 26px;
+}
+.dialog h3 {
+  font-size: 23px;
+}
+.dialog p {
+  overflow-wrap: anywhere;
+}
+.global {
+  position: relative;
+  align-self: flex-end;
+  width: fit-content;
+  margin: 10px 16px 10px auto;
+  z-index: 20;
+  display: flex;
+  gap: 6px;
+  padding: 6px;
+  border: 1px solid #ffffff20;
+  border-radius: 24px;
+  background: var(--card);
+  box-shadow: 0 8px 30px #0006;
+}
+.global button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+.notice {
+  position: fixed;
+  bottom: 92px;
+  right: 16px;
+  z-index: 30;
+  max-width: min(460px, calc(100vw - 32px));
+  background: var(--raised);
+  padding: 16px;
+  border-radius: 16px;
+  box-shadow: 0 8px 30px #0008;
+}
+.results {
+  list-style: none;
+  padding: 0;
+}
+.results a {
+  color: var(--cream);
+  display: block;
+  padding: 12px;
+  text-decoration: none;
+  border-radius: 10px;
+  overflow-wrap: anywhere;
+}
+.results a:hover {
+  background: var(--raised);
+}
+.reference section {
+  padding: 16px;
+  margin: 14px 0;
+  background: var(--raised);
+}
+.reference p {
+  display: flex;
+  gap: 16px;
+  justify-content: space-between;
+  margin: 12px 0;
+  color: var(--cream);
+}
+.reference kbd {
+  white-space: nowrap;
+  font-size: 13px;
+}
+.deck {
+  border-left: 3px solid var(--deck);
+  padding-left: 12px;
+}
+.grid section > button {
+  margin: 0 8px 8px 0;
+}
+.shell a {
+  color: var(--cream);
+}
+.menuDeck {
+  margin: 6px 0;
+}
+.menuDeck details {
+  margin-left: 12px;
+}
+.menus {
+  min-width: 0;
+}
+.menus a {
+  overflow-wrap: anywhere;
+}
+.menus svg {
+  flex-shrink: 0;
+}
+.skip {
+  position: fixed;
+  top: -100px;
+  left: 12px;
+  z-index: 50;
+  background: var(--cream);
+  color: var(--background);
+  padding: 12px;
+  border-radius: 12px;
+}
+.skip:focus {
+  top: 12px;
+}
+.deck details {
+  margin-left: 18px;
+}
+.welcome {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+.welcome img {
+  width: min(180px, 100%);
+}
+:global([data-tour-highlight]) {
+  outline: 3px solid var(--accent);
+  outline-offset: 5px;
+}
+@media (min-width: 900px) {
+  .global {
+    max-width: 240px;
+  }
+  .global button {
+    font-size: 13px;
+    padding: 8px;
+    gap: 4px;
+  }
+  .global .avatar {
+    width: 24px;
+    height: 24px;
+  }
+  .inlineTools {
+    position: static;
+    margin-left: auto;
+    box-shadow: none;
+  }
+  .notice {
+    bottom: 22px;
+  }
+}
+@media (max-width: 899px) {
+  .shell {
+    padding: 24px 16px 170px;
+  }
+  .shell > header {
+    padding: 0;
+  }
+  .sidebar {
+    position: fixed;
+    left: 16px;
+    right: 16px;
+    top: auto;
+    bottom: 16px;
+    width: auto;
+    border-radius: 22px;
+    display: flex;
+    flex-wrap: nowrap;
+    padding: 6px;
+    z-index: 15;
+    justify-content: space-around;
+    box-shadow: 0 8px 30px #0006;
+  }
+  .sidebar .brand,
+  .sidebar .menus {
+    display: none;
+  }
+  .sidebar a {
+    padding: 14px 5px;
+    font-size: 12px;
+  }
+  .grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .welcome {
+    grid-template-columns: 1fr;
+  }
+  .welcome img {
+    max-width: 80px;
+  }
+  .global {
+    margin: 8px 16px 8px auto;
+  }
+  .notice {
+    bottom: 156px;
+  }
+  .reference p {
+    flex-direction: column;
+    gap: 4px;
+  }
+}

@@ -28,6 +28,7 @@ import styles from './calendar.module.css';
 import logo from '../../../icons/brand-icon.svg';
 import { preparePhoto } from '../../../packages/persistence/src/media.ts';
 import { browserPhotoCodec } from './photo-codec.ts';
+import { GlobalTools, ManagementMenus } from './management-ui.tsx';
 
 type Projection = Awaited<ReturnType<typeof createLogbookProjection>>;
 type Draft = {
@@ -141,11 +142,13 @@ function Calendar({ projection, db }: { projection: Projection; db: LogbookStore
       : localDate();
   });
   const [view, setView] = useState<View>(() =>
-    [1, 2, 3, 4, 7].includes(Number(prefs.dv))
-      ? (Number(prefs.dv) as View)
-      : matchMedia('(min-width: 900px)').matches
-        ? 3
-        : 1,
+    prefs.dv === 'm'
+      ? 'month'
+      : [1, 2, 3, 4, 7].includes(Number(prefs.dv))
+        ? (Number(prefs.dv) as View)
+        : matchMedia('(min-width: 900px)').matches
+          ? 3
+          : 1,
   );
   const [zoom, setZoom] = useState(56);
   const [draft, setDraft] = useState<Draft | null>(null);
@@ -305,6 +308,39 @@ function Calendar({ projection, db }: { projection: Projection; db: LogbookStore
       attachments: entity?.kind === 'activity' ? entity.attachments : [],
     });
   };
+  const launchHandled = useRef(false);
+  useEffect(() => {
+    if (launchHandled.current) return;
+    launchHandled.current = true;
+    const params = new URLSearchParams(location.search),
+      id = params.get('item');
+    const entity = id
+      ? (state.entities['activity:' + id] ?? state.entities['task:' + id])
+      : undefined;
+    if (entity?.kind === 'activity' || entity?.kind === 'task')
+      open(
+        date,
+        entity.kind === 'activity' ? entity.segments[0]!.start : (entity.time ?? 540),
+        entity,
+      );
+    else if (params.get('new') === 'log')
+      open(date, Math.floor((now.getHours() * 60 + now.getMinutes()) / 5) * 5);
+    const preset = state.entities['preset:' + params.get('preset')];
+    if (preset?.kind === 'preset') {
+      open(date, 540);
+      setDraft((d) =>
+        d
+          ? {
+              ...d,
+              title: preset.title,
+              deck: preset.deck,
+              duration: preset.duration || d.duration,
+              preset: true,
+            }
+          : d,
+      );
+    }
+  }, []);
   const commit = async (
     edit: Edit,
     success = 'Saved locally',
@@ -663,23 +699,34 @@ function Calendar({ projection, db }: { projection: Projection; db: LogbookStore
         <img src={logo} width="44" height="44" alt="Sailor Logbook" />
         <h2>Logbook</h2>
         <p>Calendar</p>
-        <details>
-          <summary>Decks</summary>
-          {decks.map((d) => (
-            <p key={d.id} style={{ paddingLeft: d.parent ? 16 : 0 }}>
-              {d.name}
-            </p>
-          ))}
-        </details>
-        <details>
-          <summary>Presets</summary>
-          {presets.map((p) => (
-            <p key={p.id}>{p.title}</p>
-          ))}
-        </details>
+        <ManagementMenus projection={projection} blocked={busy || !!draft} />
         <small>Phase 3 review</small>
       </aside>
+
       <div className={styles.workspace}>
+        <GlobalTools
+          projection={projection}
+          blocked={busy || !!draft || trash || !!gesture.current}
+          action={(name) => {
+            if (name === 'new-log') {
+              open(date, 540);
+              return true;
+            }
+            if (name === 'today') {
+              navigate(localDate());
+              return true;
+            }
+            if (name === 'ArrowLeft' || name === 'ArrowRight') {
+              step(name === 'ArrowLeft' ? -1 : 1);
+              return true;
+            }
+            if (['+', '=', '-', '0'].includes(name)) {
+              setZoom((z) => (name === '0' ? 56 : clamp(z + (name === '-' ? -8 : 8), 32, 140)));
+              return true;
+            }
+            return false;
+          }}
+        />
         <header className={styles.toolbar}>
           <img className={styles.mobileLogo} src={logo} alt="Sailor Logbook" width="32" />
           <h1>
@@ -804,6 +851,7 @@ function Calendar({ projection, db }: { projection: Projection; db: LogbookStore
             <div
               className={styles.scroll}
               ref={scroller}
+              data-timeline
               onPointerMove={pointerMove}
               onPointerUp={() => void endGesture()}
               onPointerCancel={() => void endGesture(true)}
@@ -857,6 +905,8 @@ function Calendar({ projection, db }: { projection: Projection; db: LogbookStore
                           aria-label={`${entity.title} · ${day} ${clockTime(b.start)}–${clockTime(b.end)}${task ? ' · ' + taskClockStatus(entity, localDate(now), clock) : ''}`}
                           data-testid="calendar-block"
                           data-entity-id={entity.id}
+                          data-logbook-kind={entity.kind}
+                          data-logbook-id={entity.id}
                           data-segment-date={day}
                           className={`${styles.block} ${task ? styles.planned : ''}`}
                           style={{

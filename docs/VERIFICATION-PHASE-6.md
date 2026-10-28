@@ -1,5 +1,12 @@
 # Phase 6 verification
 
+Acceptance follow-up — 28 October 2026: Phase 6 Tasks/Planner is accepted and complete by explicit owner instruction on
+28 October 2026. Fetched local `main == origin/main`, zero ahead/behind, at
+`9debb35a6dc0ac8f3b0bbc72d8781e7e36f4b395`, the merge of PR #15 (final head `77ecb628`).
+Phase 7 management/experience only is authorized. Phase 8 and later ports remain gated.
+
+The review-era report below is historical; current work is [Phase 7](PHASE-7-STATUS.md).
+
 28 October 2026. Local Windows; Node 24.22.0/npm 11.19.1, Playwright 1.64.1.
 Only synthetic fixtures/disposable browser profiles were used. No real logbook/cloud data.
 

@@ -283,7 +283,7 @@ test('rollover is reviewed, leave planned cancels, skip/nogo retain dates and hi
 }) => {
   await seed(page);
   const original = await read(page);
-  await page.locator('details').first().locator('summary').click();
+  await page.locator('summary').filter({ hasText: 'unresolved past' }).click();
   await page.getByRole('button', { name: 'Review Unresolved plan', exact: true }).click();
   await page.getByRole('button', { name: 'Leave planned', exact: true }).click();
   expect((await read(page)).state).toEqual(original.state);

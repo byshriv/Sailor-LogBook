@@ -2,7 +2,7 @@
 
 Added by owner request on 28 October 2026. Status: planned, required before deployment.
 This document establishes the review process; no review item or final acceptance has
-been supplied yet. Phase 5 remains the current implementation review.
+been supplied yet. Phase 6 is accepted and complete; Phase 7 is the current implementation review.
 
 ## Purpose and timing
 

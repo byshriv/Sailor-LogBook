@@ -13,8 +13,7 @@ Phase 4 Notebook and Sea is accepted and complete by explicit owner instruction 
 Phase 5 Home and Reflection is accepted and complete by explicit owner instruction on
 28 October 2026. PR #14 merged as `5792285ded097bc16f5bf28b0f570e059d391831`;
 local main was fetched and verified equal to origin/main with zero ahead/behind.
-Phase 6 Tasks/Planner only is authorized. See [Phase 6 status](docs/PHASE-6-STATUS.md).
-Phase 7 and later implementation remains gated; prior planning edits are preserved.
+Phase 6 is now accepted and complete after merged PR #15. Phase 7 only is authorized; Phase 8+ remains gated. Prior planning edits are preserved.
 
 The most important correction is **sync first, encryption optional**, as in the demo. Earlier wording implying mandatory encryption for all Dropbox sync is superseded. Protection against Dropbox reading content applies when encryption is enabled.
 
@@ -79,3 +78,8 @@ does not start later implementation phases or accept the current Phase 5 visuals
 ## Execution inputs still to collect
 
 Concrete device models/OS/browser versions, external test access, empirically chosen media/encryption limits and independent-review availability remain inputs for their phases. They are not unanswered product-scope questions. Do not re-ask the 24 answered questions as though no decisions were made. Apply this register to ADRs, acceptance criteria and [LAUNCH-PLAN.md](LAUNCH-PLAN.md).
+
+Phase 6 Tasks/Planner is accepted and complete by explicit owner instruction on
+28 October 2026. Fetched local `main == origin/main`, zero ahead/behind, at
+`9debb35a6dc0ac8f3b0bbc72d8781e7e36f4b395`, the merge of PR #15 (final head `77ecb628`).
+Phase 7 management/experience only is authorized. Phase 8 and later ports remain gated.
