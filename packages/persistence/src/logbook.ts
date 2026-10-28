@@ -1,5 +1,6 @@
 import {
   applyEdit,
+  attachmentIds,
   blankLogbook,
   canonical,
   safeId,
@@ -183,11 +184,7 @@ export async function openLogbook(
     async load() {
       const loaded = await transaction('readonly', async (tx) => {
         const state = structuredClone((await verify(tx)).state);
-        const ids = new Set(
-          Object.values(state.entities).flatMap((e) =>
-            e.kind === 'activity' || e.kind === 'page' ? e.attachments : [],
-          ),
-        );
+        const ids = new Set(Object.values(state.entities).flatMap(attachmentIds));
         const blobs = [];
         for (const id of ids) {
           const b = await req(tx.objectStore('blobs').get(id));
@@ -251,9 +248,8 @@ export async function openLogbook(
           });
         for (const b of media) tx.objectStore('blobs').put(b, b.id);
         for (const e of Object.values(state.entities))
-          if (e.kind === 'activity' || e.kind === 'page')
-            for (const id of e.attachments)
-              if (!(await req(tx.objectStore('blobs').get(id)))) throw Error('Missing attachment');
+          for (const id of attachmentIds(e))
+            if (!(await req(tx.objectStore('blobs').get(id)))) throw Error('Missing attachment');
         const receipt: Receipt = { operation, commandDigest, revision, pending: !incoming };
         receipts.add(receipt, operation.id);
         tx.objectStore('tail').add(receipt, revision);
@@ -366,9 +362,8 @@ export async function openLogbook(
       validateLogbook(snapshot);
       const suppliedIds = new Set(blobs.map((b) => b.id));
       for (const e of Object.values(snapshot.entities))
-        if (e.kind === 'activity' || e.kind === 'page')
-          for (const id of e.attachments)
-            if (!suppliedIds.has(id)) throw Error('Migration attachment missing');
+        for (const id of attachmentIds(e))
+          if (!suppliedIds.has(id)) throw Error('Migration attachment missing');
       if ((await textDigest(source)) !== digest) throw Error('Source digest mismatch');
       const stateDigest = await textDigest(canonical(snapshot));
       for (const b of blobs)
@@ -422,9 +417,8 @@ export async function openLogbook(
         validateLogbook(m.state);
         const ids = new Set(m.blobs.map((b: { id: string }) => b.id));
         for (const e of Object.values(m.state.entities) as Entity[])
-          if (e.kind === 'activity' || e.kind === 'page')
-            for (const id of e.attachments)
-              if (!ids.has(id)) throw Error('Migration attachment missing');
+          for (const id of attachmentIds(e))
+            if (!ids.has(id)) throw Error('Migration attachment missing');
         const snapshot: Snapshot = { state: m.state, clock: {}, revision: 0 };
         tx.objectStore('meta').put({ ...snapshot, actor: head.actor }, 'head');
         tx.objectStore('meta').put(snapshot, 'checkpoint');
