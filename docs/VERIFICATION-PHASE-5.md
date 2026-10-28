@@ -13,7 +13,9 @@ Only synthetic fixtures and disposable browser profiles were used.
 | Frozen v8 reference                                      | All 37 hashes pass                                                                                   |
 | Formatting / whitespace                                  | Checked before local review commits; see handoff                                                     |
 
-There is no Phase 5 hosted workflow, Android emulator or physical-device result yet.
+Phase 5 is published in [draft PR #14](https://github.com/byshriv/Sailor-LogBook/pull/14).
+Hosted checks are running; no completed hosted or physical-device result is claimed here.
+Use the PR checks and description for final exact-head evidence.
 Before merging a published PR, require check/android-proof/codeql on its exact final
 head and inspect the separate CodeQL results check; an earlier phase/run is not evidence
 for a later revision. No required check is waived. Phase 4 acceptance and final hosted
@@ -73,3 +75,20 @@ Physical Safari/phone/storage-pressure/OS-kill tests, empirical media budgets an
 #2/#3 remain release gates. Native Blob capability limits and inherited moderate development
 tool audit findings from Phase 4 are unchanged; no dependencies/lockfile or audit/CI policy
 changed. No production sync, security audit, real-data cutover or deployment is claimed.
+
+## Publication integrity
+
+Publication used the connected GitHub Git-data tools without terminal credentials or a
+main mutation. The three published full trees exactly match their local tested trees:
+
+| Scope                             | Original local commit                    | Published commit                         | Identical tree                           |
+| --------------------------------- | ---------------------------------------- | ---------------------------------------- | ---------------------------------------- |
+| Domain and durability regressions | eab86505f734a07d73ccf94846e8d384af3203b4 | 662a4692ab8d22b62d0de6e7dd50bd1214702c39 | 83e97aaf8404a176427cb8ca0949524c66c22b32 |
+| UI and browser regressions        | 8cf9c782c673cd1d08cedf665a4b710a12a82c83 | 2bc655cb1b13b788eac42242d501a9e14abb6a30 | b1b5443f9047d407df8c2baf22196fbcda527b56 |
+| Acceptance and handoff            | 675301fc79487d1858397db66aa5f61cf8603e6a | cbc4b32af340d6c65a1ac4b7d8c80454469f6375 | 10dc48463fb7426dadf3cb399d4718a2607dd063 |
+
+Original local history remains on `codex/phase-5-home-reflection-local`. The active branch
+tracks the published history. Concurrent owner planning edits in the shared workspace
+were preserved and excluded from Phase 5 publication. No history rewrite, force push,
+merge, required-check change or deployment occurred. This publication follow-up must
+also pass every required job on its exact head; an earlier green run is not substituted.

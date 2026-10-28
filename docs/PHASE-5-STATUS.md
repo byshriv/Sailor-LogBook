@@ -1,7 +1,7 @@
 # Phase 5 Home and Reflection status
 
 28 October 2026. Branch `codex/phase-5-home-reflection`. Phase 5 only, implemented for
-owner review at `/?phase=5`. Phase 6 and later ports remain out of scope.
+owner review at `/?phase=5`, published in [draft PR #14](https://github.com/byshriv/Sailor-LogBook/pull/14). Phase 6 and later ports remain out of scope.
 
 Read PHASE-HANDOFF.md, LAUNCH-DECISIONS.md, LAUNCH-PLAN.md, ROADMAP.md,
 docs/PRODUCT-SPEC.md, earlier ADRs/architecture and verification reports before editing.

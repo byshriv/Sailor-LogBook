@@ -1,7 +1,7 @@
 # Phase handoff — Phase 5 Home and Reflection
 
 Updated 28 October 2026. Scope: Phase 5 only. Branch: `codex/phase-5-home-reflection`.
-Implementation is ready for local owner review. Do not start Phase 6 or later ports.
+Implementation is published for owner review in [draft PR #14](https://github.com/byshriv/Sailor-LogBook/pull/14). Do not start Phase 6 or later ports.
 No production deployment, real-data cutover, cloud mutation or main push occurred.
 
 ## Baseline and accepted phase
