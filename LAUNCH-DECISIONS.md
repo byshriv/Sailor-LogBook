@@ -8,6 +8,8 @@ test inputs are recorded in [ADR 0005](docs/adr/0005-phase2-domain-durability.md
 
 Phase 3 Calendar is accepted and complete by explicit owner instruction on 28 October 2026; PR #12 merged as `327ad8d` with final required checks passing. Phase 4 Notebook and Sea adventure only was then requested. See [Phase 3 status](docs/PHASE-3-STATUS.md) and [Phase 4 status](docs/PHASE-4-STATUS.md); accepted product decisions remain unchanged.
 
+Phase 4 Notebook and Sea is accepted and complete by explicit owner instruction on 28 October 2026; PR #13 merged as `953205b` after the final workflow and separate CodeQL results checks passed. Phase 5 Home and Reflection only is now authorized; see [Phase 5 status](docs/PHASE-5-STATUS.md). Phase 6 and later ports remain out of scope.
+
 The most important correction is **sync first, encryption optional**, as in the demo. Earlier wording implying mandatory encryption for all Dropbox sync is superseded. Protection against Dropbox reading content applies when encryption is enabled.
 
 ## Records, calculations and recovery

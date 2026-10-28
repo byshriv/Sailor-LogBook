@@ -1,111 +1,107 @@
-# Phase handoff — Phase 4 Notebook and Sea adventure
+# Phase handoff — Phase 5 Home and Reflection
 
-Updated 28 October 2026. Scope: Phase 4 only. Branch: `codex/phase-4-notebook`.
-Implementation is published for owner review in [draft PR #13](https://github.com/byshriv/Sailor-LogBook/pull/13). Do not start Phase 5
-or any later port. No production deployment, real-data cutover or cloud mutation occurred.
+Updated 28 October 2026. Scope: Phase 5 only. Branch: `codex/phase-5-home-reflection`.
+Implementation is published for owner review in [draft PR #14](https://github.com/byshriv/Sailor-LogBook/pull/14). Do not start Phase 6 or later ports.
+No production deployment, real-data cutover, cloud mutation or main push occurred.
 
 ## Baseline and accepted phase
 
-Read this handoff's Phase 3 predecessor, LAUNCH-DECISIONS.md, LAUNCH-PLAN.md, ROADMAP.md,
-docs/PRODUCT-SPEC.md, Phase 2 status/verification and ADR 0005, and Phase 3 architecture,
-status and verification before implementing. The current owner request explicitly accepts
-Phase 3 as complete and authorizes Phase 4 only. That acceptance is now recorded in the
-launch register/plan, roadmap and Phase 3 status/verification.
+Read the prior handoff in Git history, LAUNCH-DECISIONS.md, LAUNCH-PLAN.md, ROADMAP.md,
+docs/PRODUCT-SPEC.md and earlier ADRs/architecture/verification documents before editing.
+The owner explicitly accepts Phase 4 as complete and authorizes Phase 5 only. Acceptance
+is recorded in the launch register/plan, roadmap, product spec and Phase 4 status/verification.
 
 Fetched origin and fast-forwarded local main without rewriting history. Verified
-`main == origin/main`, zero ahead/behind, at `327ad8dfac702377e7b77b9c63226cf34af29cff`;
-PR #12's merge is an ancestor. The GitHub connector independently reports PR #12 merged
-at that SHA on 28 October 2026 at 11:32 IST. Its final head
-`86cd491a80f64f895996c3e0ba09f36f1c1088c4` passed check/android-proof/codeql in
-[run 40640483228](https://github.com/byshriv/Sailor-LogBook/actions/runs/40640483228), with
-45 hosted browser checks and 32 foundation tests. Those are Phase 3 results, not Phase 4 CI.
+`main == origin/main`, zero ahead/behind, at `953205bc71d428af14b679bec3c49e51c2b2f7ed`;
+PR #13's merge is an ancestor. GitHub independently confirms its merge on 28 October
+at 16:22 IST. Final head `d10d28fd062e282c8c6c3f4954d01cc94c756c22` passed
+check/android-proof/codeql and separate CodeQL results (no new alerts) in
+[run 40645674923](https://github.com/byshriv/Sailor-LogBook/actions/runs/40645674923),
+including 63 Linux browser checks, 36 foundation tests and three Android emulator cases.
+Those are Phase 4 results, not Phase 5 hosted evidence.
 
 ## Implementation map
 
-- `packages/domain/src/notebook.ts`: lossless page/line views, shared moments, quick syntax,
-  stroke rendering validation, sent history, eligibility, weighted selection and monthly history.
-- `apps/web/src/notebook.tsx`: isolated responsive Notebook/Sea, in-place writing, doodle
-  editor, guarded free canvas, send/Edit, filters, bottle contents, failure drafts and recovery.
-- `apps/web/src/notebook.module.css` and `notebook-art.ts`: scoped cream spread/Patrick Hand,
-  responsive paper, original logo/ship/bottle/sea-card/water geometry and reduced motion.
-- `apps/web/src/main.tsx`: lazy `/?phase=4` entry. The earlier routes remain compatible.
-- `apps/web/src/calendar.tsx`: only a validated date-link initializer for Notebook links.
-- `tests/foundation/notebook.test.ts`: four added domain/durability/migration/replay cases.
-- `tests/browser/notebook.spec.ts`: six added composed cases per browser engine.
+- `packages/domain/src/reflection.ts`: quick Must-do, union summaries, inherited exclusions,
+  backfill/streak/freezes, seven achievement flags, moods, lossless reflection records,
+  independent layouts, review and On this day.
+- `apps/web/src/reflection.tsx`: responsive Home/Reflection, protected drafts, four-item
+  selection, recovery, pointer/keyboard customization and canvas share preview.
+- `reflection.module.css` / `reflection-art.ts`: original desktop bento spans, mobile
+  paired streaks/pill, seven achievement geometries, distinct mood paths, logo/ship/fonts.
+- `apps/web/src/main.tsx`: lazy `/?phase=5`; earlier routes remain compatible.
+- `apps/web/src/notebook.tsx`: validated original-date links and optional Sea shortcut only.
+  Notebook editing/Sea rules remain; Calendar source is untouched.
+- `tests/foundation/reflection.test.ts`: seven metric/durability/migration cases.
+- `tests/browser/reflection.spec.ts`: six composed cases per browser engine.
+- `tests/foundation/phase2.test.ts`: fixes only a concurrent-order assumption in the older
+  compaction test; actual causal order decides which operation is acknowledged first.
 
-See [architecture](docs/ARCHITECTURE-PHASE-4.md), [status](docs/PHASE-4-STATUS.md) and
-[verification](docs/VERIFICATION-PHASE-4.md) for behavior and evidence boundaries.
+See [architecture](docs/ARCHITECTURE-PHASE-5.md), [status](docs/PHASE-5-STATUS.md) and
+[verification](docs/VERIFICATION-PHASE-5.md). The port shares `slb-phase2`, verified Redux
+projection, existing commands, durable/media gateway and `slb-phase2-editor` Web Lock.
+No schema change, legacy reader, simulated acknowledgement, service worker or transport.
+IDs, opaque fields, raw migration archives, editable strokes and digest blobs are retained.
+Share images are disposable previews, not canonical media or new operation attachments.
 
-The port shares `slb-phase2`, the verified Redux projection, existing commands, durable
-gateway, media store and `slb-phase2-editor` Web Lock with Calendar/Phase 2. It introduces
-no schema or command revision. No legacy storage reader, fake transport acknowledgement,
-service worker, fallback database or content collection was added. Existing record IDs,
-unknown fields, attachment references and raw migration archives are preserved.
+## Rules and interactions
 
-New drawing previews are derived SVG views of canonical editable strokes. Imported
-raster-only previews still render, and existing digest blobs remain retained/verified.
-No duplicate raster/data-URL preview is added to each new drawing operation. Vector
-drawing therefore works without claiming that native Blob writes work in engines that
-reject them. Photo encoding/storage behavior and its Phase 3 capability checks are unchanged.
+Home preserves greeting, current task/log, unresolved past tasks, quick Must-do/completion/
+percentage, best moments/mood, On this day, days/progress/streak and Sea navigation.
+Reflection preserves desktop bento, mood radar/history, heatmap, Must-do bars, lessons/
+gratitude, six week/month summaries, review/search, seven achievements and canvas sharing.
+Quick Must-do is a Home action; Planner board, rollover and later editors remain Phase 6.
+
+Hours use union elapsed minutes; hours streak/heatmap inherit stable deck exclusions and
+require 120 minutes. Backfill counts; missing today can continue yesterday. Best streak
+automatically bridges four missing past days per month, with today's unfinished day free
+and no count added for frozen days. Backfill recomputes usage. Overflow text stays in
+Notebook; choose up to four featured moments while unrelated edits remain usable.
+
+Customize Home/Reflection independently. Hide/show and keyboard Move up/down complement
+drag handles. Mouse release saves; touch requires a hold. Escape, pointer cancel and lost
+capture abandon unfinished moves. Text/selection failures retain drafts and block navigation.
+Saved only follows transaction completion. Immediate Undo and Recent changes provide
+30-day recovery after restart; later edits can require review. Retention is not physical erasure.
+
+Share streaks or an unlocked achievement to a 1080×1350 PNG preview, then explicitly download
+or share the file. Unsupported/cancelled native sharing keeps download available. Cards
+contain metrics/achievement art, not private journal text/photos. Achievement flags stay
+earned after later edits; failed durable captures expose retry.
 
 ## Local evidence
 
-Windows; Node 24.22.0/npm 11.19.1; pinned Playwright 1.64.1.
+Windows; Node 24.22.0/npm 11.19.1; Playwright 1.64.1. Synthetic fixtures only.
 
 | Check | Result |
 | --- | --- |
 | `npm test` | All 85 existing demo tests pass |
-| `npm run verify:foundation` | Typecheck, boundaries, all 36 tests and production preview build pass |
-| Full Chromium/WebKit browser suite | All 42 checks pass, including 12 Notebook/Sea and 16 Calendar checks |
-| Firefox, `--max-failures=1` | Launcher fails with `spawn UNKNOWN`; 20 checks not run; no application pass claimed |
-| `npm run check` / `npm run scan:secrets` | Pass |
-| `npm run format:check` / `git diff --check` | Pass |
-| `node scripts/freeze-demo.cjs` | All 37 frozen files verified |
+| `npm run verify:foundation` | Typecheck, boundaries, all 43 tests and preview build pass |
+| Full Chromium/WebKit browser suite | All 54 checks pass, including 12 Home/Reflection, 16 Calendar and 12 Notebook/Sea |
+| Firefox, `--max-failures=1 --workers=1` | Launcher fails with `spawn UNKNOWN`; 26 checks not run; no application pass claimed |
+| Syntax/assets / narrow secret scan | Pass |
+| Frozen demo | All 37 hashes verified |
 
-The browser suite covers writing/focus, navigation/restart, drawings/Undo/clear/cancel,
-send/Edit, all filters, monthly seen-history/restart, date review, shared best moments,
-quota failure with retained drafts and blocked navigation, single-write retry, the shared
-editor lock and persistent recovery after reload. The foundation suite additionally
-checks exact migrated bytes/media, unknown fields, older-date weighting, month rollover,
-ten-bottle limits and text/drawing causal replay into another synthetic store.
+Successful browser report: ignored `build/browser-phase5-chromium-webkit.json`. The default
+report records the latest focused Home check after readable status-label/autofill refinements;
+that two-engine follow-up also passes. Firefox failed before application launch. Desktop/mobile Chromium captures were
+inspected; WebKit counterparts exist under build/. Formatting and whitespace checks pass. Review commits separate domain/storage tests,
+UI/browser interactions, and documentation. No Phase 5 hosted, Android/emulator or real-device pass is claimed.
 
-Inspected ignored captures `build/notebook-desktop-chromium.png`,
-`build/notebook-mobile-chromium.png` and `build/sea-desktop-chromium.png`; corresponding
-WebKit captures also exist. Browser reports/traces live in ignored build/test-results paths.
-The last report is the Firefox launcher attempt; full Chromium/WebKit success is in the
-recorded command output. Only synthetic fixtures were used.
+## Owner review and continuation
 
-Review commits separate domain/storage regressions, UI/browser interactions and documentation.
-Published trees exactly match the local tested trees; the original history is preserved on
-`codex/phase-4-notebook-local`. The active branch tracks the published history. See
-docs/VERIFICATION-PHASE-4.md for the commit/tree mapping. Publication used the connected
-GitHub Git-data tools without terminal credentials, force push or a main mutation.
-No merge, required-check change or deployment is included.
+Run `npm run dev:foundation`, open `http://127.0.0.1:5173/?phase=5`, and close other
+Phase 2/3/4/5 editing tabs first. Calendar/Notebook remain at `/?phase=3` and `/?phase=4`;
+day links retain their original date. The root demo and frozen reference remain unchanged.
 
-## Review and continuation
+Review desktop/mobile proportions, long text, independent layout/visibility, real touch
+hold/cancel, keyboard/insets, historical moods/reflection, overflow selection, month-boundary
+freeze copy, progress/manual statuses, seven achievements and actual sharing targets.
+This work does not accept Phase 5 visuals or the complete new shell on the owner's behalf.
 
-Run `npm run dev:foundation`, then open `http://127.0.0.1:5173/?phase=4`.
-Close another Phase 2/3/4 tab before editing. Calendar remains at `/?phase=3`; Notebook
-best links retain the original day. The root legacy demo and frozen reference are unchanged.
-
-Review desktop spread/send placement, mobile keyboard/focus and scrolling, real touch/pen
-cancel/lost capture, guard/ink/width/Undo, imported drawings, sent Edit, bottle sizes and
-filters, older-day selection and monthly history. Enter and blur commit lines; page/section
-navigation and Send wait for drafts to save. Free strokes/Undo/clear save on completion;
-line doodles keep Done/Cancel. Failed saves retain drafts. Recent changes offers 30-day
-recovery after restart; retained media/tombstones are not a physical-erasure promise.
-
-This isolated feature review does not accept a complete new shell or Phase 4 visuals on
-the owner's behalf. PR #13 must pass check/android-proof/codeql on its exact head before merge;
-use its checks and description for final hosted evidence. Physical Safari/phone/storage-pressure/OS-kill tests, empirical
-media budgets, production cutover and issues #2/#3 remain release gates. Synthetic replay
-does not certify production synchronization; real transport remains Phase 9. Do not begin
-Home/Reflection, Planner, Settings, PWA or later ports from this handoff.
-
-
-Publication validation follow-up: run 40644890110 on head `30c113c` passed all three
-workflow jobs and 63 Linux browser checks, but its separate CodeQL results check flagged
-two Notebook date-link sinks. Both now encode the date query explicitly. Final corrected-head
-workflow/CodeQL results and artifact evidence belong in PR #13 checks/description; do not
-use the earlier workflow success as security acceptance. No alert is dismissed or check
-waived. See docs/VERIFICATION-PHASE-4.md for the inherited moderate development-tool audit findings.
+Before merging any published Phase 5 PR, require check/android-proof/codeql on its exact
+final head and inspect separate CodeQL results. Phase 4's green run is not Phase 5 evidence.
+Physical Safari/phone/storage-pressure/OS-kill checks, empirical media budgets, production
+cutover and issues #2/#3 remain release gates. Synthetic replay is not production sync;
+Dropbox transport remains Phase 9. Planner, Settings, PWA and all Phase 6+ ports require
+a new owner request. No later port was started.

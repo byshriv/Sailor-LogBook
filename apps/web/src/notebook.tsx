@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import type { Root } from 'react-dom/client';
 import type { Edit, Json, Page } from '../../../packages/domain/src/logbook.ts';
-import { canonical } from '../../../packages/domain/src/logbook.ts';
+import { canonical, wallDate } from '../../../packages/domain/src/logbook.ts';
 import { shiftDate } from '../../../packages/domain/src/calendar.ts';
 import {
   linesFor,
@@ -221,8 +221,17 @@ function Modal({
 
 export function Notebook({ projection, db }: { projection: Projection; db: LogbookStore }) {
   const state = useSyncExternalStore(projection.store.subscribe, projection.store.getState);
-  const [date, setDate] = useState(today),
-    [sea, setSea] = useState(false),
+  const [date, setDate] = useState(() => {
+      const date = new URLSearchParams(location.search).get('date');
+      try {
+        if (date) {
+          wallDate(date);
+          return date;
+        }
+      } catch {}
+      return today();
+    }),
+    [sea, setSea] = useState(new URLSearchParams(location.search).get('sea') === '1'),
     [editing, setEditing] = useState(false);
   const [status, setStatus] = useState('Saved locally'),
     [busy, setBusy] = useState(false),
