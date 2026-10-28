@@ -179,4 +179,6 @@ async function start() {
     }
   });
 }
-void start();
+if (new URLSearchParams(location.search).get('phase') === '2') {
+  void import('./phase2.tsx').then(({ startPhase2 }) => startPhase2(root));
+} else void start();

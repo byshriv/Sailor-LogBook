@@ -5,7 +5,9 @@ Public repository: [byshriv/Sailor-LogBook](https://github.com/byshriv/Sailor-Lo
 owner-created spelling supersedes the earlier lowercase target). Foundation review and
 hosted CI are in PR #1. The design review is recorded; current closure evidence and admin
 gates are in [Phase 1 status](docs/PHASE-1-STATUS.md) and [handoff](PHASE-HANDOFF.md).
-No production deployment, migration or later product port is authorized by this phase.
+Phase 2 implementation is published in [PR #11](https://github.com/byshriv/Sailor-LogBook/pull/11),
+with [status](docs/PHASE-2-STATUS.md) and [hosted evidence](docs/VERIFICATION-PHASE-2.md).
+No production deployment, real-data cutover or later product port occurred.
 
 The owner has now answered all 24 follow-up questions. [LAUNCH-DECISIONS.md](LAUNCH-DECISIONS.md) is the authoritative accepted-answer register; it supersedes older proposals. Sync starts first and encryption is optional. Safari/iOS PWA, macOS and Linux browser compatibility are 1.0 targets, with actual verification status recorded separately.
 
@@ -40,7 +42,7 @@ The demo remains **Demo v8**, with final cache revision `slb-v8-r3`. The final S
 | 0 | Mobile HTML concept/demo: Calendar, Notebook, Reflection, onboarding, local PWA and original visual design. | Reviewable demo and preserved data examples. | Done |
 | 0.1 | Desktop demo and final v8 fixes: responsive workspaces, sidebar/decks/presets, 3-day Calendar, Planner dragging, customization, keyboard tours, Dropbox, update notice, mobile header, profile pictures and Settings toggle fix. | Complete deployment/source bundles, test results and known limits documented. | Done; owner deploys/reviews v8 |
 | 1 | Public GitHub foundation, frozen demo reference, product specification, architecture records, React/TS workspace, CI, design tokens, security/contribution docs and technical spikes. | Clean clone builds and passes CI; architecture/migration/encryption/widget contracts reviewed. | Complete; public CI/browser/emulator proofs pass and main protection verified Active |
-| 2 | Domain model, pure commands/reducers, canonical IndexedDB, durable operation pipeline, recovery checkpoints, attachment storage, timezone rules and lossless demo migration. | Migration/replay/crash tests pass; no data loss; existing demo backups/cloud copies remain recoverable. | Planned |
+| 2 | Domain model, pure commands/reducers, canonical IndexedDB, durable operation pipeline, recovery checkpoints, attachment storage, timezone rules and lossless demo migration. | Migration/replay/crash tests pass; no data loss; existing demo backups/cloud copies remain recoverable. | Published for review in PR #11; hosted Linux browser/Android/CodeQL baseline passes. Current-head checks and owner review govern merge. No real-data cutover. |
 | 3 | Production Calendar port with existing mobile flow and desktop Day/3-day/Week/Month behavior, lanes, quick-add, gestures and clock-derived task states. | Mouse, touch, keyboard, overlap, midnight and timezone cases pass; owner reviews Calendar before large flow changes. | Planned |
 | 4 | Notebook and Sea adventure port: writing, doodles, stroke undo, cream spread, best-thing links, send/edit behavior, bottle selection, filters and history. | Text/drawing survives saves, navigation, restart, migration and synchronization. | Planned |
 | 5 | Home and Reflection port: bento composition, greeting, progress, moods, streaks, achievements, review, sharing and customization. | All metrics match agreed rules; responsive layout and ordering are stable. | Planned |
@@ -237,7 +239,9 @@ Continue within the current phase boundary. The isolated React/TS preview, froze
 durable-write/replay proofs, public source/CI, Argon2id candidate, native widget bridge and
 reviewed migration/encryption contracts are recorded in [Phase 1 status](docs/PHASE-1-STATUS.md),
 [review](docs/REVIEW-2026-10-28.md) and [spike evidence](research/PHASE-1-SPIKES.md). Use the
-status/handoff for actual closure evidence. Full domain/migration and large product ports
-remain later phases; CI/emulation do not establish physical-device launch acceptance.
+status/handoff for actual closure evidence. The Phase 2 domain/migration implementation
+and its remaining validation gates are now in [Phase 2 status](docs/PHASE-2-STATUS.md)
+and [ADR 0005](docs/adr/0005-phase2-domain-durability.md). Large product ports remain later
+phases; CI/emulation do not establish physical-device launch acceptance.
 
 Primary external references: [pinned source review](research/ARCHITECTURE-REVIEW.md), [Redux Toolkit + TypeScript](https://redux.js.org/toolkit/usage/usage-with-typescript), [Vite](https://vite.dev/guide/), [Capacitor Android](https://capacitorjs.com/docs/android), [Android widgets](https://developer.android.com/develop/ui/views/appwidgets/overview), [Android signing](https://developer.android.com/studio/publish/app-signing), [Dropbox production guide](https://docs.dropboxapi.com/dropbox-api/docs/developer-resources/developer-guide), [Google Play personal-account test requirements](https://support.google.com/googleplay/android-developer/answer/14151465).
