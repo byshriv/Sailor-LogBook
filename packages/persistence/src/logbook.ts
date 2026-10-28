@@ -201,6 +201,72 @@ export async function openLogbook(
       return loaded.state;
     },
     actor: () => transaction('readonly', async (tx) => (await readHead(tx)).actor),
+    // Phase 9 protocol journal shares the durable database, but is never content/exported credentials.
+    syncJournal: () => transaction('readonly', (tx) => req(tx.objectStore('meta').get('sync-v2'))),
+    keyPolicy: () =>
+      transaction('readonly', (tx) => req(tx.objectStore('meta').get('content-key-v1'))),
+    resetSyncJoin: (expected: string) =>
+      transaction('readwrite', async (tx) => {
+        const head = await verify(tx);
+        if (canonical(head.state) !== expected)
+          throw Error('Local copy changed; verify backup again');
+        const journal = await req(tx.objectStore('meta').get('sync-v2'));
+        const id = 'rejoin:' + crypto.randomUUID();
+        tx.objectStore('migration').add(
+          { id, journal, actor: head.actor, reason: 'Explicit reviewed device rejoin' },
+          id,
+        );
+        if ((await req(tx.objectStore('migration').get(id)))?.id !== id)
+          throw Error('Join archive verification failed');
+        tx.objectStore('meta').delete('sync-v2');
+      }),
+    saveKeyPolicy: (value: unknown) =>
+      transaction('readwrite', async (tx) => {
+        tx.objectStore('meta').put(structuredClone(value), 'content-key-v1');
+        if (canonical(await req(tx.objectStore('meta').get('content-key-v1'))) !== canonical(value))
+          throw Error('Key policy persistence failed');
+      }),
+    async retainSyncSource(raw: string) {
+      const id = 'cloud:' + (await textDigest(canonical(JSON.parse(raw).payload)));
+      await transaction('readwrite', async (tx) => {
+        if (await req(tx.objectStore('migration').get(id))) return;
+        tx.objectStore('migration').put(
+          { id, source: raw, reason: 'Verified incoming Dropbox copy' },
+          id,
+        );
+        if ((await req(tx.objectStore('migration').get(id)))?.source !== raw)
+          throw Error('Cloud recovery archive failed');
+      });
+    },
+    syncSources: () =>
+      transaction('readonly', async (tx) =>
+        (await req(tx.objectStore('migration').getAll()))
+          .filter(
+            (v) =>
+              typeof v?.id === 'string' &&
+              v.id.startsWith('cloud:') &&
+              typeof v.source === 'string',
+          )
+          .map((v) => ({ id: v.id as string, source: v.source as string })),
+      ),
+    saveSyncJournal: (value: unknown, expectedActor: string) =>
+      transaction('readwrite', async (tx) => {
+        if ((await verify(tx)).actor !== expectedActor)
+          throw Error('Local generation changed; join again');
+        tx.objectStore('meta').put(structuredClone(value), 'sync-v2');
+      }),
+    finishSync: (value: unknown, expectedActor: string, expectedState: string, ids: string[]) =>
+      transaction('readwrite', async (tx) => {
+        const head = await verify(tx);
+        if (head.actor !== expectedActor || canonical(head.state) !== expectedState)
+          throw Error('Local copy changed; sync again');
+        for (const id of ids) {
+          const r = await req(tx.objectStore('receipts').get(id));
+          if (!r) throw Error('Unknown sync acknowledgement');
+          tx.objectStore('receipts').put({ ...r, pending: false }, id);
+        }
+        tx.objectStore('meta').put(structuredClone(value), 'sync-v2');
+      }),
     async commit(
       input: EditCommand,
       remote?: CausalOperation,
