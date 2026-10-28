@@ -1,5 +1,15 @@
 # Phase 7 management and experience status
 
+## Current acceptance — Phase 8 continuation
+
+Phase 7 is accepted and complete by explicit owner instruction on 28 October 2026.
+Fetched local `main == origin/main` (zero ahead/behind) at
+`887fcdda9855e6fad62f5c05589110f8b25412aa`, the PR #16 merge, including final head
+`e7b77bbfb11429ee48c48ed4a5b8dbebe89cc5af`. Phase 8 only is authorized.
+Phase 9 and later ports, real-data cutover and deployment remain gated.
+
+Earlier review-era status below is historical where it differs.
+
 28 October 2026. Branch `codex/phase-7-settings`, based on current main
 `9debb35a6dc0ac8f3b0bbc72d8781e7e36f4b395`, merged PR #15.
 The owner's continuation explicitly accepts Phase 6 as complete and authorizes Phase 7

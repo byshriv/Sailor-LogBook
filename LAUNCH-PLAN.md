@@ -1,5 +1,15 @@
 # Sailor Logbook — open-source 1.0 launch plan
 
+## Current acceptance — Phase 8 continuation
+
+Phase 7 is accepted and complete by explicit owner instruction on 28 October 2026.
+Fetched local `main == origin/main` (zero ahead/behind) at
+`887fcdda9855e6fad62f5c05589110f8b25412aa`, the PR #16 merge, including final head
+`e7b77bbfb11429ee48c48ed4a5b8dbebe89cc5af`. Phase 8 only is authorized.
+Phase 9 and later ports, real-data cutover and deployment remain gated.
+
+Earlier review-era status below is historical where it differs.
+
 Planning baseline: 27 October 2026; execution updated 28 October 2026. Owner: **byshriv**.
 Public repository: [byshriv/Sailor-LogBook](https://github.com/byshriv/Sailor-LogBook) (the
 owner-created spelling supersedes the earlier lowercase target). Foundation review and
@@ -7,7 +17,7 @@ hosted CI are in PR #1. The design review is recorded; current closure evidence 
 gates are in [Phase 1 status](docs/PHASE-1-STATUS.md) and [handoff](PHASE-HANDOFF.md).
 Phase 2 implementation is published in [PR #11](https://github.com/byshriv/Sailor-LogBook/pull/11),
 with [status](docs/PHASE-2-STATUS.md) and [hosted evidence](docs/VERIFICATION-PHASE-2.md).
-PR #11 merged as 7107798. Phase 3 Calendar is accepted and complete by owner instruction; PR #12 merged as `327ad8d` after all final required checks passed. Phase 4 Notebook/Sea is accepted and complete; PR #13 merged as `953205b` after all final checks passed. Phase 5 Home/Reflection is accepted and complete by owner instruction after PR #14 merged as `5792285`. Phase 6 Tasks/Planner is accepted and complete after PR #15 merged as `9debb35`. Phase 7 only is authorized. No production deployment or real-data cutover occurred.
+PR #11 merged as 7107798. Phase 3 Calendar is accepted and complete by owner instruction; PR #12 merged as `327ad8d` after all final required checks passed. Phase 4 Notebook/Sea is accepted and complete; PR #13 merged as `953205b` after all final checks passed. Phase 5 Home/Reflection is accepted and complete by owner instruction after PR #14 merged as `5792285`. Phase 6 Tasks/Planner is accepted and complete after PR #15 merged as `9debb35`. Phase 7 is accepted; Phase 8 only is authorized. No production deployment or real-data cutover occurred.
 
 The owner has now answered all 24 follow-up questions. [LAUNCH-DECISIONS.md](LAUNCH-DECISIONS.md) is the authoritative accepted-answer register; it supersedes older proposals. Sync starts first and encryption is optional. Safari/iOS PWA, macOS and Linux browser compatibility are 1.0 targets, with actual verification status recorded separately.
 
@@ -47,8 +57,8 @@ The demo remains **Demo v8**, with final cache revision `slb-v8-r3`. The final S
 | 4 | Notebook and Sea adventure port: writing, doodles, stroke undo, cream spread, best-thing links, send/edit behavior, bottle selection, filters and history. | Text/drawing survives saves, navigation, restart, migration and synchronization. | Accepted and complete by owner instruction; PR #13 merged as 953205b; final run 40645674923 passed all required jobs, separate CodeQL results, 63 Linux browser and 36 foundation checks |
 | 5 | Home and Reflection port: bento composition, greeting, progress, moods, streaks, achievements, review, sharing and customization. | All metrics match agreed rules; responsive layout and ordering are stable. | Accepted and complete by owner instruction; PR #14 merged as 5792285; final hosted run 40682341891 passes required jobs and separate CodeQL results |
 | 6 | Tasks/Planner port: day columns, moves, timed/untimed tasks, Must-do, rollover/skipped states, Waiting on, Low energy and Voyage progress. | No duplicate/lost tasks after moves, rollover, drag cancellation or date changes. | Accepted and complete by owner instruction; PR #15 merged as 9debb35 |
-| 7 | Settings/profile/deck/preset management, onboarding, normal and keyboard walkthroughs, reminders, global search, accessibility and platform-specific capability copy. | Every setting persists correctly; no replayed animations or dead controls; optional flows are understandable. | Implemented for review at /?phase=7; see docs/PHASE-7-STATUS.md; Phase 8+ remains gated |
-| 8 | Production PWA/offline/update behavior, versioned backups, export/import, local recovery and storage health. | Install/offline/reopen/update/restore works with real data and active drafts; upgrade failure leaves a recoverable version. | Planned |
+| 7 | Settings/profile/deck/preset management, onboarding, normal and keyboard walkthroughs, reminders, global search, accessibility and platform-specific capability copy. | Every setting persists correctly; no replayed animations or dead controls; optional flows are understandable. | Accepted and complete; PR #16 merged as 887fcdd |
+| 8 | Production PWA/offline/update behavior, versioned backups, export/import, local recovery and storage health. | Install/offline/reopen/update/restore works with real data and active drafts; upgrade failure leaves a recoverable version. | Implemented for review at /?phase=8; see docs/PHASE-8-STATUS.md; physical/owner acceptance pending |
 | 9 | Production Dropbox operation transport, optional full-content encryption after initial sync, guided key/recovery setup, first-device join, conflict review and mixed-version migration. | Real multi-device, race, expiry, offline, recovery and encryption scenarios pass; no false Synced status. | Planned; architecture starts in Phases 1–2 |
 | 10 | Android Capacitor shell, app links/OAuth return, native reminders, secure unlock, backups and required native widgets; GitHub Actions signed APK builds. | APK installs/upgrades and both widgets work on real Android devices, including offline and process restart. | Required for 1.0 |
 | 11 | Dedicated owner-led UI refinement, bug fixing and release hardening: browser/device matrix, accessibility, performance, storage stress, dependency/security review and soak tests. | Owner accepts the experience; no unresolved release blockers or known broken required flows. | Planned; feedback tracked throughout all phases |
@@ -258,4 +268,10 @@ Primary external references: [pinned source review](research/ARCHITECTURE-REVIEW
 Phase 6 Tasks/Planner is accepted and complete by explicit owner instruction on
 28 October 2026. Fetched local `main == origin/main`, zero ahead/behind, at
 `9debb35a6dc0ac8f3b0bbc72d8781e7e36f4b395`, the merge of PR #15 (final head `77ecb628`).
-Phase 7 management/experience only is authorized. Phase 8 and later ports remain gated.
+Phase 7 is accepted; Phase 8 only is authorized. Phase 9 and later ports remain gated.
+
+Phase 8 implementation is reviewable at `/?phase=8` on the existing canonical store.
+See [Phase 8 status](docs/PHASE-8-STATUS.md) for scope, review instructions and remaining
+platform evidence. Production offline updates wait for all old tabs to close; data tools
+provide versioned plaintext backups, Merge/Replace preview and verified recovery before
+mutation. Phase 8 acceptance remains pending; Phase 9+ is not started.
