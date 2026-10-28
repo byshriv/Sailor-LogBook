@@ -30,6 +30,11 @@ exclusion, linked midnight segments retaining original wall dates, reassignment 
 deletion and best-thing overflow retention. These must not silently alter the frozen demo.
 Phase 2 supplies a lossless typed schema/fixture suite before ports begin.
 
+Phase 3 Calendar is accepted and complete after PR #12 merged as `327ad8d`. Phase 4
+Notebook/Sea now has an isolated review surface at `/?phase=4`; see
+[Phase 4 architecture](ARCHITECTURE-PHASE-4.md) for preservation and review details.
+Its local verification does not accept the owner's visuals or implement later transport.
+
 Visual tokens start in apps/web/src/tokens.css: dark background, cream text/buttons,
 blue accent, Rethink headings/body and restrained motion/reduced motion. Notebook paper,
 Patrick Hand, original icons/animations and complete responsive interactions remain in
