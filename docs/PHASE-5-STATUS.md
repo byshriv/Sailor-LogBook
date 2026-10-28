@@ -1,5 +1,14 @@
 # Phase 5 Home and Reflection status
 
+Accepted and complete by explicit owner instruction on 28 October 2026. GitHub confirms
+PR #14 merged at `5792285ded097bc16f5bf28b0f570e059d391831` at 17:23:08 IST.
+Fetched main equals origin/main with zero ahead/behind and contains that merge. Final
+head `2bdbb16a8408f5af72ec7b2a935f98de110c209c` passes check/android-proof/codeql and
+separate CodeQL results (no new alerts) in run 40682341891: 81 Linux browser checks,
+43 foundation checks and three Android emulator cases. These are Phase 5 evidence.
+Phase 6 only is now authorized; see [Phase 6 status](PHASE-6-STATUS.md). The earlier
+review-era report below is historical; physical-device/release gates remain.
+
 28 October 2026. Branch `codex/phase-5-home-reflection`. Phase 5 only, implemented for
 owner review at `/?phase=5`, published in [draft PR #14](https://github.com/byshriv/Sailor-LogBook/pull/14). Phase 6 and later ports remain out of scope.
 

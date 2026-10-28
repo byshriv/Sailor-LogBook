@@ -3,6 +3,15 @@
 Authority: LAUNCH-DECISIONS.md and LAUNCH-PLAN.md section 3. The accepted decisions override
 historical questionnaire recommendations. All demo features remain required at 1.0.
 
+Final preservation acceptance includes **Phase 13**, a dedicated owner-dictated review
+after Phase 12 and before Phase 14 deployment. The owner may raise previously
+unmentioned bugs, UI/UX changes, missing behavior/additions and Demo v8 discrepancies.
+Record expected behavior, fixes, verification and owner acceptance in the
+[review register](PRE-RELEASE-OWNER-REVIEW.md). Earlier phase acceptance does not waive
+this review. Explicitly accepted production changes remain authoritative; final fixes
+must update this specification where behavior changes. Deployment requires the owner's
+acceptance of the final build and all launch gates.
+
 The preserved implementation is reference/demo-v8, cache slb-v8-r3, verified using
 `node scripts/freeze-demo.cjs`. The root legacy source remains the working demo. Fonts,
 original artwork and notices are preserved. Do not replace the live demo with the proof.
@@ -48,4 +57,19 @@ progress, review and canvas sharing. Metrics apply accepted union/inherited-excl
 rules. Automatic best-streak freezes bridge four missing past days per calendar month;
 today does not consume one, frozen days do not count, and backfill recomputes usage.
 All overflow text stays in Notebook while users choose up to four featured moments.
-No Planner, Settings or later port is included.
+Phase 5 is now accepted and complete by explicit owner instruction on 28 October 2026
+after PR #14 merged as `5792285`. This does not waive the final owner review.
+
+Phase 6 Tasks/Planner is implemented for review at `/?phase=6`. Preserve responsive
+day columns (three previous days and eight starting at the selected day), dimmed past
+headers, timed/untimed task editing and moves, Must-do, Waiting on, Low energy, Voyage
+progress and manual/clock statuses. Unresolved tasks stay on their original date, even
+when a timed plan displays Done by clock; neither a plan nor its completion logs time.
+The review dialog offers Leave planned, rollover to an explicit later date/time, Skip
+and Not gonna do. Rollover defaults to untimed To do and records Skipped on the original
+day with the prior status retained. Ordinary moves retain status/time. Dated history
+markers link to the current task; edits, moves, review and deletion use Undo/30-day
+recovery. The Calendar scheduling dock only schedules the same task; the full Calendar
+remains the accepted Calendar port. Editor Date/Time provides a keyboard alternative to
+dragging. These review details are in [Phase 6 architecture](ARCHITECTURE-PHASE-6.md).
+Settings and Phase 7+ ports remain out of scope.
