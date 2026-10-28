@@ -101,3 +101,11 @@ use its checks and description for final hosted evidence. Physical Safari/phone/
 media budgets, production cutover and issues #2/#3 remain release gates. Synthetic replay
 does not certify production synchronization; real transport remains Phase 9. Do not begin
 Home/Reflection, Planner, Settings, PWA or later ports from this handoff.
+
+
+Publication validation follow-up: run 40644890110 on head `30c113c` passed all three
+workflow jobs and 63 Linux browser checks, but its separate CodeQL results check flagged
+two Notebook date-link sinks. Both now encode the date query explicitly. Final corrected-head
+workflow/CodeQL results and artifact evidence belong in PR #13 checks/description; do not
+use the earlier workflow success as security acceptance. No alert is dismissed or check
+waived. See docs/VERIFICATION-PHASE-4.md for the inherited moderate development-tool audit findings.

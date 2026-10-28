@@ -67,3 +67,19 @@ only. Use [PR checks](https://github.com/byshriv/Sailor-LogBook/pull/13/checks) 
 description for the final head SHA/run/artifact evidence. Earlier runs are not proof of a
 later revision. All required jobs remain check/android-proof/codeql. Draft publication and
 CI do not imply owner Phase 4 acceptance or authorization to merge or start Phase 5.
+
+## CodeQL results follow-up
+
+The initial published final head `30c113cd5bf5118d5203371e981adfcfb59cea0f` passed the
+workflow jobs in run 40644890110: all 63 Linux browser checks, all 36 foundation tests,
+84 demo passes/one expected local-reference skip, and three Android emulator tests.
+However, the separate CodeQL results check flagged two DOM-text-to-HTML flows in the
+Notebook's date-link `href`/navigation assignments. The date query is now explicitly
+URI-component encoded at both sinks. No security result is dismissed or check disabled.
+The corrected head requires its own workflow and separate CodeQL-results success; use
+PR #13's current checks/description for the final revision and artifacts.
+
+The same run's high-severity npm audit gate passed but reports three inherited moderate
+findings in the Capacitor CLI / xcode / uuid development-tool dependency chain
+(GHSA-w5hq-g745-h8pq). Phase 4 changes no dependency or lockfile; no forced downgrade
+or claim of zero vulnerabilities is made.

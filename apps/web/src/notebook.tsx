@@ -624,11 +624,11 @@ export function Notebook({ projection, db }: { projection: Projection; db: Logbo
                     {line.moment && (
                       <a
                         className={styles.bestLink}
-                        href={`/?phase=3&date=${date}`}
+                        href={`/?phase=3&date=${encodeURIComponent(date)}`}
                         onClick={(e) => {
                           e.preventDefault();
                           void navigate(() => {
-                            location.href = `/?phase=3&date=${date}`;
+                            location.href = `/?phase=3&date=${encodeURIComponent(date)}`;
                           });
                         }}
                       >
