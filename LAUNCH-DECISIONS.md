@@ -8,7 +8,13 @@ test inputs are recorded in [ADR 0005](docs/adr/0005-phase2-domain-durability.md
 
 Phase 3 Calendar is accepted and complete by explicit owner instruction on 28 October 2026; PR #12 merged as `327ad8d` with final required checks passing. Phase 4 Notebook and Sea adventure only was then requested. See [Phase 3 status](docs/PHASE-3-STATUS.md) and [Phase 4 status](docs/PHASE-4-STATUS.md); accepted product decisions remain unchanged.
 
-Phase 4 Notebook and Sea is accepted and complete by explicit owner instruction on 28 October 2026; PR #13 merged as `953205b` after the final workflow and separate CodeQL results checks passed. Phase 5 Home and Reflection only is now authorized; see [Phase 5 status](docs/PHASE-5-STATUS.md). Phase 6 and later ports remain out of scope.
+Phase 4 Notebook and Sea is accepted and complete by explicit owner instruction on 28 October 2026; PR #13 merged as `953205b` after the final workflow and separate CodeQL results checks passed.
+
+Phase 5 Home and Reflection is accepted and complete by explicit owner instruction on
+28 October 2026. PR #14 merged as `5792285ded097bc16f5bf28b0f570e059d391831`;
+local main was fetched and verified equal to origin/main with zero ahead/behind.
+Phase 6 Tasks/Planner only is authorized. See [Phase 6 status](docs/PHASE-6-STATUS.md).
+Phase 7 and later implementation remains gated; prior planning edits are preserved.
 
 The most important correction is **sync first, encryption optional**, as in the demo. Earlier wording implying mandatory encryption for all Dropbox sync is superseded. Protection against Dropbox reading content applies when encryption is enabled.
 
@@ -56,6 +62,19 @@ The most important correction is **sync first, encryption optional**, as in the 
 - React/TypeScript/Redux Toolkit under delegated framework choice, with Super Productivity's local-first/modular/operation-log boundaries.
 - One active editing tab per browser profile; three total deck levels; original local record dates/times retained when travelling.
 - Guided passphrase/recovery key and trusted Android unlock apply when the optional encryption feature is enabled.
+
+## Additional owner decision — 28 October 2026
+
+Add a separate **Phase 13 final owner-dictated review before 1.0.0 deployment**, after
+Phase 12 documentation/preparation. The owner may raise previously unmentioned errors,
+bugs, UI/UX changes, missing behavior or additions, and differences that should match
+Demo v8. Record each item in the [review register](docs/PRE-RELEASE-OWNER-REVIEW.md),
+implement agreed changes, retest and repeat until the owner accepts the final build.
+Earlier phase acceptance does not waive this review; Phase 11 hardening remains.
+Only the owner may approve nonblocking deferrals; required demo behavior and release
+blockers remain launch gates. Deployment moves from Phase 13 to **Phase 14** and
+requires final review acceptance and owner deployment approval. This planning update
+does not start later implementation phases or accept the current Phase 5 visuals.
 
 ## Execution inputs still to collect
 

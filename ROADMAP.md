@@ -8,18 +8,21 @@
 | 2 | Shared TypeScript domain, React/state architecture, canonical IndexedDB, durable operations, linked-day/overlap rules, Undo/30-day recovery, WebP media and safe demo migration | merged in PR #11 at 7107798; final required checks passed; see docs/VERIFICATION-PHASE-2.md |
 | 3 | Calendar port: views, +deck quick-add, drag and resize | accepted and complete by owner instruction; PR #12 merged as 327ad8d; final required jobs and 45 hosted browser checks passed; see docs/PHASE-3-STATUS.md |
 | 4 | Notebook port: text, drawing, bottles and Sea adventure | accepted and complete by owner instruction; PR #13 merged as 953205b; final workflow and CodeQL results pass with 63 Linux browser checks; see docs/PHASE-4-STATUS.md |
-| 5 | Home and Reflection port: dashboards, streaks and achievements | implemented for owner review at /?phase=5 on codex/phase-5-home-reflection; see docs/PHASE-5-STATUS.md |
-| 6 | Tasks and Planner port: must-do, rollover, statuses and Voyage progress | planned |
+| 5 | Home and Reflection port: dashboards, streaks and achievements | accepted and complete by owner instruction; PR #14 merged as 5792285; final hosted run 40682341891 passes required jobs and separate CodeQL results; see docs/PHASE-5-STATUS.md |
+| 6 | Tasks and Planner port: must-do, rollover, statuses and Voyage progress | implemented for owner review at /?phase=6 on codex/phase-6-planner; see docs/PHASE-6-STATUS.md; Phase 7+ remains gated |
 | 7 | Settings, walkthrough and reminders | planned |
 | 8 | PWA hardening: offline updates, backup, export and import | planned |
 | 9 | Production Dropbox sync first; optional E2EE content, passphrase/recovery key, trusted Android unlock, conflict review and cross-version safety | planned; contracts/proof begin in Phases 1–2 |
 | 10 | Signed Android APK via GitHub Actions; native lifecycle/reminders; Quick log and Today / best thing widgets | required for 1.0 |
 | 11 | Owner-led UI/usability refinement and bug fixing; browser/device tests, accessibility, performance, security and RC soak | required; owner feedback tracked throughout earlier phases too |
 | 12 | Documentation, privacy/security/support, third-party notices, contributor/repository polish and release preparation | planned |
-| 13 | Approved 1.0.0 web/PWA + signed GitHub APK; migration/recovery verification and post-launch triage | planned; quality gates, no fixed date |
+| 13 | Final owner-dictated review: errors, bugs, UI/UX changes, missing behavior and Demo v8 parity; implement, retest and repeat until accepted | required before deployment; see docs/PRE-RELEASE-OWNER-REVIEW.md |
+| 14 | Approved 1.0.0 web/PWA + signed GitHub APK; migration/recovery verification and post-launch triage | planned; Phase 13 acceptance and quality gates required, no fixed date |
 | After 1.0 | Google Play; possible F-Droid, native iOS/App Store and future native platform/UI work | separate later scope |
 
 Agreed 27 October 2026: public **byshriv/sailor-logbook**, MIT. Web/PWA, Android APK and both widgets are required for 1.0. All demo features remain; further owner requests concern usability, UI polish and bug fixes. Google Play is later.
+
+Added by owner request on 28 October 2026: Phase 13 is a dedicated final hands-on review after Phase 12 and before 1.0.0 deployment. The owner may dictate previously unmentioned errors, bugs, UI/UX changes, additions and differences from Demo v8. Record every item in the [review register](docs/PRE-RELEASE-OWNER-REVIEW.md), implement agreed changes and obtain owner acceptance after retesting. Earlier phase acceptance does not waive this review. Phase 11 hardening remains required; deployment is now Phase 14.
 
 Architecture recommendation: React + TypeScript + Vite + Redux Toolkit, with framework-independent domain, persistence, sync-core and provider packages. Follow Super Productivity's local-first/operation-log boundaries without copying its entire product. Three deck levels, original local record dates/times, one active editing browser tab, optional encryption with passphrase/recovery key and trusted Android unlock, and private-by-default widget text are settled. Sync must work before encryption setup.
 

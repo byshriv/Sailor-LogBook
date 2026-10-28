@@ -1,5 +1,14 @@
 # Phase 5 verification
 
+Acceptance follow-up, 28 October 2026: Phase 5 is accepted and complete by explicit
+owner instruction. PR #14 merged as `5792285ded097bc16f5bf28b0f570e059d391831` at
+17:23:08 IST; fetched local main equals origin/main (zero ahead/behind) and includes it.
+GitHub's PR metadata records final hosted [run 40682341891](https://github.com/byshriv/Sailor-LogBook/actions/runs/40682341891)
+on head `2bdbb16a8408f5af72ec7b2a935f98de110c209c`: check/android-proof/codeql and
+separate CodeQL results pass with no new alerts, 81 Linux browser checks, 43 foundation
+tests and three Android emulator cases. This supersedes the pending-publication copy
+below. Phase 6 needs its own verification; physical-device release gates remain.
+
 28 October 2026. Local Windows; Node 24.22.0/npm 11.19.1; pinned Playwright 1.64.1.
 Only synthetic fixtures and disposable browser profiles were used.
 
