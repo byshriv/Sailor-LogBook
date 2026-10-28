@@ -1,3 +1,5 @@
+import { RecoveryScreen } from './recovery-screen.tsx';
+import { DataTools } from './data-tools.tsx';
 import React, { useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import type { Root } from 'react-dom/client';
 import type { Deck, Edit, Json, Preset } from '../../../packages/domain/src/logbook.ts';
@@ -540,11 +542,7 @@ function Management({ projection }: { projection: Projection }) {
                   Request persistent storage
                 </button>
               </div>
-              <p>
-                Production offline updates, versioned backup, import/export and recovery management
-                arrive in Phase 8. Keep using the existing demo for its data tools. This review does
-                not read or replace demo data.
-              </p>
+              <DataTools projection={projection} blocked={blocked} />
             </section>
           )}
           {show(
@@ -553,9 +551,9 @@ function Management({ projection }: { projection: Projection }) {
             <section id="capabilities">
               <h2>Platform capabilities</h2>
               <p>
-                Web/PWA and iOS/iPadOS 17+ Safari/PWA are launch targets. This review has no
-                production offline/install/update flow. Native iOS packaging is later. Actual Safari
-                and phone verification remains pending.
+                Web/PWA and iOS/iPadOS 17+ Safari/PWA are launch targets. The production build
+                provides offline installation and deferred updates in Storage & data. Native iOS
+                packaging is later. Actual Safari and phone verification remains pending.
               </p>
               <p>
                 Android 12+ is the product target; 4 GB RAM is recommended. Signed APK, native
@@ -1112,10 +1110,10 @@ function Management({ projection }: { projection: Projection }) {
         {panel === 'join' && (
           <Modal title="Bring your logbook aboard" close={close}>
             <p>
-              Use the same Dropbox account as your other device, or restore a local backup.
-              Production backup import arrives in Phase 8 and Dropbox joining in Phase 9. No
-              connection is made from this Phase 7 review. Your existing data stays on its current
-              device and in the demo.
+              Use the same Dropbox account as your other device, or restore a local backup. Use
+              Backup and recovery in Storage & data to preview a local file. Dropbox joining arrives
+              in Phase 9. No connection is made here. Your existing data stays on its current device
+              and in the demo.
             </p>
             <button onClick={close}>Back to Settings</button>
           </Modal>
@@ -1324,8 +1322,15 @@ export async function startManagement(root: Root) {
       return;
     }
     try {
-      const db = await openLogbook(indexedDB),
+      const db = await openLogbook(indexedDB);
+      let projection;
+      try {
         projection = await createLogbookProjection(db, () => {});
+      } catch {
+        root.render(<RecoveryScreen db={db} />);
+        await new Promise<void>(() => {});
+        return;
+      }
       root.render(<Management projection={projection} />);
       await new Promise<void>(() => {});
     } catch {

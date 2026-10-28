@@ -20,6 +20,8 @@ export async function createLogbookProjection(db: LogbookStore, schedule: () => 
     schedule,
   );
   return {
+    db,
+    refresh: async () => store.dispatch(projection.actions.durable(await db.load())),
     store,
     pipeline,
     attachment: db.attachment,
