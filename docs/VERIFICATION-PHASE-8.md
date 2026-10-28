@@ -101,3 +101,21 @@ The test fixtures restored the artifact before these SHA-256 values were recorde
 Storage review commit `272fbf8`; PWA/UI/CI review commit `9625445`; documentation follows.
 All commits are local. README/DEPLOY owner diffs are excluded and remain exactly intact.
 No remote publication, merge, deployment, cloud authorization or native port occurred.
+
+## Draft publication integrity
+
+Owner-authorized next step: [draft PR #17](https://github.com/byshriv/Sailor-LogBook/pull/17).
+GitHub connector Git-data publication preserves three tree-identical review snapshots:
+
+| Scope                       | Original local commit                    | Published commit                         | Identical tree                           |
+| --------------------------- | ---------------------------------------- | ---------------------------------------- | ---------------------------------------- |
+| Persistence and regressions | 272fbf85638b2209bca8aac22f0b8b76b6d0e702 | b22e91b0d8256d85b46611c9096074e969485453 | 69cc1deea63687fda0068bd58f56302d33c817e7 |
+| UI/PWA/browser/CI           | 96254452f8e4f69c6ed5193a7e7742ef7e1d6a9f | 1458923f98f65d155e07cfaabd5c7cac6c99969e | b6163aa50f84dd4536a661bd20a75e8df0192714 |
+| Acceptance and handoff      | 4716462c682080e8d3ddea655698bb5c6cfac3ff | 12fd67b023bf9db2b8f68e8a9713eeb4fdc45523 | 68890d2bc2900f90a67a4110d041e0818b0da5de |
+
+Original local history remains on `codex/phase-8-recovery-local`; the active branch tracks
+published history. Owner README/DEPLOY diffs remain exactly intact and excluded. No terminal
+credentials, force push, main push, merge or deployment occurred. This publication follow-up
+needs all required jobs and separate CodeQL results on its own final head. Consult PR #17's
+checks/description for the exact result; pending jobs are not a hosted pass. Draft publication
+does not accept Phase 8 or authorize Phase 9, deployment or a merge.

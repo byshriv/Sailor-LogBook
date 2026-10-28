@@ -110,3 +110,16 @@ Full and final focused browser reports are retained under ignored `build/`; see 
 
 The tested final shell cache is `slb-production-ffe8e2dd6d2e0ae9`. No production artifact
 was promoted. Only README.md and DEPLOY.md should remain modified after these commits.
+
+## Draft publication follow-up
+
+Published at the owner's next-step request in [draft PR #17](https://github.com/byshriv/Sailor-LogBook/pull/17).
+The three published full trees exactly match the tested local storage, UI/PWA and documentation
+snapshots; see the verification table. Original history is retained on
+`codex/phase-8-recovery-local`; the active branch tracks the published history. README/DEPLOY
+owner edits remain uncommitted and excluded. No terminal credentials, force push, main push,
+merge, real-data cutover or deployment was used. Phase 8 owner acceptance remains pending.
+
+This publication record also requires fresh checks on its final head. Use PR #17 checks and
+description for the exact revision/run results; earlier local or hosted runs do not substitute
+for a later revision. Phase 9 and later ports remain gated.
