@@ -2,6 +2,7 @@
 
 Updated 28 October 2026. Scope: Phase 6 only. Branch `codex/phase-6-planner`.
 Implemented for owner review at `/?phase=6`. Phase 7 and later ports remain gated.
+Published in [draft PR #15](https://github.com/byshriv/Sailor-LogBook/pull/15).
 No production deployment, real-data cutover, cloud mutation or main push occurred.
 
 ## Baseline and acceptance
@@ -92,3 +93,10 @@ Before merging a published Phase 6 PR, require check/android-proof/codeql and se
 CodeQL results on its exact final head. Phase 5's green run is not Phase 6 evidence.
 No Phase 6 hosted/Android/physical-device pass is claimed by local tests. Settings and
 all Phase 7+ ports require a new owner request; no later port was started.
+
+Publication follow-up: connected GitHub Git-data tools preserved identical full trees
+for the domain, UI/browser and documentation commits. Original local history remains on
+`codex/phase-6-planner-local`; the active branch tracks the published history. README and
+DEPLOY owner edits remain uncommitted and excluded from publication. See the PR checks
+and description for final exact-head hosted results; this follow-up also requires all
+checks. Publication does not authorize merge or imply owner Phase 6 acceptance.

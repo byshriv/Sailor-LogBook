@@ -69,3 +69,21 @@ budgets and existing release gates remain. Windows WebKit's native Blob limitati
 remain unchanged. No dependency/lockfile/audit/CI policy changes or security audit.
 Required check/android-proof/codeql and separate CodeQL results must pass on a published
 PR's exact final head before merge. Phase 7+ and production synchronization remain later.
+
+## Publication integrity
+
+Review: [draft PR #15](https://github.com/byshriv/Sailor-LogBook/pull/15). Publication
+used connected GitHub Git-data tools; no terminal credentials, main push, force push or
+history rewrite. Original local history is retained on `codex/phase-6-planner-local`.
+Each complete published tree was checked against its tested local counterpart:
+
+| Scope                  | Local commit | Published commit                         | Identical tree                           |
+| ---------------------- | ------------ | ---------------------------------------- | ---------------------------------------- |
+| Domain/durability      | 26b94fd      | 7230a5f4d4cf5997c2707657fb6dbfe07a81e901 | ce780bc6b37325fc1a84c22cd815511eb622f84a |
+| UI/browser regressions | f61bcf1      | 6cfb4dbe26b9d5d59fa97a0b877902a47d1fc98e | ef0ab571e7ebb7863d9e09a56170f4cf1254ceb1 |
+| Acceptance/handoff     | 3d11602      | 01c819fb8decc35c1d20161fac8df7b8c74e98be | cc8395bd3883385bd6e049653c542c006862bd83 |
+
+README/DEPLOY owner edits are preserved and excluded from publication. This publication
+follow-up also requires every check on its final head. Use current PR checks/description
+for exact final head/run/artifact evidence; earlier green runs do not substitute for it.
+CI does not accept Phase 6 visuals or authorize merge, deployment or Phase 7+.

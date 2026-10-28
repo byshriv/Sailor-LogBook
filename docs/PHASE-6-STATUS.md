@@ -19,3 +19,9 @@ See [architecture](ARCHITECTURE-PHASE-6.md), [verification](VERIFICATION-PHASE-6
 and [handoff](../PHASE-HANDOFF.md). Owner visual/interaction acceptance remains required.
 No Phase 7+ port, deployment, real-data cutover, cloud mutation or dependency change.
 Pre-existing owner planning edits for Phase 13/final review are preserved.
+
+Published in [draft PR #15](https://github.com/byshriv/Sailor-LogBook/pull/15). The
+published full trees match the locally tested commits; original local history remains
+on `codex/phase-6-planner-local`. Required jobs and separate CodeQL results must pass
+on the final head; consult PR checks/description for hosted evidence. No merge or owner
+Phase 6 acceptance is implied. Unrelated README/DEPLOY owner edits remain uncommitted.
