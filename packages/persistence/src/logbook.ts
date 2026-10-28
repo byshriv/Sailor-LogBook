@@ -205,6 +205,7 @@ export async function openLogbook(
       input: EditCommand,
       remote?: CausalOperation,
       attachments: { id: string; digest: string; blob: Blob }[] = [],
+      expectedState?: string,
     ): Promise<DurableResult> {
       const command = structuredClone(input),
         incoming = remote && structuredClone(remote);
@@ -218,6 +219,8 @@ export async function openLogbook(
       return transaction('readwrite', async (tx) => {
         const head = await verify(tx),
           receipts = tx.objectStore('receipts');
+        if (expectedState !== undefined && canonical(head.state) !== expectedState)
+          throw Error('Logbook changed since preview; preview again');
         const prior = (await req(receipts.get(command.id))) as Receipt | CompactReceipt | undefined;
         if (prior) {
           const operation: CausalOperation = { ...prior.operation, command };
@@ -240,12 +243,16 @@ export async function openLogbook(
         const clock = advance(head.clock, operation),
           state = applyEdit(head.state, command),
           revision = head.revision + 1;
-        if (command.edit.type === 'recover')
+        if (command.edit.type === 'recover') {
           await addRecovery(tx, 'restore:' + command.id, {
-            id: command.id,
+            id: 'restore:' + command.id,
             reason: 'before restore',
             snapshot: { state: head.state, clock: head.clock, revision: head.revision },
           });
+          const saved = await req(tx.objectStore('recovery').get('restore:' + command.id));
+          if (canonical(saved.snapshot.state) !== canonical(head.state))
+            throw Error('Recovery verification failed');
+        }
         for (const b of media) tx.objectStore('blobs').put(b, b.id);
         for (const e of Object.values(state.entities))
           for (const id of attachmentIds(e))
@@ -324,18 +331,72 @@ export async function openLogbook(
         await addRecovery(tx, id, point);
         return point;
       }),
-    recoverySnapshot: (id: string) =>
-      transaction('readonly', async (tx) => {
+    recoverySnapshot: async (id: string) => {
+      const saved = await transaction('readonly', async (tx) => {
         const point = (await req(tx.objectStore('recovery').get(id))) as RecoveryPoint | undefined;
         if (!point?.snapshot) throw Error('Recovery point unavailable');
         validateLogbook(point.snapshot.state);
-        return point.snapshot.state;
-      }),
+        const blobs = [];
+        for (const key of new Set(
+          Object.values(point.snapshot.state.entities).flatMap(attachmentIds),
+        )) {
+          const b = await req(tx.objectStore('blobs').get(key));
+          if (!b || b.id !== key || b.digest !== key) throw Error('Recovery media missing');
+          blobs.push(b);
+        }
+        return { state: point.snapshot.state, blobs };
+      });
+      for (const b of saved.blobs)
+        if ((await sha256(await b.blob.arrayBuffer())) !== b.digest)
+          throw Error('Recovery media corrupted');
+      return saved.state;
+    },
+    // Explicit local rescue only. Retain every damaged store in an unaged forensic archive.
+    // This creates a new causal actor; it must never be uploaded as a continuation by Phase 9.
+    async rescueRecovery(id: string) {
+      const state = await this.recoverySnapshot(id);
+      return transaction('readwrite', async (tx) => {
+        const point = await req(tx.objectStore('recovery').get(id));
+        if (canonical(point?.snapshot?.state) !== canonical(state)) throw Error('Recovery changed');
+        const retained = Object.fromEntries(
+          await Promise.all(
+            stores.map(async (name) => [
+              name,
+              {
+                keys: await req(tx.objectStore(name).getAllKeys()),
+                values: await req(tx.objectStore(name).getAll()),
+              },
+            ]),
+          ),
+        );
+        const key = 'rescue:' + crypto.randomUUID();
+        tx.objectStore('migration').add(
+          { id: key, retained, reason: 'Before explicit local rescue' },
+          key,
+        );
+        const verified = await req(tx.objectStore('migration').get(key));
+        if (
+          canonical(verified.retained.meta) !== canonical(retained.meta) ||
+          canonical(verified.retained.tail) !== canonical(retained.tail)
+        )
+          throw Error('Rescue archive verification failed');
+        tx.objectStore('meta').clear();
+        tx.objectStore('tail').clear();
+        tx.objectStore('receipts').clear();
+        const snapshot = { state, clock: {}, revision: 0 };
+        tx.objectStore('meta').put({ ...snapshot, actor: crypto.randomUUID() }, 'head');
+        tx.objectStore('meta').put(snapshot, 'checkpoint');
+      });
+    },
     recoveryPoints: () =>
-      transaction(
-        'readonly',
-        (tx) => req(tx.objectStore('recovery').getAll()) as Promise<RecoveryPoint[]>,
-      ),
+      transaction('readonly', async (tx) => {
+        const recovery = tx.objectStore('recovery');
+        const values = (await req(recovery.getAll())) as RecoveryPoint[];
+        const keys = await req(recovery.getAllKeys());
+        // Earlier recover points stored the command ID in the value and restore:ID as the key.
+        // Present the durable lookup key without rewriting any existing point.
+        return values.map((value, i) => ({ ...value, id: String(keys[i]) }));
+      }),
     exportRetained: () =>
       transaction('readonly', async (tx) =>
         Object.fromEntries(

@@ -1,5 +1,15 @@
 # Sailor Logbook roadmap
 
+## Current acceptance — Phase 8 continuation
+
+Phase 7 is accepted and complete by explicit owner instruction on 28 October 2026.
+Fetched local `main == origin/main` (zero ahead/behind) at
+`887fcdda9855e6fad62f5c05589110f8b25412aa`, the PR #16 merge, including final head
+`e7b77bbfb11429ee48c48ed4a5b8dbebe89cc5af`. Phase 8 only is authorized.
+Phase 9 and later ports, real-data cutover and deployment remain gated.
+
+Earlier review-era status below is historical where it differs.
+
 | Phase | Goal | Status |
 | ----- | ---- | ------ |
 | 0 | Mobile v1 demo: calendar, notebook, reflection, onboarding and local PWA | done |
@@ -10,8 +20,8 @@
 | 4 | Notebook port: text, drawing, bottles and Sea adventure | accepted and complete by owner instruction; PR #13 merged as 953205b; final workflow and CodeQL results pass with 63 Linux browser checks; see docs/PHASE-4-STATUS.md |
 | 5 | Home and Reflection port: dashboards, streaks and achievements | accepted and complete by owner instruction; PR #14 merged as 5792285; final hosted run 40682341891 passes required jobs and separate CodeQL results; see docs/PHASE-5-STATUS.md |
 | 6 | Tasks and Planner port: must-do, rollover, statuses and Voyage progress | accepted and complete by owner instruction; PR #15 merged as 9debb35; see docs/PHASE-6-STATUS.md |
-| 7 | Settings/profile, decks/presets, onboarding/tours, reminders, search, accessibility and capability copy | implemented for review at /?phase=7; see docs/PHASE-7-STATUS.md; Phase 8+ gated |
-| 8 | PWA hardening: offline updates, backup, export and import | planned |
+| 7 | Settings/profile, decks/presets, onboarding/tours, reminders, search, accessibility and capability copy | accepted and complete; PR #16 merged as 887fcdd; Phase 8 only authorized |
+| 8 | PWA hardening: offline updates, backup, export and import | implemented for review at /?phase=8; see docs/PHASE-8-STATUS.md |
 | 9 | Production Dropbox sync first; optional E2EE content, passphrase/recovery key, trusted Android unlock, conflict review and cross-version safety | planned; contracts/proof begin in Phases 1–2 |
 | 10 | Signed Android APK via GitHub Actions; native lifecycle/reminders; Quick log and Today / best thing widgets | required for 1.0 |
 | 11 | Owner-led UI/usability refinement and bug fixing; browser/device tests, accessibility, performance, security and RC soak | required; owner feedback tracked throughout earlier phases too |
@@ -35,4 +45,10 @@ Accepted production refinements: midnight-linked segments; elapsed minutes count
 Phase 6 Tasks/Planner is accepted and complete by explicit owner instruction on
 28 October 2026. Fetched local `main == origin/main`, zero ahead/behind, at
 `9debb35a6dc0ac8f3b0bbc72d8781e7e36f4b395`, the merge of PR #15 (final head `77ecb628`).
-Phase 7 management/experience only is authorized. Phase 8 and later ports remain gated.
+Phase 7 is accepted; Phase 8 only is authorized. Phase 9 and later ports remain gated.
+
+Phase 8 implementation is reviewable at `/?phase=8` on the existing canonical store.
+See [Phase 8 status](docs/PHASE-8-STATUS.md) for scope, review instructions and remaining
+platform evidence. Production offline updates wait for all old tabs to close; data tools
+provide versioned plaintext backups, Merge/Replace preview and verified recovery before
+mutation. Phase 8 acceptance remains pending; Phase 9+ is not started.

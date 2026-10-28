@@ -230,6 +230,8 @@ test('Calendar storage abort retains draft and publishes no partial deck or acti
 });
 
 test('Mobile held ghost resize preserves typed text and commits only on Done', async ({ page }) => {
+  // Keep this resize fixture away from midnight; linked-day behavior has its own case.
+  await page.clock.install({ time: new Date('2026-10-28T10:00:00') });
   await page.setViewportSize({ width: 390, height: 844 });
   await seed(page);
   await page.getByRole('button', { name: 'Quick log', exact: true }).click();

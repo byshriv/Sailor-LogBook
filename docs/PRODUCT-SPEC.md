@@ -1,5 +1,15 @@
 # Phase 1 product preservation specification
 
+## Current acceptance — Phase 8 continuation
+
+Phase 7 is accepted and complete by explicit owner instruction on 28 October 2026.
+Fetched local `main == origin/main` (zero ahead/behind) at
+`887fcdda9855e6fad62f5c05589110f8b25412aa`, the PR #16 merge, including final head
+`e7b77bbfb11429ee48c48ed4a5b8dbebe89cc5af`. Phase 8 only is authorized.
+Phase 9 and later ports, real-data cutover and deployment remain gated.
+
+Earlier review-era status below is historical where it differs.
+
 Authority: LAUNCH-DECISIONS.md and LAUNCH-PLAN.md section 3. The accepted decisions override
 historical questionnaire recommendations. All demo features remain required at 1.0.
 
@@ -77,7 +87,7 @@ Phase 6 is now accepted and complete following merged PR #15 at `9debb35`. Phase
 Phase 6 Tasks/Planner is accepted and complete by explicit owner instruction on
 28 October 2026. Fetched local `main == origin/main`, zero ahead/behind, at
 `9debb35a6dc0ac8f3b0bbc72d8781e7e36f4b395`, the merge of PR #15 (final head `77ecb628`).
-Phase 7 management/experience only is authorized. Phase 8 and later ports remain gated.
+Phase 7 is accepted; Phase 8 only is authorized. Phase 9 and later ports remain gated.
 
 Phase 7 management/experience is implemented for review at `/?phase=7`; see
 [architecture](ARCHITECTURE-PHASE-7.md) and [status](PHASE-7-STATUS.md). Preserve
@@ -96,3 +106,9 @@ permission/capability limits honestly. Closed-app reminders, production PWA/data
 tools, Dropbox joining/transport, optional encryption and native widgets remain
 their later phases. Earlier screens and the root/frozen demo remain available.
 Phase 7 owner acceptance is pending; no Phase 8+ implementation is authorized.
+
+Phase 8 implementation is reviewable at `/?phase=8` on the existing canonical store.
+See [Phase 8 status](PHASE-8-STATUS.md) for scope, review instructions and remaining
+platform evidence. Production offline updates wait for all old tabs to close; data tools
+provide versioned plaintext backups, Merge/Replace preview and verified recovery before
+mutation. Phase 8 acceptance remains pending; Phase 9+ is not started.

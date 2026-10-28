@@ -1,144 +1,125 @@
-# Phase handoff — Phase 7 management and experience
+# Phase handoff — Phase 8 offline, backups and recovery
 
-Updated 28 October 2026. Branch `codex/phase-7-settings`. Implemented for owner review
-at `/?phase=7`, published in [draft PR #16](https://github.com/byshriv/Sailor-LogBook/pull/16). Phase 8 and later ports remain gated. No deployment, real-data cutover,
-Dropbox connection or main push occurred.
+Updated 28 October 2026. Branch `codex/phase-8-recovery`. Phase 8 implemented for owner
+review at `/?phase=8`; Phase 8 acceptance remains pending. Phase 9 and later ports remain
+gated. No production deployment, real-data cutover, Dropbox connection or main push.
 
-## Baseline and acceptance
+## Acceptance and baseline
 
-Read this handoff, LAUNCH-DECISIONS.md, LAUNCH-PLAN.md, ROADMAP.md, docs/PRODUCT-SPEC.md
-and earlier architecture/ADRs/verification before continuing. The owner explicitly
-accepts Phase 6 as complete and authorizes Phase 7 only; acceptance is recorded in the
-launch documents, product spec and Phase 6 reports.
+The owner's continuation explicitly accepts Phase 7 as complete and authorizes Phase 8
+only. Acceptance is recorded in launch decisions, plan, roadmap, product spec and Phase 7
+status/verification. Earlier review-era pending-acceptance text is historical. The previous
+handoff is retained in [Phase 7 handoff](docs/PHASE-7-HANDOFF.md).
 
-Fetched origin before work and again before final review. Local `main == origin/main`,
-zero ahead/behind, at `9debb35a6dc0ac8f3b0bbc72d8781e7e36f4b395`, the PR #15 merge.
-Its final head `77ecb628639c18517320d0f23bb265a05c14d235` is an ancestor. Git records
-its merge at 19:32:03 IST on 28 October. Earlier hosted results are not Phase 7 proof.
+Read this handoff, LAUNCH-DECISIONS.md, LAUNCH-PLAN.md, ROADMAP.md, docs/PRODUCT-SPEC.md,
+earlier architecture/ADRs/verification, then the Phase 8 documents before continuing.
+Fetched origin at start and finish. Local `main == origin/main`, zero ahead/behind, at
+`887fcdda9855e6fad62f5c05589110f8b25412aa`, PR #16's merge, with final head
+`e7b77bbfb11429ee48c48ed4a5b8dbebe89cc5af` an ancestor. Merge recorded 23:14:48 IST.
+No hosted Phase 8 result is claimed; Phase 7 acceptance does not substitute for it.
 
-README.md and DEPLOY.md retain their exact pre-existing owner diffs, remain uncommitted
-and are excluded from Phase 7 commits. Phase 13 final owner review and Phase 14 deployment
-gates remain in place. No owner feedback, final acceptance or later authorization is invented.
+README.md and DEPLOY.md retain the exact pre-existing owner changes and remain uncommitted.
+They are excluded from Phase 8 commits. All 37 frozen reference files and the root demo
+remain unchanged. Phase 13 final owner review and Phase 14 deployment gates remain.
 
 ## Implementation map
 
-- `packages/domain/src/management.ts`: settings/profile/deck/preset edits preserving
-  compatibility, hierarchy validation, descendant records, search and reminder rules.
-- Domain/persistence `logbook.ts`: existing media validation now also verifies profile
-  digest references, atomic commit, migration staging/activation and startup hashes.
-- `apps/web/src/management.tsx` / `management.module.css`: Settings, profile, hierarchy,
-  presets, reassignment/recovery, onboarding and capability feedback.
-- `management-ui.tsx` / `deck-art.ts`: original deck icons, shared avatar/menus/search,
-  normal walkthrough, safe keyboard practice/reference, shortcuts, focus and reminders.
-- Existing Calendar/Notebook/Home/Reflection/Planner: small shared-control composition,
-  original-date item/preset links, Month preference, Reflection route/date and Planner time labels.
-- Eight new foundation regressions and twelve Phase 7 browser cases per engine.
+- `packages/persistence/src/backup.ts`: version 1/schema 2 plaintext backup, whole payload
+  and media verification, existing v8 converter, read-only preview, Merge/Replace planning,
+  collision/deletion choices, revalidation and stale-preview checks.
+- `packages/persistence/src/logbook.ts`: expected-baseline commit guard, recovery read-back
+  before mutation, media-verified recovery snapshots and explicit damaged-store rescue with
+  retained forensic history. Existing causal commands remain unchanged.
+- `apps/web/src/data-tools.tsx`, `recovery-screen.tsx`: Settings tools, previews, quota retry,
+  recovery/health and startup forensic export/rescue. Projection adds db/refresh composition.
+- `apps/web/src/pwa.tsx`, `scripts/production-pwa.cjs`: production browser bootstrap,
+  original-icon manifest, complete artifact cache, waiting update/status and owned cleanup.
+- `main.tsx`: Phase 8 route and production browser root. Existing Capacitor proof/default
+  native entry stays Phase 1, with no web worker registration. No Phase 10 port.
+- Foundation/browser/PWA tests, standalone PWA config/script, and CI PWA check after build.
 
-See [architecture](docs/ARCHITECTURE-PHASE-7.md), [status](docs/PHASE-7-STATUS.md) and
-[verification](docs/VERIFICATION-PHASE-7.md). All ports share `slb-phase2`, verified replay,
-Redux projection, durable command/media gateway and `slb-phase2-editor`. No new schema,
-command, migration activation, transport or PWA behavior. IDs, opaque fields, archives,
-editable drawings, original media and earlier screens stay intact. The root demo and
-all 37 frozen reference files remain unchanged.
+See [architecture](docs/ARCHITECTURE-PHASE-8.md), [status](docs/PHASE-8-STATUS.md),
+[user guide](docs/PHASE-8-DATA-GUIDE.md) and [verification](docs/VERIFICATION-PHASE-8.md).
+All accepted screens retain the same schema 2 store, media pipeline and editing Web Lock.
 
-## Reviewable interactions
+## Reviewable interactions and limits
 
-Settings has profile, preferences, decks, presets, reminders, storage, capabilities and
-Help cards, desktop sidebar dropdowns and mobile pill navigation. Shared controls occupy
-normal workspace/header layout and do not cover accepted-screen actions. Review desktop/
-mobile proportions, keyboard/insets and visual density against v8.
+Settings → Storage & data provides explicitly labelled plaintext download, file preview,
+Merge/Replace, per-ID collision choices, manual point, health/list and confirmed restore.
+Selecting/cancelling writes nothing. Invalid combined references/featured limits block Apply.
+Legacy exclusions/orphan references require explicit review; exact source/unknown fields stay
+archived. Missing/future/corrupt files fail closed. Source and baseline are checked again at
+Apply; recovery, blobs, head, receipt and tail commit atomically. Failure retains the preview.
 
-Deck disclosure/open/edit controls are independent. Three levels are validated across
-whole subtrees. Colours, all sixteen original icons and six original starter decks remain.
-Deletion previews explicit child-deck/record/preset reassignment, never deletes activities
-and has compound Undo. Preset duration zero retains the Calendar ghost length and exposes Done.
-Normal changes have immediate Undo and 30-day Recent changes; stale restores require review.
+Backups include full current state and all retained media without recompression. Whole-file
+transfer is provisionally limited to 64 MiB and uses memory; larger files are rejected without
+trimming content. Imported trash/tombstones/history stay in the complete source archive rather
+than impersonating local causal operations. Existing local recovery/trash/media remain retained.
+Downloads cannot prove disk writes; verify the actual file with Preview import. Encryption/key
+setup and Dropbox remain Phase 9. No production key policy is configured or downgraded here.
 
-Profile photos use the existing verified WebP pipeline and provisional media budgets.
-Keep original starts unchecked and explains source size/storage/transfer cost. Name/reference/
-blob save together; failure retains the draft. Removal is reversible without physically
-collecting blobs. Migrated data URLs and archives stay. Windows WebKit's native Blob
-limitation remains visible; no Safari photo-storage pass is implied.
+Five ordinary local points share browser storage and do not replace an external copy. Healthy
+restore is a causal recover command plus pre-restore point; referenced media hashes must verify.
+A damaged Phase 8 startup offers forensic retained-store export and verified snapshots. Explicit
+rescue archives every damaged store before creating a new actor/baseline; it never acknowledges
+or uploads old operations. **Phase 9 must treat rescue as a new local generation requiring
+join/review.** No valid point means retain/export data for manual recovery, never auto-clear.
 
-Seven-step onboarding commits once at Set sail; Cancel writes nothing. Existing content
-survives reviewing setup. Explicit create/help/guide links avoid stacked first-run overlays.
-Joining an existing logbook explains later capabilities without connecting. The normal guide
-visits actual screens with Back/Next/Skip and completion tracking. Desktop completion offers
-optional keyboard practice. Four safe exercises end in the full reference and record completion
-without creating journal content. Normal reopen does not replay the guide; Help allows replay.
+Production uses a dedicated secure origin, separate from Demo v8. Dev registers no worker.
+All screen chunks/fonts/icons are precached. No skipWaiting/claim/forced reload: save drafts,
+close **all controlled old tabs/windows**, then reopen to activate a waiting update. A failed
+required-asset install retains the active shell. Cache cleanup touches only owned production
+caches; unknown/demo workers are refused. No database migration was introduced. Future schema
+rollback still requires explicit compatibility checks; frontend rollback is not a DB downgrade.
 
-Search spans entries/tasks, original dates/deck paths, Notebook/Reflection, decks/presets,
-Settings and commands. Links open existing editors on their original day. Typing/composition
-guards, Ctrl/Cmd variants, item focus/edit/Done/duplicate/confirmed delete, Undo and Calendar
-shortcuts remain. Planner display follows time format while native time inputs retain their
-values. Dialogs wrap Tab, handle Escape, keep the background inert and return focus, including
-WebKit. Drafts block in-app tools/navigation. Failure retains fields and announces inside dialogs.
-
-Reminders check open tabs in the selected local minute, only without logged activity that day.
-Plans/completion never count as logging. A durable daily receipt prevents repeats. Permission
-and Test are explicit; denial/unavailable APIs retain in-app feedback. Background suspension/
-closed-app delivery is not promised. Storage grants/estimates and sound/haptics report actual limits.
-
-Encryption remains secondary. This preview does not encrypt local IndexedDB or connect Dropbox.
-Production PWA/update/data tools stay Phase 8; Dropbox/join/encryption stay Phase 9; native APK/
-reminders/keys/widgets stay Phase 10. Platform targets are not physical-device verification claims.
+Browser install UI/persistence/estimates/notifications vary. OS clearing, unsaved OS-kill loss,
+physical Safari/phone/storage-pressure, keyboard/insets, empirical media budgets, independent
+accessibility/security review and existing #2/#3 gates remain. No cloud/native/device pass or
+audit is inferred from headless tests. Required hosted check/android-proof/codeql and separate
+CodeQL results must pass on a published PR's exact final head before merge.
 
 ## Verification and continuation
 
-Synthetic fixtures/disposable profiles only. Results:
+Use synthetic fixtures/disposable profiles only. Exact commands/results and corrected fixture
+findings are recorded in docs/VERIFICATION-PHASE-8.md. Local Firefox currently fails before
+application launch with Windows `spawn UNKNOWN`; no Firefox application pass is claimed.
+Chromium/WebKit native media capability tests retain their explicit failure paths.
 
-- All 85 unchanged demo tests pass.
-- Typecheck, boundaries, all 57 foundation tests and preview build pass.
-- Full Chromium/WebKit suite: 89 pass, one explicit Windows WebKit profile-Blob skip.
-- Final Phase 7/empty-store route follow-up: 23 pass, one explicit Windows WebKit photo skip.
-- Firefox fails before app launch with Windows `spawn UNKNOWN`; 44 remaining cases do not run.
-- Syntax/manifests/assets, all 37 frozen hashes, narrow secret scan, formatting and whitespace pass.
+Data-tool review: `npm run dev:foundation`, then `http://127.0.0.1:5173/?phase=8`.
+Offline review: `npm run build:foundation`, then
+`npx vite preview apps/web --outDir ../../build/foundation --host 127.0.0.1 --port 5175`.
+Use `http://127.0.0.1:5175/?phase=8&tool=help` to bypass empty-store setup for review.
+`npm run test:pwa` requires the build first and tests a disposable localhost origin. It
+stages test releases in the ignored build and restores files in finally; no deployment.
 
-The full passing report is retained locally at ignored `build/browser-phase7-chromium-webkit.json`.
-The default report may show a later Firefox or targeted run. Desktop/mobile captures under
-`build/` were inspected. Tests caught and corrected control overlap and dialog focus gaps.
-Calendar's resize fixture centers the handle away from edge scrolling; its gesture code is
-unchanged. Planner's disclosure fixture names unresolved tasks instead of a generic first dropdown.
+Continue Phase 8 review/fixes only. Do not start Phase 9, connect Dropbox, activate production
+migration, erase owner data, publish/merge/deploy or change native platform scope without
+appropriate authorization. Owner visual/interaction acceptance is still needed for this phase.
 
-Phase 7 owner acceptance remains pending. Physical phone/Safari/touch/keyboard-inset/storage-
-pressure/OS-kill evidence, final media budgets, independent audits and existing #2/#3 gates remain.
-No hosted Phase 7/native/emulator pass is claimed. Before any later PR merges, require check/
-android-proof/codeql and separate CodeQL results on its exact final head. Local commits separate
-rules/media, UI/browser, empty-store routing and documentation; they do not imply publication,
-merge or deployment.
+## Final local review record
 
-Run `npm run dev:foundation`, open `http://127.0.0.1:5173/?phase=7` and close other Phase 2–7
-editing tabs first. Prior routes stay at phases 3/4/5/6; Reflection accepts
-`/?phase=5&screen=reflection`. Use disposable data. Continue Phase 7 review/fixes only unless
-the owner explicitly authorizes another phase. Do not start Phase 8 or later ports.
+Review commits: `272fbf8` (backup/import/recovery persistence and 11 regressions),
+`9625445` (PWA/data UI, browser/production tests and CI), followed by the documentation
+commit containing this handoff. Commits are local; no PR was created or pushed.
 
-Review commits: `cb11575` (domain/media), `306128e` (UI/browser), `36d667c`
-(empty-store route follow-up), followed by the acceptance/verification/handoff commit.
-Only README.md and DEPLOY.md should remain modified after committing this handoff.
+Final local evidence: all 85 unchanged demo tests; all 68 foundation tests; typecheck,
+boundaries and production build; full Chromium/WebKit suite 102 pass/zero skips; final
+Phase 8 follow-up 8 pass; production PWA 2 pass. Formatting, whitespace, narrow secret
+scan and all 37 frozen hashes pass. Firefox remains a pre-launch Windows failure.
+Full and final focused browser reports are retained under ignored `build/`; see verification.
 
-## Publication follow-up
+The tested final shell cache is `slb-production-ffe8e2dd6d2e0ae9`. No production artifact
+was promoted. Only README.md and DEPLOY.md should remain modified after these commits.
 
-Published through the connected GitHub Git-data tools in draft PR #16. Every full
-domain/media, UI/browser, routing and documentation tree exactly matches its locally
-verified counterpart. No terminal credential, force push, main push, merge or deployment.
-The original local history is retained on `codex/phase-7-settings-local`; the active
-branch tracks the published history after fetching. README/DEPLOY owner edits remain
-uncommitted and excluded. See VERIFICATION-PHASE-7.md for the tree identity table.
+## Draft publication follow-up
 
-The publication record itself also requires all checks on its final head. Hosted checks
-were pending when this record was committed; use PR #16 checks/description for the exact
-final head/run/artifact results. No earlier local or hosted run substitutes for a later
-revision. Draft publication does not accept Phase 7 or authorize merge, deployment or Phase 8+.
+Published at the owner's next-step request in [draft PR #17](https://github.com/byshriv/Sailor-LogBook/pull/17).
+The three published full trees exactly match the tested local storage, UI/PWA and documentation
+snapshots; see the verification table. Original history is retained on
+`codex/phase-8-recovery-local`; the active branch tracks the published history. README/DEPLOY
+owner edits remain uncommitted and excluded. No terminal credentials, force push, main push,
+merge, real-data cutover or deployment was used. Phase 8 owner acceptance remains pending.
 
-## Corrective verification follow-up
-
-Initial PR #16 run 40732641494 on `0041af5` passed Android proof but reported one
-high CodeQL results alert on the file-derived selected-photo URL and a Linux WebKit
-Blob-store failure (137 other browser cases passed). The preview now renders bounded
-raster pixels to canvas without file URLs/HTML interpretation. A markup-rejection
-regression retains the draft and verifies zero script execution or canonical writes.
-Profile media tests now run on every engine and verify either exact saves or an
-explicit native-capability failure with retained fields; there are no photo skips.
-WebKit native time inputs capture live changes before Save. All 26 corrective local
-Phase 7 Chromium/WebKit cases pass. The corrected final head needs fresh hosted checks;
-use PR #16 checks/description for the exact result. No Phase 8+ port or owner acceptance.
+This publication record also requires fresh checks on its final head. Use PR #17 checks and
+description for the exact revision/run results; earlier local or hosted runs do not substitute
+for a later revision. Phase 9 and later ports remain gated.

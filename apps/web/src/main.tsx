@@ -1,3 +1,4 @@
+import { prepareOffline } from './pwa.tsx';
 import React, { useEffect, useState, useSyncExternalStore } from 'react';
 import { createRoot } from 'react-dom/client';
 import { configureStore, createSlice } from '@reduxjs/toolkit';
@@ -7,7 +8,7 @@ import type { State } from '../../../packages/domain/src/index.ts';
 import { openProofStore, WriteGateway } from '../../../packages/persistence/src/index.ts';
 import './tokens.css';
 import { benchmarkArgon } from '../../../packages/crypto/src/argon.ts';
-import { launchAction, listenForWidgetLaunch, publishWidget } from './native.ts';
+import { isNative, launchAction, listenForWidgetLaunch, publishWidget } from './native.ts';
 
 const slice = createSlice({
   name: 'proof',
@@ -140,6 +141,7 @@ function App() {
     </main>
   );
 }
+if (import.meta.env.PROD && !isNative()) void prepareOffline().catch(() => {});
 const root = createRoot(document.getElementById('root')!);
 function message(text: string) {
   root.render(
@@ -179,7 +181,11 @@ async function start() {
     }
   });
 }
-if (new URLSearchParams(location.search).get('phase') === '7') {
+if (
+  new URLSearchParams(location.search).get('phase') === '7' ||
+  new URLSearchParams(location.search).get('phase') === '8' ||
+  (import.meta.env.PROD && !isNative() && !new URLSearchParams(location.search).has('phase'))
+) {
   void import('./management.tsx').then(({ startManagement }) => startManagement(root));
 } else if (new URLSearchParams(location.search).get('phase') === '6') {
   void import('./planner.tsx').then(({ startPlanner }) => startPlanner(root));

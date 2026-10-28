@@ -137,7 +137,7 @@ async function read(page: Page) {
   }, path);
 }
 async function saved(page: Page) {
-  await expect(page.getByRole('status')).toHaveText('Saved locally');
+  await expect(page.locator('main > [role="status"]')).toHaveText('Saved locally');
 }
 test('preferences/profile persist through restart and configure Calendar; cancellation and typing stay safe', async ({
   page,
@@ -355,7 +355,7 @@ test('save failure keeps profile draft, retry commits once; shared editor lock a
   await expect(page.locator('#capabilities')).toContainText('This review does not encrypt content');
   await expect(page.locator('#reminders')).toContainText('Closed-app scheduling is unavailable');
   await page.getByRole('button', { name: 'Test reminder', exact: true }).click();
-  await expect(page.getByRole('status')).toContainText('How was your day?');
+  await expect(page.locator('main > [role="status"]')).toContainText('How was your day?');
 });
 test('mobile settings have no overflow; onboarding cancels without writes and walkthrough completes without automatic replay', async ({
   page,
@@ -481,7 +481,7 @@ test('profile media saves verified bytes or retains drafts when native Blob stor
   await expect(page.getByLabel('Keep original')).not.toBeChecked();
   await page.getByRole('button', { name: 'Save profile' }).click();
   if (!blobStorage) {
-    await expect(page.getByRole('status')).toContainText(
+    await expect(page.locator('main > [role="status"]')).toContainText(
       'Unsaved · Photo storage failed in this browser',
     );
     await expect(page.getByRole('dialog', { name: 'Edit profile', exact: true })).toBeVisible();

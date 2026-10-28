@@ -328,3 +328,29 @@
     gap: 4px;
   }
 }
+
+.grid .dataTools {
+  padding: 20px 0 0;
+  background: transparent;
+  border: 0;
+}
+.dataTools > button {
+  margin: 4px 8px 4px 0;
+}
+.dataTools input[type='file'] {
+  max-width: 100%;
+}
+
+.comparison {
+  min-width: 0;
+  margin: 16px 0;
+  border: 1px solid var(--muted);
+  border-radius: 14px;
+}
+.comparison pre {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  max-height: 240px;
+  overflow: auto;
+  font-size: 13px;
+}
