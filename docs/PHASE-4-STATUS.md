@@ -1,6 +1,6 @@
 # Phase 4 Notebook and Sea adventure status
 
-28 October 2026. Scope: Phase 4 only. Branch `codex/phase-4-notebook`.
+28 October 2026. Scope: Phase 4 only. Published in [draft PR #13](https://github.com/byshriv/Sailor-LogBook/pull/13), branch `codex/phase-4-notebook`.
 
 Read PHASE-HANDOFF.md, LAUNCH-DECISIONS.md, LAUNCH-PLAN.md, ROADMAP.md,
 docs/PRODUCT-SPEC.md, Phase 2 status/verification and ADR 0005, and Phase 3 architecture,
@@ -23,6 +23,6 @@ run 40640483228; this is not substituted for Phase 4 evidence.
 - Calendar date links with its existing editing behavior retained; no later feature port.
 
 See [architecture](ARCHITECTURE-PHASE-4.md), [verification](VERIFICATION-PHASE-4.md)
-and [handoff](../PHASE-HANDOFF.md). Phase 4 owner review and hosted exact-head checks
-remain separate from local verification. No production deployment, real-data cutover,
+and [handoff](../PHASE-HANDOFF.md). Phase 4 owner review remains pending. Use PR #13 checks and description for final
+exact-head hosted evidence; local verification does not substitute for hosted checks. No production deployment, real-data cutover,
 cloud mutation or Phase 5+ work occurred.

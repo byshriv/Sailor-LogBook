@@ -31,7 +31,7 @@ Existing Calendar/Phase 2/foundation browser tests remain in the full suite.
 
 ## Evidence boundaries
 
-Hosted check/android-proof/codeql must pass on an eventual Phase 4 PR's exact head before
+Hosted check/android-proof/codeql must pass on PR #13's exact head before
 merge. No earlier phase's run is Phase 4 evidence, and no required check is waived.
 The Phase 3 final hosted run 40640483228 passed 45 browser checks and all required jobs
 before PR #12 merged. Phase 3 acceptance is recorded separately by explicit owner instruction.
@@ -45,3 +45,25 @@ work; existing photo capability/failure tests remain unchanged.
 Synthetic two-store replay verifies text and editable drawing operations without local
 recapture. It does not implement or certify the Phase 9 Dropbox transport, concurrent merge,
 encryption or stale-device protocol. Phase 5 and later ports remain unstarted.
+
+## Publication integrity
+
+Published for owner review in [draft PR #13](https://github.com/byshriv/Sailor-LogBook/pull/13),
+branch `codex/phase-4-notebook`, based on main `327ad8dfac702377e7b77b9c63226cf34af29cff`.
+Remote main was rechecked before publication and still matched. No existing PR or remote
+branch used the Phase 4 name. Connected GitHub Git-data tools created the review history;
+no terminal credentials, force push, main mutation, merge or deployment were used.
+
+| Scope                    | Original local commit                    | Published commit                         | Identical tree                           |
+| ------------------------ | ---------------------------------------- | ---------------------------------------- | ---------------------------------------- |
+| Domain/regressions       | 252fbe3b4d1e5b70c4fcebc59da2b9e3dee261e5 | adfa633bb96c3a9504b26fbcc801ee29b76793c0 | 416c9e4bd3d547875c0c68c2d52be429b2a57f36 |
+| UI/browser regressions   | 565ea8a368dd0cef6c98d99daec2a34f99d4a39a | 4aee961a7e1f11ee23920dc0e473ceed59ad257a | a8a8cb2ef6f08b58b92593c99047c9024cb493df |
+| Acceptance/documentation | 1966ac131d490f016633afb6ab15d76b8489c840 | ea358490f524749ac84f75a98461fc77309572fb | 02d0e592faf1e07240d79c97fbc279d1a0cbf6c0 |
+
+GitHub commit metadata differs from local metadata; every full tree was checked for exact
+equality before branch creation. Original local commits remain on `codex/phase-4-notebook-local`;
+the active checkout tracks the published branch. This publication follow-up changes documents
+only. Use [PR checks](https://github.com/byshriv/Sailor-LogBook/pull/13/checks) and the PR
+description for the final head SHA/run/artifact evidence. Earlier runs are not proof of a
+later revision. All required jobs remain check/android-proof/codeql. Draft publication and
+CI do not imply owner Phase 4 acceptance or authorization to merge or start Phase 5.

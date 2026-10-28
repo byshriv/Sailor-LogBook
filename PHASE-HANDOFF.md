@@ -1,7 +1,7 @@
 # Phase handoff — Phase 4 Notebook and Sea adventure
 
 Updated 28 October 2026. Scope: Phase 4 only. Branch: `codex/phase-4-notebook`.
-Implementation and local verification are ready for owner review. Do not start Phase 5
+Implementation is published for owner review in [draft PR #13](https://github.com/byshriv/Sailor-LogBook/pull/13). Do not start Phase 5
 or any later port. No production deployment, real-data cutover or cloud mutation occurred.
 
 ## Baseline and accepted phase
@@ -75,9 +75,12 @@ WebKit captures also exist. Browser reports/traces live in ignored build/test-re
 The last report is the Firefox launcher attempt; full Chromium/WebKit success is in the
 recorded command output. Only synthetic fixtures were used.
 
-Review commits separate domain/storage regressions (`252fbe3`) from UI/browser interactions
-(`565ea8a`); documentation is a third commit. The branch is local and has not been pushed
-or submitted as a PR. No merge, required-check change or deployment is included.
+Review commits separate domain/storage regressions, UI/browser interactions and documentation.
+Published trees exactly match the local tested trees; the original history is preserved on
+`codex/phase-4-notebook-local`. The active branch tracks the published history. See
+docs/VERIFICATION-PHASE-4.md for the commit/tree mapping. Publication used the connected
+GitHub Git-data tools without terminal credentials, force push or a main mutation.
+No merge, required-check change or deployment is included.
 
 ## Review and continuation
 
@@ -93,8 +96,8 @@ line doodles keep Done/Cancel. Failed saves retain drafts. Recent changes offers
 recovery after restart; retained media/tombstones are not a physical-erasure promise.
 
 This isolated feature review does not accept a complete new shell or Phase 4 visuals on
-the owner's behalf. An eventual Phase 4 PR must pass check/android-proof/codeql on its
-exact head before merge. Physical Safari/phone/storage-pressure/OS-kill tests, empirical
+the owner's behalf. PR #13 must pass check/android-proof/codeql on its exact head before merge;
+use its checks and description for final hosted evidence. Physical Safari/phone/storage-pressure/OS-kill tests, empirical
 media budgets, production cutover and issues #2/#3 remain release gates. Synthetic replay
 does not certify production synchronization; real transport remains Phase 9. Do not begin
 Home/Reflection, Planner, Settings, PWA or later ports from this handoff.
