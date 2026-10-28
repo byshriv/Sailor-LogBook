@@ -87,3 +87,10 @@ README/DEPLOY owner edits are preserved and excluded from publication. This publ
 follow-up also requires every check on its final head. Use current PR checks/description
 for exact final head/run/artifact evidence; earlier green runs do not substitute for it.
 CI does not accept Phase 6 visuals or authorize merge, deployment or Phase 7+.
+
+Hosted follow-up: run 40693819420 on head `956b756` passed Android and CodeQL,
+including separate CodeQL results with no new alerts, but two Firefox gesture fixtures
+failed because they assumed pointer ID 1. The other 100 browser checks passed. Fixtures
+now capture the actual browser-assigned pointer ID before simulating touch-style input;
+no application code or test coverage is bypassed. The corrected final head requires a
+fresh full run; consult PR #15 checks/description for its result.

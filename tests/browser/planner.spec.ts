@@ -117,6 +117,19 @@ async function read(page: Page) {
 async function saved(page: Page) {
   await expect(page.getByRole('status')).toContainText('Saved locally');
 }
+async function mouseDownPointerId(page: Page, handle: Locator) {
+  await handle.evaluate((el) =>
+    el.addEventListener(
+      'pointerdown',
+      (event) => {
+        el.setAttribute('data-test-pointer', String((event as PointerEvent).pointerId));
+      },
+      { once: true },
+    ),
+  );
+  await page.mouse.down();
+  return Number(await handle.getAttribute('data-test-pointer'));
+}
 async function dragTo(page: Page, handle: Locator, target: Locator) {
   await handle.scrollIntoViewIfNeeded();
   const a = await handle.boundingBox();
@@ -240,24 +253,24 @@ test('Escape, pointer cancellation, lost capture, outside release and pre-hold t
   await handle.scrollIntoViewIfNeeded();
   const touchBox = await handle.boundingBox();
   await page.mouse.move(touchBox!.x + touchBox!.width / 2, touchBox!.y + touchBox!.height / 2);
-  await page.mouse.down();
+  const pointerId = await mouseDownPointerId(page, handle);
   await handle.dispatchEvent('pointercancel');
   await handle.dispatchEvent('pointerdown', {
-    pointerId: 1,
+    pointerId,
     pointerType: 'touch',
     button: 0,
     clientX: 100,
     clientY: 200,
   });
   await handle.dispatchEvent('pointermove', {
-    pointerId: 1,
+    pointerId,
     pointerType: 'touch',
     clientX: 130,
     clientY: 200,
   });
   await page.clock.runFor(400);
   await handle.dispatchEvent('pointerup', {
-    pointerId: 1,
+    pointerId,
     pointerType: 'touch',
     clientX: 130,
     clientY: 200,
@@ -326,17 +339,17 @@ test('held touch-style drag ignores a second pointer, filters retain tasks and k
   await handle.scrollIntoViewIfNeeded();
   const b = await handle.boundingBox();
   await page.mouse.move(b!.x + b!.width / 2, b!.y + b!.height / 2);
-  await page.mouse.down();
+  const pointerId = await mouseDownPointerId(page, handle);
   await handle.dispatchEvent('pointercancel');
   await handle.dispatchEvent('pointerdown', {
-    pointerId: 1,
+    pointerId,
     pointerType: 'touch',
     button: 0,
     clientX: b!.x,
     clientY: b!.y,
   });
   await handle.dispatchEvent('pointerdown', {
-    pointerId: 2,
+    pointerId: pointerId + 100,
     pointerType: 'touch',
     button: 0,
     clientX: b!.x,
