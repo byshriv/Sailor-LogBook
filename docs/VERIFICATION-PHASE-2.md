@@ -1,5 +1,7 @@
 # Phase 2 publication and hosted verification
 
+Merge follow-up: PR #11 merged as `7107798b96137a87328204d0db5576a80ecdc5ad` on 28 October 2026. Final head `71cefbd1af670fb4b4ee0727da43324794b498aa` passed all three required jobs in [run 40631959812](https://github.com/byshriv/Sailor-LogBook/actions/runs/40631959812), including 26 foundation and 21 browser checks. Earlier publication notes below are historical. Phase 3 requires its own evidence.
+
 28 October 2026. Review: [PR #11](https://github.com/byshriv/Sailor-LogBook/pull/11),
 branch `codex/phase-2-domain-durability`, based on main `c0f3afa`.
 No production deployment, real-data migration, cloud mutation or later feature port occurred.

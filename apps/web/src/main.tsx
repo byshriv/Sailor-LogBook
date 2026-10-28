@@ -179,6 +179,8 @@ async function start() {
     }
   });
 }
-if (new URLSearchParams(location.search).get('phase') === '2') {
+if (new URLSearchParams(location.search).get('phase') === '3') {
+  void import('./calendar.tsx').then(({ startCalendar }) => startCalendar(root));
+} else if (new URLSearchParams(location.search).get('phase') === '2') {
   void import('./phase2.tsx').then(({ startPhase2 }) => startPhase2(root));
 } else void start();

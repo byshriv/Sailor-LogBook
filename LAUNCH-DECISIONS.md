@@ -6,6 +6,8 @@ Phase 2 was explicitly requested on 28 October 2026. Its technical choices and r
 test inputs are recorded in [ADR 0005](docs/adr/0005-phase2-domain-durability.md) and
 [Phase 2 status](docs/PHASE-2-STATUS.md); no accepted product decision below was reopened.
 
+Phase 3 Calendar was explicitly requested on 28 October 2026 after PR #11 merged. Its isolated implementation and pending owner/browser acceptance are recorded in [Phase 3 status](docs/PHASE-3-STATUS.md); accepted product decisions remain unchanged.
+
 The most important correction is **sync first, encryption optional**, as in the demo. Earlier wording implying mandatory encryption for all Dropbox sync is superseded. Protection against Dropbox reading content applies when encryption is enabled.
 
 ## Records, calculations and recovery

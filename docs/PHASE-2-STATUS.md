@@ -1,5 +1,7 @@
 # Phase 2 implementation and verification
 
+Historical Phase 2 report. PR #11 merged on 28 October 2026 as `7107798` after final required checks passed in run 40631959812. Phase 3 was subsequently requested; current work is in [Phase 3 status](PHASE-3-STATUS.md).
+
 Updated 28 October 2026. Implementation published for review in
 [PR #11](https://github.com/byshriv/Sailor-LogBook/pull/11); no deployment or real-data cutover.
 Hosted baseline check/android-proof/codeql and all 21 browser cases passed; see

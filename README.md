@@ -137,3 +137,11 @@ Demo v8 is the completed prototype baseline. The final cache revision is `slb-v8
 See [the complete launch plan](LAUNCH-PLAN.md), [roadmap](ROADMAP.md), [accepted launch answers](LAUNCH-DECISIONS.md) and [pinned Super Productivity architecture review](research/ARCHITECTURE-REVIEW.md). These are planning artifacts; the GitHub repository and production rewrite have not been started by this demo task.
 
 All 24 follow-up questions are answered in LAUNCH-DECISIONS.md. The production plan is sync-first with optional encryption; WebP compression plus opt-in originals; Undo and 30-day recovery; preview/recovery before merge/import; and a confirmed erase-everywhere flow for app-owned Dropbox data. Target Android 12+ (4 GB recommended, not enforced), iOS/iPadOS 17+ Safari/PWA and popular Windows/macOS/Linux browsers, with honest coverage records. These are launch requirements only; the frozen v8 app is unchanged and Phase 1 has not started.
+
+## Phase 3 Calendar review
+
+Run `npm run dev:foundation` and open `http://127.0.0.1:5173/?phase=3`.
+Calendar uses the Phase 2 durable pipeline/database and shared editing lock. The default
+foundation preview, Phase 2 preview and demo remain available. This is an isolated Calendar
+review, not a production cutover. See [status](docs/PHASE-3-STATUS.md),
+[architecture](docs/ARCHITECTURE-PHASE-3.md) and [handoff](PHASE-HANDOFF.md).

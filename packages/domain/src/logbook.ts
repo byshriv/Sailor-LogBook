@@ -90,6 +90,7 @@ export interface Logbook {
 }
 export type Edit =
   | { type: 'put'; entity: Entity }
+  | { type: 'putMany'; entities: Entity[] }
   | { type: 'delete'; keys: string[] }
   | { type: 'restore'; deletion: string }
   | { type: 'deck.remove'; id: string; reassign: string | null }
@@ -264,7 +265,15 @@ export function applyEdit(input: Logbook, c: EditCommand): Logbook {
   const s = structuredClone(input),
     before = structuredClone(s.entities),
     edit = c.edit;
-  if (edit.type === 'put') {
+  if (edit.type === 'putMany') {
+    const keys = edit.entities.map(entityKey);
+    if (!keys.length || new Set(keys).size !== keys.length) throw Error('Invalid compound put');
+    for (const entity of edit.entities) {
+      const key = entityKey(entity);
+      if (s.tombstones[key]) throw Error('Restore deleted content explicitly');
+      s.entities[key] = structuredClone(entity);
+    }
+  } else if (edit.type === 'put') {
     const key = entityKey(edit.entity);
     if (s.tombstones[key]) throw Error('Restore deleted content explicitly');
     s.entities[key] = structuredClone(edit.entity);
@@ -337,6 +346,7 @@ export function applyEdit(input: Logbook, c: EditCommand): Logbook {
     edit.type === 'deck.remove' ||
     edit.type === 'feature' ||
     edit.type === 'recover' ||
+    edit.type === 'putMany' ||
     (edit.type === 'put' && before[entityKey(edit.entity)])
   ) {
     const keys = [...new Set([...Object.keys(before), ...Object.keys(s.entities)])].filter(
@@ -351,7 +361,10 @@ export function applyEdit(input: Logbook, c: EditCommand): Logbook {
         deletedAt: c.at,
         expiresAt: c.at + 30 * 86400000,
         before: Object.fromEntries(keys.map((k) => [k, before[k] ?? null])),
-        after: Object.fromEntries(keys.map((k) => [k, s.entities[k] ?? null])),
+        after:
+          edit.type === 'putMany'
+            ? structuredClone(Object.fromEntries(keys.map((k) => [k, s.entities[k] ?? null])))
+            : Object.fromEntries(keys.map((k) => [k, s.entities[k] ?? null])),
         ...(edit.type === 'recover' ? { archiveBefore: structuredClone(input.archive) } : {}),
       };
       for (const key of keys) if (!s.entities[key]) s.tombstones[key] = c.id;
