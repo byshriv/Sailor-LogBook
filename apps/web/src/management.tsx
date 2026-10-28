@@ -39,6 +39,68 @@ const starterDecks = [
   ['Health', '#4fae7f', 'heart'],
   ['Time Wasted', '#5b5855', 'clock'],
 ] as const;
+const photoLimits = {
+  inputBytes: 8 * 1024 * 1024,
+  outputBytes: 1024 * 1024,
+  pixels: 16000000,
+  longEdge: 2048,
+};
+function PhotoPreview({ file }: { file: File }) {
+  const canvas = useRef<HTMLCanvasElement>(null);
+  const [error, setError] = useState('');
+  useEffect(() => {
+    let cancelled = false;
+    setError('');
+    const preview = canvas.current;
+    preview?.getContext('2d')?.clearRect(0, 0, preview.width, preview.height);
+    void (async () => {
+      // File input acceptance is only a chooser hint. Decode bounded raster formats;
+      // never reinterpret a file-derived URL or markup in an HTML image source.
+      if (
+        !['image/png', 'image/jpeg', 'image/webp', 'image/gif'].includes(file.type) ||
+        !file.size ||
+        file.size > photoLimits.inputBytes
+      )
+        throw Error('Unsupported photo');
+      const bitmap = await createImageBitmap(file);
+      try {
+        if (!bitmap.width || !bitmap.height || bitmap.width * bitmap.height > photoLimits.pixels)
+          throw Error('Photo memory limit');
+        if (cancelled || !preview) return;
+        const scale = Math.min(1, 128 / Math.max(bitmap.width, bitmap.height));
+        preview.width = Math.max(1, Math.round(bitmap.width * scale));
+        preview.height = Math.max(1, Math.round(bitmap.height * scale));
+        const context = preview.getContext('2d');
+        if (!context) throw Error('Preview unavailable');
+        context.drawImage(bitmap, 0, 0, preview.width, preview.height);
+      } finally {
+        bitmap.close();
+      }
+    })().catch(() => {
+      if (!cancelled)
+        setError(
+          'Photo preview unavailable. Choose PNG, JPEG, WebP or GIF within the preview limits.',
+        );
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [file]);
+  return (
+    <>
+      {error ? <p role="alert">{error}</p> : null}
+      <canvas
+        ref={canvas}
+        className={styles.avatar}
+        role="img"
+        aria-label="Selected photo preview"
+        hidden={!!error}
+        width={1}
+        height={1}
+      />
+    </>
+  );
+}
 
 function Management({ projection }: { projection: Projection }) {
   const state = useSyncExternalStore(projection.store.subscribe, projection.store.getState),
@@ -57,8 +119,7 @@ function Management({ projection }: { projection: Projection }) {
   const [name, setName] = useState(String(profile.name ?? '')),
     [file, setFile] = useState<File | null>(null),
     [original, setOriginal] = useState(false),
-    [removePhoto, setRemovePhoto] = useState(false),
-    [photoUrl, setPhotoUrl] = useState('');
+    [removePhoto, setRemovePhoto] = useState(false);
   const [prefs, setPrefs] = useState<Record<string, Json>>(p),
     [storage, setStorage] = useState('Storage status not checked'),
     [notification, setNotification] = useState('Notification permission not checked');
@@ -93,15 +154,6 @@ function Management({ projection }: { projection: Projection }) {
     return () => window.removeEventListener('beforeunload', before);
   }, [dirty]);
   useEffect(() => {
-    if (!file) {
-      setPhotoUrl('');
-      return;
-    }
-    const url = URL.createObjectURL(file);
-    setPhotoUrl(url);
-    return () => URL.revokeObjectURL(url);
-  }, [file]);
-  useEffect(() => {
     if (initial.current) return;
     initial.current = true;
     if (new URLSearchParams(location.search).get('new') === 'deck') setDeck(newDeck());
@@ -128,7 +180,9 @@ function Management({ projection }: { projection: Projection }) {
       setStatus('Saved locally');
       return true;
     } catch (e) {
-      setStatus(`Unsaved · ${(e as Error).message}. Your draft is retained; retry.`);
+      setStatus(
+        `Unsaved · ${media.length ? 'Photo storage failed in this browser. ' : ''}${(e as Error).message}. Your draft is retained; retry.`,
+      );
       return false;
     } finally {
       saving.current = false;
@@ -593,17 +647,7 @@ function Management({ projection }: { projection: Projection }) {
                 setBusy(true);
                 try {
                   const photo = file
-                    ? await preparePhoto(
-                        file,
-                        original,
-                        {
-                          inputBytes: 8 * 1024 * 1024,
-                          outputBytes: 1024 * 1024,
-                          pixels: 16000000,
-                          longEdge: 2048,
-                        },
-                        browserPhotoCodec,
-                      )
+                    ? await preparePhoto(file, original, photoLimits, browserPhotoCodec)
                     : null;
                   const patch: Record<string, Json> = { name: name.trim() };
                   if (photo) {
@@ -654,9 +698,7 @@ function Management({ projection }: { projection: Projection }) {
                   }}
                 />
               </label>
-              {photoUrl && (
-                <img className={styles.avatar} src={photoUrl} alt="Selected photo preview" />
-              )}
+              {file && <PhotoPreview file={file} />}
               <label>
                 <input
                   type="checkbox"

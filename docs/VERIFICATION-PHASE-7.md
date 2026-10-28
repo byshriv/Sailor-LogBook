@@ -134,3 +134,32 @@ This publication record also needs the final-head checks. Hosted validation was 
 when committed. Consult PR #16 checks/description for exact final head/run/artifacts;
 no earlier green run substitutes for a later head. Local Windows Firefox/Blob limits
 above remain local facts; Linux hosted results and physical-device acceptance are separate.
+
+## Hosted findings and corrective follow-up
+
+Initial hosted run [40732641494](https://github.com/byshriv/Sailor-LogBook/actions/runs/40732641494)
+on `0041af53bc34cc4808349ed23762bdd1c2f7df51` passed Android proof and the CodeQL
+execution job, but its separate CodeQL results check reported one high-severity
+`js/xss-through-dom` alert on the file-derived photo preview image URL. The browser
+job passed 137 cases and failed the WebKit profile photo save because native Blob
+storage aborted. This was not a successful final validation run.
+
+The selected-photo preview now uses bounded raster decoding and canvas pixels, with
+no file URL/HTML image-source interpretation. A new browser regression verifies a
+valid raster preview without any `URL.createObjectURL` call, then rejects a markup-
+bearing SVG, executes no script, retains the name/file, and commits no operation.
+This follows the [CodeQL query guidance](https://codeql.github.com/codeql-query-help/javascript/js-xss-through-dom/).
+The original save pipeline and exact original-byte behavior remain intact.
+
+Profile media coverage now runs on every engine, probing native IndexedDB Blob support
+in a disposable store. It asserts byte/MIME correctness when supported, or explicit
+photo-storage failure, unchanged canonical state/pending operations and retained
+draft/file when unsupported. Linux WebKit is therefore not presented as supporting
+photo persistence, and no test is skipped to conceal its native limitation. A local
+rerun also exposed a WebKit native time-input commit race; live input capture retains
+the chosen task time before Save.
+
+Corrective local validation: all 26 Phase 7 Chromium/WebKit cases pass with zero skips;
+typecheck and preview build pass. This adds a thirteenth Phase 7 browser case per
+engine. The corrected published head still requires all hosted jobs and the separate
+CodeQL results check; consult PR #16 checks/description for the final result.

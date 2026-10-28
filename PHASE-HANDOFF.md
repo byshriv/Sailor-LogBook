@@ -129,3 +129,16 @@ The publication record itself also requires all checks on its final head. Hosted
 were pending when this record was committed; use PR #16 checks/description for the exact
 final head/run/artifact results. No earlier local or hosted run substitutes for a later
 revision. Draft publication does not accept Phase 7 or authorize merge, deployment or Phase 8+.
+
+## Corrective verification follow-up
+
+Initial PR #16 run 40732641494 on `0041af5` passed Android proof but reported one
+high CodeQL results alert on the file-derived selected-photo URL and a Linux WebKit
+Blob-store failure (137 other browser cases passed). The preview now renders bounded
+raster pixels to canvas without file URLs/HTML interpretation. A markup-rejection
+regression retains the draft and verifies zero script execution or canonical writes.
+Profile media tests now run on every engine and verify either exact saves or an
+explicit native-capability failure with retained fields; there are no photo skips.
+WebKit native time inputs capture live changes before Save. All 26 corrective local
+Phase 7 Chromium/WebKit cases pass. The corrected final head needs fresh hosted checks;
+use PR #16 checks/description for the exact result. No Phase 8+ port or owner acceptance.

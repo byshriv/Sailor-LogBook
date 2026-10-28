@@ -115,3 +115,20 @@ secondary; IndexedDB is not encrypted and unencrypted Dropbox copies lack that p
 Phase 7 owner review, physical keyboard/touch/insets/Safari, storage pressure/OS kill,
 final media budgets and existing issues #2/#3 remain explicit gates. Phase 8 and later
 ports have not started. Phase 13 final owner review remains required before deployment.
+
+## Hosted verification follow-up
+
+PR #16 first reported `js/xss-through-dom` on the file-derived selected-photo image URL.
+New photo previews now decode only supported raster MIME types within the existing
+input/pixel limits and draw bounded pixels to a canvas. They do not create file URLs
+or reinterpret markup as an HTML image source. Encoding, digest storage and opt-in
+original bytes remain in the existing save pipeline. Unsupported preview files remain
+selected with a clear error; Save retains the draft and rejects unsupported sources.
+
+Native IndexedDB Blob writes also abort in the hosted Linux WebKit build, not just
+Windows. Browser tests now probe a separate disposable native Blob store and assert
+either verified WebP/original bytes or an explicit photo-storage failure with no
+canonical/operation mutation and retained name/file. No photo case is skipped or
+storage backend changed. Actual Safari verification and media budgets remain gates.
+Planner time inputs also capture live input events so a native time change is not lost
+when a WebKit button click does not commit a deferred change event.

@@ -720,6 +720,7 @@ function Planner({ projection }: { projection: Projection }) {
                   <input
                     type="time"
                     value={timeText(draft.time)}
+                    onInput={(e) => setDraft({ ...draft, time: minute(e.currentTarget.value) })}
                     onChange={(e) => setDraft({ ...draft, time: minute(e.target.value) })}
                   />
                 </label>

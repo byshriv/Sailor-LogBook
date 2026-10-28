@@ -439,15 +439,32 @@ test('automatic reminder is recorded once, skips logged days and never claims cl
   await page.clock.runFor(30000);
   expect((await read(page)).pending.length).toBe(pending);
 });
-test('profile original bytes use durable media and restore after removal', async ({
+test('profile media saves verified bytes or retains drafts when native Blob storage is unavailable', async ({
   page,
-  browserName,
 }) => {
-  test.skip(
-    process.platform === 'win32' && browserName === 'webkit',
-    'Windows WebKit native Blob writes remain unsupported; exact byte browser proof uses Chromium.',
-  );
   await seed(page);
+  const before = await read(page);
+  const blobStorage = await page.evaluate(async () => {
+    const opening = indexedDB.open('profile-blob-capability', 1);
+    opening.onupgradeneeded = () => opening.result.createObjectStore('data');
+    const db = await new Promise<IDBDatabase>((resolve, reject) => {
+      opening.onsuccess = () => resolve(opening.result);
+      opening.onerror = () => reject(opening.error);
+    });
+    try {
+      await new Promise<void>((resolve, reject) => {
+        const tx = db.transaction('data', 'readwrite');
+        tx.oncomplete = () => resolve();
+        tx.onabort = () => reject(tx.error);
+        tx.objectStore('data').put(new Blob(['test'], { type: 'image/png' }), 'test');
+      });
+      return true;
+    } catch {
+      return false;
+    } finally {
+      db.close();
+    }
+  });
   const bytes = Buffer.from(
     await page.evaluate(() => {
       const canvas = document.createElement('canvas');
@@ -463,6 +480,22 @@ test('profile original bytes use durable media and restore after removal', async
     .setInputFiles({ name: 'profile.png', mimeType: 'image/png', buffer: bytes });
   await expect(page.getByLabel('Keep original')).not.toBeChecked();
   await page.getByRole('button', { name: 'Save profile' }).click();
+  if (!blobStorage) {
+    await expect(page.getByRole('status')).toContainText(
+      'Unsaved · Photo storage failed in this browser',
+    );
+    await expect(page.getByRole('dialog', { name: 'Edit profile', exact: true })).toBeVisible();
+    await expect(page.getByLabel('Your name')).toHaveValue('Captain');
+    expect(
+      await page
+        .getByLabel('Profile photo', { exact: true })
+        .evaluate((i: HTMLInputElement) => i.files?.[0]?.name),
+    ).toBe('profile.png');
+    const after = await read(page);
+    expect(after.state).toEqual(before.state);
+    expect(after.pending).toHaveLength(before.pending.length);
+    return;
+  }
   await saved(page);
   const webpDigest = (await read(page)).state.entities['settings:legacy'].value.avatarDigest;
   expect(
@@ -595,4 +628,56 @@ test('explicit create/help/walkthrough routes do not stack first-run onboarding 
   await expect(page.getByRole('dialog')).toHaveCount(1);
   await guide.getByRole('button', { name: 'Next', exact: true }).click();
   await expect(guide).toContainText('Make the familiar easy');
+});
+
+test('photo preview decodes bounded raster pixels without file URLs and rejects markup while retaining drafts', async ({
+  page,
+}) => {
+  await seed(page);
+  const before = await read(page);
+  const png = Buffer.from(
+    await page.evaluate(() => {
+      const canvas = document.createElement('canvas');
+      canvas.width = canvas.height = 8;
+      canvas.getContext('2d')!.fillRect(0, 0, 8, 8);
+      (window as any).filePreviewUrls = 0;
+      URL.createObjectURL = () => {
+        (window as any).filePreviewUrls++;
+        throw Error('File preview must not render URLs');
+      };
+      return canvas.toDataURL('image/png').split(',')[1]!;
+    }),
+    'base64',
+  );
+  await page.getByRole('button', { name: 'Edit profile', exact: true }).click();
+  await page.getByLabel('Your name').fill('Retained captain');
+  const upload = page.getByLabel('Profile photo', { exact: true });
+  await upload.setInputFiles({ name: 'safe.png', mimeType: 'image/png', buffer: png });
+  const preview = page.getByRole('img', { name: 'Selected photo preview' });
+  await expect(preview).toHaveJSProperty('tagName', 'CANVAS');
+  await expect
+    .poll(() =>
+      preview.evaluate(
+        (c: HTMLCanvasElement) => c.getContext('2d')!.getImageData(0, 0, 1, 1).data[3],
+      ),
+    )
+    .toBe(255);
+  await upload.setInputFiles({
+    name: 'unsafe.svg',
+    mimeType: 'image/svg+xml',
+    buffer: Buffer.from(
+      '<svg xmlns="http://www.w3.org/2000/svg" onload="window.previewMarkupExecuted=true"><script>window.previewMarkupExecuted=true</script></svg>',
+    ),
+  });
+  await expect(page.getByRole('alert')).toContainText('Photo preview unavailable');
+  await expect(preview).toHaveCount(0);
+  await page.getByRole('button', { name: 'Save profile' }).click();
+  await expect(page.getByText(/Unsaved · Unsupported or oversized photo/).first()).toBeVisible();
+  await expect(page.getByLabel('Your name')).toHaveValue('Retained captain');
+  expect(await page.evaluate(() => (window as any).previewMarkupExecuted)).toBeUndefined();
+  expect(await page.evaluate(() => (window as any).filePreviewUrls)).toBe(0);
+  expect((await read(page)).state).toEqual(before.state);
+  expect(await upload.evaluate((input: HTMLInputElement) => input.files?.[0]?.name)).toBe(
+    'unsafe.svg',
+  );
 });
