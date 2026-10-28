@@ -111,3 +111,26 @@ Open-tab reminders do not prove background/closed-app scheduling. Synthetic caus
 is not production sync. No hosted Phase 7, native/emulator or physical-device pass is claimed.
 Before a later published PR merges, require check/android-proof/codeql and separate CodeQL
 results on its exact final head; no earlier phase's run substitutes for that evidence.
+
+## Publication integrity
+
+Review: [draft PR #16](https://github.com/byshriv/Sailor-LogBook/pull/16).
+Connected GitHub Git-data publication preserves four separate review snapshots:
+
+| Scope               | Local commit | Published commit                         | Identical complete tree                  |
+| ------------------- | ------------ | ---------------------------------------- | ---------------------------------------- |
+| Domain/media        | cb11575      | d0e90885c0e81f19d8e4f6f9f66a28080f1c369a | e3c4051d1f5cde1afb837811035b244fd1dc6f49 |
+| UI/browser          | 306128e      | 78954ffab6c31f37a996a44380042e0e7d4ced02 | b472020e996507853794b567321e6f9aa29c6a0c |
+| Empty-store routing | 36d667c      | 38c6ef28b538e6391298f5bc0cec7e9a170b31e6 | 9aae47beaa7b3fa633a8bfdcc55267820cd53193 |
+| Acceptance/handoff  | e0e9c9f      | 328971ecf637c87f01d2a27daf15a52eee751cc9 | 6e9dc75860da59a9ef361ea6dabc1308cd13949d |
+
+GitHub commit metadata differs; every full tree was checked for identity. Original
+local history is retained on `codex/phase-7-settings-local`. README/DEPLOY owner edits
+are excluded and remain uncommitted. No terminal credentials, force push, main push,
+merge or deployment occurred. One transient GitHub tree-creation timeout succeeded
+on retry without changing the requested tree.
+
+This publication record also needs the final-head checks. Hosted validation was pending
+when committed. Consult PR #16 checks/description for exact final head/run/artifacts;
+no earlier green run substitutes for a later head. Local Windows Firefox/Blob limits
+above remain local facts; Linux hosted results and physical-device acceptance are separate.

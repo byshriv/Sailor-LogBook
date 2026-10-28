@@ -23,3 +23,10 @@ See [architecture](ARCHITECTURE-PHASE-7.md), [verification](VERIFICATION-PHASE-7
 and [handoff](../PHASE-HANDOFF.md) for review choices and evidence.
 Owner acceptance is separate from automated verification. No production deployment,
 real-data cutover, Dropbox connection, PWA/backup port or native capability is implied.
+
+Published for review in [draft PR #16](https://github.com/byshriv/Sailor-LogBook/pull/16).
+Published full trees were verified identical to the tested local snapshots. Original
+local history is retained separately; README/DEPLOY owner edits stay uncommitted.
+Required check/android-proof/codeql and separate CodeQL results must pass on the exact
+final head before merge. Use the PR checks/description for current hosted evidence;
+publication does not establish owner acceptance or later-phase authorization.

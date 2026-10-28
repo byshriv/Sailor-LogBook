@@ -1,7 +1,7 @@
 # Phase handoff — Phase 7 management and experience
 
 Updated 28 October 2026. Branch `codex/phase-7-settings`. Implemented for owner review
-at `/?phase=7`. Phase 8 and later ports remain gated. No deployment, real-data cutover,
+at `/?phase=7`, published in [draft PR #16](https://github.com/byshriv/Sailor-LogBook/pull/16). Phase 8 and later ports remain gated. No deployment, real-data cutover,
 Dropbox connection or main push occurred.
 
 ## Baseline and acceptance
@@ -115,3 +115,17 @@ the owner explicitly authorizes another phase. Do not start Phase 8 or later por
 Review commits: `cb11575` (domain/media), `306128e` (UI/browser), `36d667c`
 (empty-store route follow-up), followed by the acceptance/verification/handoff commit.
 Only README.md and DEPLOY.md should remain modified after committing this handoff.
+
+## Publication follow-up
+
+Published through the connected GitHub Git-data tools in draft PR #16. Every full
+domain/media, UI/browser, routing and documentation tree exactly matches its locally
+verified counterpart. No terminal credential, force push, main push, merge or deployment.
+The original local history is retained on `codex/phase-7-settings-local`; the active
+branch tracks the published history after fetching. README/DEPLOY owner edits remain
+uncommitted and excluded. See VERIFICATION-PHASE-7.md for the tree identity table.
+
+The publication record itself also requires all checks on its final head. Hosted checks
+were pending when this record was committed; use PR #16 checks/description for the exact
+final head/run/artifact results. No earlier local or hosted run substitutes for a later
+revision. Draft publication does not accept Phase 7 or authorize merge, deployment or Phase 8+.
