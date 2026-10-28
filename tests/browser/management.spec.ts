@@ -576,3 +576,23 @@ test('Planner uses the saved time format without rewriting native time input val
   await page.keyboard.press('Escape');
   await expect(page.locator('[data-task="plan"]')).toContainText('13:15');
 });
+
+test('explicit create/help/walkthrough routes do not stack first-run onboarding on an empty store', async ({
+  page,
+}) => {
+  await page.goto('/?phase=7&new=deck');
+  await expect(page.getByRole('dialog', { name: 'Add deck', exact: true })).toBeVisible();
+  await expect(page.getByRole('dialog')).toHaveCount(1);
+  await page.keyboard.press('Escape');
+  expect(Object.keys((await read(page)).state.entities)).toHaveLength(0);
+  await page.goto('/?phase=7&tool=shortcuts');
+  await expect(page.getByRole('dialog', { name: 'Keyboard shortcuts', exact: true })).toBeVisible();
+  await expect(page.getByRole('dialog')).toHaveCount(1);
+  await page.keyboard.press('Escape');
+  await page.goto('/?phase=7&tour=5');
+  const guide = page.getByRole('dialog', { name: 'Logbook walkthrough' });
+  await expect(guide).toBeVisible();
+  await expect(page.getByRole('dialog')).toHaveCount(1);
+  await guide.getByRole('button', { name: 'Next', exact: true }).click();
+  await expect(guide).toContainText('Make the familiar easy');
+});

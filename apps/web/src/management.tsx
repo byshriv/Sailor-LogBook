@@ -62,7 +62,13 @@ function Management({ projection }: { projection: Projection }) {
   const [prefs, setPrefs] = useState<Record<string, Json>>(p),
     [storage, setStorage] = useState('Storage status not checked'),
     [notification, setNotification] = useState('Notification permission not checked');
-  const [welcome, setWelcome] = useState(!Object.keys(state.entities).length),
+  const [welcome, setWelcome] = useState(() => {
+      const route = new URLSearchParams(location.search);
+      return (
+        !Object.keys(state.entities).length &&
+        !['tour', 'tool', 'new', 'editDeck', 'editPreset', 'deck'].some((key) => route.has(key))
+      );
+    }),
     [step, setStep] = useState(0),
     [starter, setStarter] = useState([
       'Work',
