@@ -1,7 +1,10 @@
 # Phase 2 implementation and verification
 
-Updated 28 October 2026. Local implementation delivered; no publication/deployment or
-real-data cutover performed. Main was fetched and verified equal to origin/main at
+Updated 28 October 2026. Implementation published for review in
+[PR #11](https://github.com/byshriv/Sailor-LogBook/pull/11); no deployment or real-data cutover.
+Hosted baseline check/android-proof/codeql and all 21 browser cases passed; see
+[publication evidence](VERIFICATION-PHASE-2.md) and the PR checks for the current revision.
+Main was fetched and verified equal to origin/main at
 `c0f3afa` (zero commits ahead/behind), with a clean workspace before edits. Phase 1 history
 was preserved. No Calendar, Notebook, Reflection, Planner or Settings port was started.
 
@@ -31,35 +34,37 @@ remain JSON rather than pretending those screens or their complete editors alrea
 
 Host: Windows, Node 24.22.0, npm 11.19.1; pinned lockfile dependencies.
 
-| Check                          | Result                                                                                                                                                                                        |
-| ------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `npm test`                     | 85 existing demo tests passed                                                                                                                                                                 |
-| `npm run verify:foundation`    | TypeScript, package boundaries, 25 tests and production preview build passed                                                                                                                  |
-| Chromium + WebKit Playwright   | 14 tests passed, including Phase 2 composed UI, migration/restart/checkpoint and real image codec                                                                                             |
-| Windows Firefox                | Launch fails before test execution with `browserType.launch: spawn UNKNOWN`; six checks attempted before the final preview test was added; all seven checks still required in hosted Linux CI |
-| `npm run check`                | Legacy syntax/manifests/offline assets passed                                                                                                                                                 |
-| `npm run scan:secrets`         | Narrow credential/private-key scan passed                                                                                                                                                     |
-| `node scripts/freeze-demo.cjs` | All 37 frozen files verified                                                                                                                                                                  |
-| Formatting                     | Prettier check passed                                                                                                                                                                         |
+| Check                          | Result                                                                                                                                                                                      |
+| ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `npm test`                     | 85 existing demo tests passed                                                                                                                                                               |
+| `npm run verify:foundation`    | TypeScript, package boundaries, 26 tests and production preview build passed                                                                                                                |
+| Chromium + WebKit Playwright   | 14 tests passed, including Phase 2 composed UI, migration/restart/checkpoint and real image codec                                                                                           |
+| Windows Firefox                | Launch fails before test execution with `browserType.launch: spawn UNKNOWN`; six checks attempted before the final preview test was added; all seven Firefox checks pass in hosted Linux CI |
+| `npm run check`                | Legacy syntax/manifests/offline assets passed                                                                                                                                               |
+| `npm run scan:secrets`         | Narrow credential/private-key scan passed                                                                                                                                                   |
+| `node scripts/freeze-demo.cjs` | All 37 frozen files verified                                                                                                                                                                |
+| Formatting                     | Prettier check passed                                                                                                                                                                       |
 
-The 16 added Node tests cover hierarchy, midnight/overlaps, explicit DST/travel, planned
+The 17 added Node tests cover hierarchy, midnight/overlaps, explicit DST/travel, planned
 versus logged time, deck deletion/Undo/expiry, causal dependencies/concurrency rejection,
 pending retention/compaction/retry, caller snapshots, source equality, all legacy entity
 families/settings, zero-duration presets, sent/seen history, seven achievement-state entries,
 editable strokes/photos, overflow, unknown conflicts/deletes, malformed/duplicate inputs,
 orphan review, exact source-size boundary (~1 MiB), backup/recovery quota failures, aborted
-activation, restart/resume, media integrity, recovery ring and failed secondary effects.
+activation, restart/resume, media integrity, recovery ring, failed secondary effects and
+deletion-barrier retention when Undo removes snapshot-restored content.
 
 Browser output is locally generated in ignored `build/browser-results.json` and test traces
 in `test-results`. Chromium/WebKit versions come from the pinned Playwright 1.64.1 install;
-the report records each run. No new hosted CI, actual Firefox pass, physical Safari result,
-OS process-kill durability result or phone performance measurement is claimed. Existing CI
-already discovers the added tests. The production preview includes the Phase 2 lazy bundle.
+the report records each run. Hosted Linux evidence now covers Firefox and all three required
+jobs, with exact baseline revision/artifact digests in VERIFICATION-PHASE-2.md. Current-head
+results belong to PR #11. No physical Safari, OS process-kill durability or phone performance
+measurement is claimed. The production preview includes the Phase 2 lazy bundle.
 
 ## Remaining release gates
 
-- Run the final revision in hosted Linux CI, including Firefox; keep existing native/CodeQL
-  required checks. This session does not substitute old Phase 1 hosted results for Phase 2.
+- Keep all three required jobs green on the exact review head before merge. Phase 2 has
+  its own hosted evidence; Phase 1 results are not substituted for Phase 2.
 - Physical media/storage-pressure/OS-kill tests and final device budgets remain issue #2 /
   Phase 11 evidence. Synthetic transaction aborts do not prove durable writes under power loss.
 - Production import/merge/replace and backup-download UI, old-device cutover guidance,

@@ -535,6 +535,34 @@ test('orphaned demo deck references require review while old best text remains r
   db.close();
 });
 
+test('Undo of snapshot recovery retains a causal deletion barrier after checkpoint/restart', async () => {
+  for (const previouslyDeleted of [false, true]) {
+    const factory = new IDBFactory();
+    let db = await openLogbook(factory, 'undo-snapshot', 'actor');
+    const snapshot = blankLogbook();
+    snapshot.entities['activity:old'] = activity('old');
+    if (previouslyDeleted) {
+      await db.commit(put('old'));
+      await db.commit({
+        id: 'prior-delete',
+        at: 1,
+        edit: { type: 'delete', keys: ['activity:old'] },
+      });
+    }
+    await db.commit({ id: 'recover', at: 2, edit: { type: 'recover', snapshot } });
+    await db.commit({ id: 'undo-recover', at: 3, edit: { type: 'restore', deletion: 'recover' } });
+    await db.acknowledge((await db.pending()).map((op) => op.id));
+    await db.checkpoint();
+    db.close();
+    db = await openLogbook(factory, 'undo-snapshot');
+    const state = await db.load();
+    assert.equal(state.entities['activity:old'], undefined);
+    assert.equal(state.tombstones['activity:old'], 'undo-recover');
+    await assert.rejects(db.commit({ ...put('old'), id: 'stale-recreate' }), /Restore deleted/);
+    db.close();
+  }
+});
+
 test('near-budget source remains byte-identical and recovery/activation quota failures are resumable', async () => {
   const raw = JSON.stringify({ entries: [], docks: [], future: 'x'.repeat(1024 * 1024) });
   const near = await previewV8(raw, {

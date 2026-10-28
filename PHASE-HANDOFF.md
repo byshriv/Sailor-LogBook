@@ -1,13 +1,15 @@
-# Phase handoff — Phase 2 local implementation
+# Phase handoff — Phase 2 public review
 
 Updated 28 October 2026. The owner explicitly requested Phase 2 only. Domain, durable
-storage/operations, recovery and synthetic lossless migration are implemented locally.
+storage/operations, recovery and synthetic lossless migration are published in
+[PR #11](https://github.com/byshriv/Sailor-LogBook/pull/11).
 No later product port, real-data migration, cloud mutation or deployment occurred.
 
 ## Read first
 
 1. LAUNCH-DECISIONS.md remains the authority; the 24 questions are already answered.
-2. [Phase 2 status/evidence](docs/PHASE-2-STATUS.md) and [ADR 0005](docs/adr/0005-phase2-domain-durability.md).
+2. [Phase 2 status](docs/PHASE-2-STATUS.md), [hosted verification](docs/VERIFICATION-PHASE-2.md)
+   and [ADR 0005](docs/adr/0005-phase2-domain-durability.md).
 3. LAUNCH-PLAN.md / ROADMAP.md, architecture review, ADRs 0001–0004 and
    [cutover contract](docs/migrations/V8-CUTOVER-CONTRACT.md).
 4. Phase 1 history/evidence remains in docs/PHASE-1-STATUS.md,
@@ -16,10 +18,11 @@ No later product port, real-data migration, cloud mutation or deployment occurre
 ## Repository state
 
 Started clean on main, fetched origin and verified main == origin/main, zero ahead/behind,
-at c0f3afa. No history reset/rebase or remote mutation was needed. These Phase 2 edits
-are workspace changes, not a claimed published PR or hosted CI result. Main protection
-and Phase 1 publication remain unchanged. Inspect current git status and fetch before
-publication; do not force-push or bypass required checks.
+at c0f3afa. Published the review branch through the connected GitHub tools. Its tree was
+verified identical to the local staged files before switching this workspace to track
+codex/phase-2-domain-durability. Main protection and Phase 1 history remain unchanged.
+No reset/rebase, force-push or main mutation occurred. Inspect git status/fetch before
+further work; do not bypass required checks. The PR remains open for review.
 
 ## Implementation
 
@@ -40,11 +43,14 @@ publication; do not force-push or bypass required checks.
 
 ## Evidence
 
-85 demo tests and 25 foundation/domain/storage tests pass. Typecheck, boundaries,
+85 local demo tests and 26 foundation/domain/storage tests pass. Typecheck, boundaries,
 preview build, formatting, legacy checks, secret-pattern scan and 37 frozen hashes pass.
-Fourteen Chromium/WebKit browser checks pass. Windows Firefox cannot launch
-(spawn UNKNOWN), as in Phase 1; final Firefox checks need hosted Linux CI. See the status
-doc for commands and limits. No new hosted CI, physical-device/OS-kill evidence or
+Fourteen local Chromium/WebKit checks pass. Hosted Linux runs all 21 browser cases,
+including Firefox; baseline run 40631431207 passes check/android-proof/codeql and all
+three emulator tests. See docs/VERIFICATION-PHASE-2.md for exact revision/artifacts and
+PR #11 checks for the current head. The review fix keeps deletion markers when Undo
+removes snapshot-restored content and adds the 26th foundation test. Every follow-up
+revision must pass the same required checks. No physical-device/OS-kill evidence or
 independent security audit is claimed. No dependency update was introduced.
 
 ## Continue safely
@@ -88,4 +94,5 @@ Encrypted/cloud record envelopes require later readers/unlock/review. No lossles
 production downgrade is promised. Old cloud files and offline demo devices remain intact.
 
 Stop at Phase 2. Calendar and every later feature port require a new owner request.
-The next technical follow-up is final hosted CI/review without expanding phase scope.
+The next owner step is reviewing PR #11 and merging through the required checks when
+accepted. No merge or new phase is implied by publishing this review.

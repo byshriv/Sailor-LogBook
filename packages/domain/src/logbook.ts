@@ -278,9 +278,15 @@ export function applyEdit(input: Logbook, c: EditCommand): Logbook {
       )
         throw Error('Restore needs review: content changed');
     for (const [key, value] of Object.entries(t.before)) {
-      if (value) s.entities[key] = value;
-      else delete s.entities[key];
-      delete s.tombstones[key];
+      if (value) {
+        s.entities[key] = value;
+        delete s.tombstones[key];
+      } else {
+        delete s.entities[key];
+        // Undoing a snapshot addition is itself a new causal deletion. Retain the
+        // barrier so a stale put cannot resurrect content removed by that Undo.
+        s.tombstones[key] = c.id;
+      }
     }
     if (Object.hasOwn(t, 'archiveBefore')) s.archive = structuredClone(t.archiveBefore!);
     delete s.trash[edit.deletion];
