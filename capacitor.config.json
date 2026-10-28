@@ -1,0 +1,6 @@
+{
+  "appId": "work.shriv.sailorlogbook.proof",
+  "appName": "Logbook Proof",
+  "webDir": "build/foundation",
+  "android": { "path": "platforms/android" }
+}

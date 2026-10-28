@@ -1,0 +1,24 @@
+name: Bug or UI issue
+description: Report a reproducible problem without personal logbook content.
+body:
+  - type: textarea
+    id: behavior
+    attributes:
+      label: Expected and actual behavior
+      description: Include steps and phase/version. Use synthetic examples; remove personal text and credentials.
+    validations:
+      required: true
+  - type: input
+    id: platform
+    attributes:
+      label: Device, OS and browser versions
+    validations:
+      required: true
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Impact
+      options:
+        - UI or usability
+        - Required flow broken
+        - Potential data loss (stop using the affected flow and keep a backup)
