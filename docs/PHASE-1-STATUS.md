@@ -1,6 +1,6 @@
 # Phase 1 status — 28 October 2026
 
-**Technical foundation complete; repository-policy closure pending the owner's settings.**
+**Phase 1 complete: technical evidence and repository policy verified on 28 October 2026.**
 Only Phase 1 was implemented. No production migration, deployment or large product port occurred.
 
 | Deliverable              | Evidence/status                                                                                                                                                                       |
@@ -17,21 +17,17 @@ Only Phase 1 was implemented. No production migration, deployment or large produ
 | Clean clone/tooling      | Actual local Git clone: npm ci, type check, build and 37 reference hashes pass. CI checks clean Linux source                                                                          |
 | Security/contribution    | MIT, notices in build artifacts, lockfile license inventory, templates, conduct/contribution/security docs, Dependabot, narrow local scan and scoped CodeQL                           |
 | Private reporting        | Enabled by owner; read-only status independently verified                                                                                                                             |
-| Main protection          | Owner-created Protect Main ruleset was disabled and lacked status-check requirements at last verification. Owner chose to enable this themselves; not waived                          |
+| Main protection          | Protect Main verified Active; requires pull requests and check/android-proof/codeql, blocks force pushes/deletions, no bypass actors                                                  |
 | Hosting                  | Existing logbook.shriv.work responds HTTP 200 over HTTPS through Cloudflare. No account/admin/staging access or production deployment was performed                                   |
 | Public later-phase gates | [Device/browser/media/KDF evidence #2](https://github.com/byshriv/Sailor-LogBook/issues/2), [encryption/recovery/native trust #3](https://github.com/byshriv/Sailor-LogBook/issues/3) |
 
-## Remaining Phase 1 closure action
+## Closure verified
 
-In the existing Protect Main ruleset set Enforcement to Active and require passing check
-and android-proof statuses (codeql may also be required after its successful setup).
-Keep pull requests required, zero required outside approvals for the solo owner, and
-force pushes/deletion disabled. Private reporting is already enabled.
-Exact links/settings: [REPOSITORY-SETTINGS.md](REPOSITORY-SETTINGS.md).
-
-The connector has no admin mutation tools. The owner's choice of manual setup is recorded;
-do not silently mark this policy active or claim the whole phase closed while it is disabled.
-The foundation PR can be finalized after its current checks pass and policy is verified.
+The owner enabled Protect Main ruleset 25984549. Read-only verification confirms Active
+protection for main, all three required GitHub Actions statuses, zero outside approvals,
+blocked force pushes/deletions and no bypass actors. Private reporting is enabled.
+PR #1 delivers the foundation through those checks. No admin action remains for Phase 1.
+See [REPOSITORY-SETTINGS.md](REPOSITORY-SETTINGS.md) for the retained setup instructions.
 
 ## Work deliberately belonging to later phases
 

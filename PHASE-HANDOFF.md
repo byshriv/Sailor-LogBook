@@ -1,8 +1,6 @@
-# Phase handoff — Phase 1 technical work complete
+# Phase handoff — Phase 1 complete
 
-Updated 28 October 2026. Technical foundation and feasibility work are complete. **Full Phase 1
-closure still needs the owner's Protect Main policy enabled and required checks configured.**
-Do not start Phase 2 merely because the code is published. No production deployment occurred.
+Updated 28 October 2026. Phase 1 exit gates are verified: technical checks pass and main protection is active. Foundation delivery is through PR #1. No production deployment occurred. Phase 2 requires a new user request.
 
 ## Read first
 
@@ -41,14 +39,13 @@ full-domain port or production encryption/native release is implemented by these
 - Private vulnerability reporting is enabled and verified. Root public host returns HTTPS 200
   through Cloudflare; no Cloudflare account/staging access or deployment is claimed.
 
-## Remaining owner action / closure
+## Closure verification
 
-The owner explicitly chose exact settings rather than deferral. Private reporting is done.
-Protect Main ruleset 25984549 was still disabled at last read and contained no required status
-checks. Set Enforcement Active, require pull requests and check/android-proof (optionally
-codeql), keep external approvals at zero for the solo owner, and prohibit force push/deletion.
-The connector cannot change admin settings. Verify actual policy before declaring closure.
-Then finalize/merge PR #1 after its latest checks pass. No protection bypass is authorized.
+On 28 October 2026, Protect Main ruleset 25984549 was verified Active for main, with
+required check, android-proof and codeql statuses from GitHub Actions, required pull requests,
+zero outside approvals, blocked force pushes/deletions and no bypass actors. Private
+reporting is enabled. The owner completed the final admin action; no waiver or bypass was used.
+PR #1 carries the foundation and this handoff through the required checks before merge.
 
 ## Continue safely
 

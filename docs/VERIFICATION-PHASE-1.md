@@ -17,7 +17,7 @@ No personal logbook, live Dropbox account or desktop browser profile was used.
 | Source scanning                           | Scoped JavaScript/TypeScript foundation CodeQL job succeeds; not an independent audit                                                         |
 | Public host                               | HTTPS HEAD returned 200, Cloudflare server; no deployment/account/staging verification                                                        |
 | Private vulnerability reporting           | Public read-only API reports enabled                                                                                                          |
-| Main ruleset                              | Last observed disabled, without required statuses; owner setup remains a closure gate                                                         |
+| Main ruleset                              | Verified Active: required PR and check/android-proof/codeql; force pushes/deletion blocked; no bypass actors                                  |
 
 ## Hosted evidence
 

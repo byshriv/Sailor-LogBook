@@ -1,8 +1,11 @@
-# Repository administration — owner action
+# Repository administration — verified setup
 
 The connected GitHub tools publish code, PRs, issues and CI evidence, but have no repository
 administration mutation tools. The owner chose to enable these settings themselves on
-28 October 2026. Do not mark them enabled until confirmed/verified.
+28 October 2026. Private reporting and Active main protection were subsequently verified.
+Protect Main requires check/android-proof/codeql from GitHub Actions, pull requests, zero
+outside approvals, and blocks deletion/force pushes with no bypass actors. No Phase 1
+admin action remains. The steps below are retained as maintenance/reference instructions.
 
 1. Open [Code security settings](https://github.com/byshriv/Sailor-LogBook/settings/security_analysis)
    and enable **Private vulnerability reporting**. Enable secret scanning/push protection
