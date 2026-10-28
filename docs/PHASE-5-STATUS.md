@@ -1,0 +1,31 @@
+# Phase 5 Home and Reflection status
+
+28 October 2026. Branch `codex/phase-5-home-reflection`. Phase 5 only, implemented for
+owner review at `/?phase=5`. Phase 6 and later ports remain out of scope.
+
+Read PHASE-HANDOFF.md, LAUNCH-DECISIONS.md, LAUNCH-PLAN.md, ROADMAP.md,
+docs/PRODUCT-SPEC.md, earlier ADRs/architecture and verification reports before editing.
+Fetched origin and fast-forwarded local main to `953205bc71d428af14b679bec3c49e51c2b2f7ed`;
+main equals origin/main, zero ahead/behind, and contains merged PR #13. GitHub independently
+confirms its merge on 28 October at 16:22 IST. The owner's continuation explicitly accepts
+Phase 4 as complete; that acceptance is recorded in its status/verification and launch docs.
+Final Phase 4 evidence is run 40645674923, including 63 hosted browser checks and separate
+CodeQL results with no new alerts; it is not substituted for Phase 5 evidence.
+
+Delivered on the existing domain, durable store/media gateway and editor lock:
+
+- Responsive Home greeting/current task, quick Must-do/completion/progress, best moments,
+  moods, days logged, streak and Sea navigation; no Planner board or rollover port.
+- Original desktop Reflection bento, paired mobile streaks, radar/history, heatmap,
+  Must-do bars, lessons/gratitude, On this day, six week/month summaries and review/search.
+- Separate saved Home/Reflection layouts, hide/show, keyboard reorder, held touch/mouse
+  handles, cancellation, immediate Undo and restart-persistent 30-day recovery.
+- Union time, inherited exclusions, backfill, automatic four-freezes/month behavior,
+  four-featured selection with all overflow text retained, seven persistent achievements.
+- Original artwork and fonts, local canvas share preview, explicit PNG download/native share.
+- Protected failure drafts and original-date review links; no legacy-storage/cloud mutation.
+
+See [architecture](ARCHITECTURE-PHASE-5.md), [verification](VERIFICATION-PHASE-5.md) and
+[handoff](../PHASE-HANDOFF.md) for evidence and owner review steps. No production cutover,
+deployment or later-phase acceptance is included. Required hosted jobs and physical-device
+release gates remain separate from local checks.

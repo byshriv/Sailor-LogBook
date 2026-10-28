@@ -7,8 +7,8 @@
 | 1 | Public GitHub foundation: tooling, CI, MIT/docs, tokens, architecture decisions and storage/sync/encryption/widget feasibility spikes | complete; public foundation, clean CI/browser/emulator proofs, reviewed contracts and active main protection verified; see docs/PHASE-1-STATUS.md |
 | 2 | Shared TypeScript domain, React/state architecture, canonical IndexedDB, durable operations, linked-day/overlap rules, Undo/30-day recovery, WebP media and safe demo migration | merged in PR #11 at 7107798; final required checks passed; see docs/VERIFICATION-PHASE-2.md |
 | 3 | Calendar port: views, +deck quick-add, drag and resize | accepted and complete by owner instruction; PR #12 merged as 327ad8d; final required jobs and 45 hosted browser checks passed; see docs/PHASE-3-STATUS.md |
-| 4 | Notebook port: text, drawing, bottles and Sea adventure | published for owner review in draft PR #13 on codex/phase-4-notebook; preview /?phase=4; 36 foundation and 42 Chromium/WebKit checks pass; see docs/PHASE-4-STATUS.md |
-| 5 | Home and Reflection port: dashboards, streaks and achievements | planned |
+| 4 | Notebook port: text, drawing, bottles and Sea adventure | accepted and complete by owner instruction; PR #13 merged as 953205b; final workflow and CodeQL results pass with 63 Linux browser checks; see docs/PHASE-4-STATUS.md |
+| 5 | Home and Reflection port: dashboards, streaks and achievements | implemented for owner review at /?phase=5 on codex/phase-5-home-reflection; see docs/PHASE-5-STATUS.md |
 | 6 | Tasks and Planner port: must-do, rollover, statuses and Voyage progress | planned |
 | 7 | Settings, walkthrough and reminders | planned |
 | 8 | PWA hardening: offline updates, backup, export and import | planned |

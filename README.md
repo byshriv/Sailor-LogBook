@@ -157,3 +157,12 @@ filters and monthly history. Close other preview editors before use. See
 [status](docs/PHASE-4-STATUS.md), [architecture](docs/ARCHITECTURE-PHASE-4.md),
 [verification](docs/VERIFICATION-PHASE-4.md) and [handoff](PHASE-HANDOFF.md).
 This isolated review does not activate a production migration or start Phase 5.
+
+### Phase 5 Home and Reflection review
+
+Phase 4 is accepted and complete after merged PR #13 (`953205b`). Run
+`npm run dev:foundation` and open `http://127.0.0.1:5173/?phase=5` to review Home and
+Reflection on the existing durable store. Close any other Phase 2/3/4/5 editing tab first.
+See [Phase 5 status](docs/PHASE-5-STATUS.md), [architecture](docs/ARCHITECTURE-PHASE-5.md)
+and [handoff](PHASE-HANDOFF.md). The root demo and earlier review routes are preserved.
+This is a local review surface; Phase 6 and later ports, cutover and deployment are gated.

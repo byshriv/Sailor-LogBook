@@ -39,3 +39,13 @@ Visual tokens start in apps/web/src/tokens.css: dark background, cream text/butt
 blue accent, Rethink headings/body and restrained motion/reduced motion. Notebook paper,
 Patrick Hand, original icons/animations and complete responsive interactions remain in
 the reference until their port. No new feature family is introduced by this preview.
+
+Phase 4 Notebook/Sea is accepted and complete by owner instruction after merged PR #13
+at `953205b`. Phase 5 Home/Reflection now has an isolated review surface at `/?phase=5`;
+see [Phase 5 architecture](ARCHITECTURE-PHASE-5.md). It preserves v8 desktop bento spans,
+mobile navigation, greeting, original seven achievement/mood artwork, independent layouts,
+progress, review and canvas sharing. Metrics apply accepted union/inherited-exclusion
+rules. Automatic best-streak freezes bridge four missing past days per calendar month;
+today does not consume one, frozen days do not count, and backfill recomputes usage.
+All overflow text stays in Notebook while users choose up to four featured moments.
+No Planner, Settings or later port is included.

@@ -1,5 +1,16 @@
 # Phase 4 verification
 
+Phase 4 is accepted and complete by explicit owner instruction on 28 October 2026.
+PR #13 merged at `953205bc71d428af14b679bec3c49e51c2b2f7ed` (16:22 IST).
+Fetched local `main` equals `origin/main` at that SHA, zero ahead/behind; the merge is
+an ancestor of the Phase 5 branch. GitHub independently confirms the merge. Final head
+`d10d28fd062e282c8c6c3f4954d01cc94c756c22` passed check/android-proof/codeql and the
+separate CodeQL results check (no new alerts) in
+[run 40645674923](https://github.com/byshriv/Sailor-LogBook/actions/runs/40645674923),
+including 63 Linux browser checks, 36 foundation tests and three Android emulator cases.
+These are Phase 4 results, not Phase 5 evidence. Physical-device/release gates remain.
+The review-era report below is historical; current work is [Phase 5](PHASE-5-STATUS.md).
+
 28 October 2026. Local Windows; Node 24.22.0/npm 11.19.1 and pinned Playwright 1.64.1.
 Only synthetic fixtures are used. Final results are recorded in PHASE-HANDOFF.md.
 
