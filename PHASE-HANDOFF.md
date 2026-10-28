@@ -1,102 +1,117 @@
-# Phase handoff — Phase 6 Tasks and Planner
+# Phase handoff — Phase 7 management and experience
 
-Updated 28 October 2026. Scope: Phase 6 only. Branch `codex/phase-6-planner`.
-Implemented for owner review at `/?phase=6`. Phase 7 and later ports remain gated.
-Published in [draft PR #15](https://github.com/byshriv/Sailor-LogBook/pull/15).
-No production deployment, real-data cutover, cloud mutation or main push occurred.
+Updated 28 October 2026. Branch `codex/phase-7-settings`. Implemented for owner review
+at `/?phase=7`. Phase 8 and later ports remain gated. No deployment, real-data cutover,
+Dropbox connection or main push occurred.
 
 ## Baseline and acceptance
 
-Read PHASE-HANDOFF.md, LAUNCH-DECISIONS.md, LAUNCH-PLAN.md, ROADMAP.md,
-docs/PRODUCT-SPEC.md and earlier architecture/ADRs/verification records before editing.
-The owner's continuation explicitly accepts Phase 5 as complete and authorizes Phase 6
-only. Acceptance is recorded in launch decisions/plan, roadmap, product spec and Phase 5
-status/verification. Earlier review-era reports remain historical.
+Read this handoff, LAUNCH-DECISIONS.md, LAUNCH-PLAN.md, ROADMAP.md, docs/PRODUCT-SPEC.md
+and earlier architecture/ADRs/verification before continuing. The owner explicitly
+accepts Phase 6 as complete and authorizes Phase 7 only; acceptance is recorded in the
+launch documents, product spec and Phase 6 reports.
 
-Fetched origin and verified local `main == origin/main`, zero ahead/behind, at
-`5792285ded097bc16f5bf28b0f570e059d391831`, containing merged PR #14. GitHub independently
-confirms its merge on 28 October at 17:23:08 IST. Final Phase 5 head
-`2bdbb16a8408f5af72ec7b2a935f98de110c209c` passes check/android-proof/codeql and separate
-CodeQL results (no new alerts) in [run 40682341891](https://github.com/byshriv/Sailor-LogBook/actions/runs/40682341891),
-including 81 Linux browser checks, 43 foundation tests and three Android emulator cases.
-Those are Phase 5 results, not hosted Phase 6 evidence.
+Fetched origin before work and again before final review. Local `main == origin/main`,
+zero ahead/behind, at `9debb35a6dc0ac8f3b0bbc72d8781e7e36f4b395`, the PR #15 merge.
+Its final head `77ecb628639c18517320d0f23bb265a05c14d235` is an ancestor. Git records
+its merge at 19:32:03 IST on 28 October. Earlier hosted results are not Phase 7 proof.
 
-Pre-existing uncommitted owner planning updates are preserved: Phase 13 is the final
-owner-dictated review after Phase 12 and before deployment, now Phase 14. Track errors,
-bugs, UI/UX changes, missing additions and Demo v8 discrepancies, including previously
-unmentioned feedback, in [the review register](docs/PRE-RELEASE-OWNER-REVIEW.md). Implement
-agreed fixes, retest and repeat until owner acceptance. Earlier acceptance does not waive
-this review; Phase 11 hardening remains. No later implementation was started.
+README.md and DEPLOY.md retain their exact pre-existing owner diffs, remain uncommitted
+and are excluded from Phase 7 commits. Phase 13 final owner review and Phase 14 deployment
+gates remain in place. No owner feedback, final acceptance or later authorization is invented.
 
 ## Implementation map
 
-- `packages/domain/src/planner.ts`: task drafts/flags, quick syntax, atomic edits,
-  stable-identity moves, reviewed rollover/skipping, dated history and day columns.
-- `apps/web/src/planner.tsx` / `planner.module.css`: desktop/mobile Planner, task editor,
-  pointer/held-touch moves, filters, review, scheduling dock, Undo and persistent recovery.
-- `apps/web/src/main.tsx`: lazy `/?phase=6`; earlier routes remain compatible.
-- `apps/web/src/reflection.tsx`: Planner links only, including unresolved-task review.
-- `tests/foundation/planner.test.ts`: six domain/durability/migration/media regressions.
-- `tests/browser/planner.spec.ts`: seven composed cases per engine covering interaction,
-  rollover, cancellation, dates/restart, failure retry and prior-surface preservation.
+- `packages/domain/src/management.ts`: settings/profile/deck/preset edits preserving
+  compatibility, hierarchy validation, descendant records, search and reminder rules.
+- Domain/persistence `logbook.ts`: existing media validation now also verifies profile
+  digest references, atomic commit, migration staging/activation and startup hashes.
+- `apps/web/src/management.tsx` / `management.module.css`: Settings, profile, hierarchy,
+  presets, reassignment/recovery, onboarding and capability feedback.
+- `management-ui.tsx` / `deck-art.ts`: original deck icons, shared avatar/menus/search,
+  normal walkthrough, safe keyboard practice/reference, shortcuts, focus and reminders.
+- Existing Calendar/Notebook/Home/Reflection/Planner: small shared-control composition,
+  original-date item/preset links, Month preference, Reflection route/date and Planner time labels.
+- Eight new foundation regressions and twelve Phase 7 browser cases per engine.
 
-See [architecture](docs/ARCHITECTURE-PHASE-6.md), [status](docs/PHASE-6-STATUS.md) and
-[verification](docs/VERIFICATION-PHASE-6.md). The port shares `slb-phase2`, verified
-Redux projection, existing commands, durable/media gateway and `slb-phase2-editor` lock.
-No schema/command/migration/transport changes. Calendar and Notebook sources/CSS are
-untouched. IDs, unknown compatibility fields, raw archives, editable strokes and digest
-blobs survive targeted edits. Task edits never create logged activities or media copies.
+See [architecture](docs/ARCHITECTURE-PHASE-7.md), [status](docs/PHASE-7-STATUS.md) and
+[verification](docs/VERIFICATION-PHASE-7.md). All ports share `slb-phase2`, verified replay,
+Redux projection, durable command/media gateway and `slb-phase2-editor`. No new schema,
+command, migration activation, transport or PWA behavior. IDs, opaque fields, archives,
+editable drawings, original media and earlier screens stay intact. The root demo and
+all 37 frozen reference files remain unchanged.
 
 ## Reviewable interactions
 
-The board retains three past days and eight from the selected day; past headers dim.
-Timed and untimed tasks, Must-do, Waiting on, Low energy, Voyage percentage and explicit/
-manual/clock statuses stay available. Skipped/Not gonna do rows and dated historical
-markers remain inspectable. Editor Date/Time is the keyboard alternative to dragging.
+Settings has profile, preferences, decks, presets, reminders, storage, capabilities and
+Help cards, desktop sidebar dropdowns and mobile pill navigation. Shared controls occupy
+normal workspace/header layout and do not cover accepted-screen actions. Review desktop/
+mobile proportions, keyboard/insets and visual density against v8.
 
-Unresolved tasks stay on their original dates across midnight/restart. Clock Done does
-not mean work was logged or automatically resolve a saved To do plan. Review offers:
+Deck disclosure/open/edit controls are independent. Three levels are validated across
+whole subtrees. Colours, all sixteen original icons and six original starter decks remain.
+Deletion previews explicit child-deck/record/preset reassignment, never deletes activities
+and has compound Undo. Preset duration zero retains the Calendar ghost length and exposes Done.
+Normal changes have immediate Undo and 30-day Recent changes; stale restores require review.
 
-- Leave planned/Cancel, with no write.
-- Rollover preview to an explicit later date/time, defaulting to untimed To do. The same
-  identity moves; history records Skipped on its original day plus the prior saved status.
-  Title/deck/flags/progress remain. Ordinary moves preserve current status/time.
-- Skip or Not gonna do, retaining the original date and historical prior status.
+Profile photos use the existing verified WebP pipeline and provisional media budgets.
+Keep original starts unchecked and explains source size/storage/transfer cost. Name/reference/
+blob save together; failure retains the draft. Removal is reversible without physically
+collecting blobs. Migrated data URLs and archives stay. Windows WebKit's native Blob
+limitation remains visible; no Safari photo-storage pass is implied.
 
-The optional Calendar scheduling dock adds half-hour drop targets and a full Calendar
-link; scheduling only changes the same task's date/time. Clearing Time makes it untimed.
-This dock, rollover defaults and historical markers require owner interaction review.
-Plans, clock-Done tasks, manual Done and 100% Voyage never add logged time or streak hours.
+Seven-step onboarding commits once at Set sail; Cancel writes nothing. Existing content
+survives reviewing setup. Explicit create/help/guide links avoid stacked first-run overlays.
+Joining an existing logbook explains later capabilities without connecting. The normal guide
+visits actual screens with Back/Next/Skip and completion tracking. Desktop completion offers
+optional keyboard practice. Four safe exercises end in the full reference and record completion
+without creating journal content. Normal reopen does not replay the guide; Help allows replay.
 
-Mouse release commits once using its final hit target. Touch/pen uses a stationary 350ms
-hold; early movement cancels. Escape, pointer cancel, lost capture and outside release
-leave canonical state unchanged; other pointers are ignored. Drafts block in-app date/
-navigation/filter changes; explicit Cancel discards. Failed saves retain fields and allow
-retry. Saved follows transaction completion. Normal creation/edit/move/review/deletion
-supports immediate Undo and persistent 30-day Recent changes, with stale-restore review.
+Search spans entries/tasks, original dates/deck paths, Notebook/Reflection, decks/presets,
+Settings and commands. Links open existing editors on their original day. Typing/composition
+guards, Ctrl/Cmd variants, item focus/edit/Done/duplicate/confirmed delete, Undo and Calendar
+shortcuts remain. Planner display follows time format while native time inputs retain their
+values. Dialogs wrap Tab, handle Escape, keep the background inert and return focus, including
+WebKit. Drafts block in-app tools/navigation. Failure retains fields and announces inside dialogs.
+
+Reminders check open tabs in the selected local minute, only without logged activity that day.
+Plans/completion never count as logging. A durable daily receipt prevents repeats. Permission
+and Test are explicit; denial/unavailable APIs retain in-app feedback. Background suspension/
+closed-app delivery is not promised. Storage grants/estimates and sound/haptics report actual limits.
+
+Encryption remains secondary. This preview does not encrypt local IndexedDB or connect Dropbox.
+Production PWA/update/data tools stay Phase 8; Dropbox/join/encryption stay Phase 9; native APK/
+reminders/keys/widgets stay Phase 10. Platform targets are not physical-device verification claims.
 
 ## Verification and continuation
 
-Local results and exact limits are in [Phase 6 verification](docs/VERIFICATION-PHASE-6.md).
-Only synthetic fixtures/disposable profiles were used. Actual phone/Safari/keyboard/
-storage-pressure/OS-kill tests, final media budgets and existing issues #2/#3 remain
-release gates. Synthetic replay is not production sync; Dropbox remains Phase 9.
+Synthetic fixtures/disposable profiles only. Results:
 
-Run `npm run dev:foundation`, open `http://127.0.0.1:5173/?phase=6`, and close other
-Phase 2/3/4/5/6 editing tabs first. Calendar/Notebook/Home remain at `/?phase=3`,
-`/?phase=4` and `/?phase=5`; day links retain their original dates. The root demo and
-37-file frozen reference are unchanged. Review desktop/mobile composition, actual touch
-hold/cancel/edge scrolling, keyboard/insets, date boundaries, history, rollover defaults,
-statuses and Voyage. This implementation does not accept Phase 6 on the owner's behalf.
+- All 85 unchanged demo tests pass.
+- Typecheck, boundaries, all 57 foundation tests and preview build pass.
+- Full Chromium/WebKit suite: 89 pass, one explicit Windows WebKit profile-Blob skip.
+- Final Phase 7/empty-store route follow-up: 23 pass, one explicit Windows WebKit photo skip.
+- Firefox fails before app launch with Windows `spawn UNKNOWN`; 44 remaining cases do not run.
+- Syntax/manifests/assets, all 37 frozen hashes, narrow secret scan, formatting and whitespace pass.
 
-Before merging a published Phase 6 PR, require check/android-proof/codeql and separate
-CodeQL results on its exact final head. Phase 5's green run is not Phase 6 evidence.
-No Phase 6 hosted/Android/physical-device pass is claimed by local tests. Settings and
-all Phase 7+ ports require a new owner request; no later port was started.
+The full passing report is retained locally at ignored `build/browser-phase7-chromium-webkit.json`.
+The default report may show a later Firefox or targeted run. Desktop/mobile captures under
+`build/` were inspected. Tests caught and corrected control overlap and dialog focus gaps.
+Calendar's resize fixture centers the handle away from edge scrolling; its gesture code is
+unchanged. Planner's disclosure fixture names unresolved tasks instead of a generic first dropdown.
 
-Publication follow-up: connected GitHub Git-data tools preserved identical full trees
-for the domain, UI/browser and documentation commits. Original local history remains on
-`codex/phase-6-planner-local`; the active branch tracks the published history. README and
-DEPLOY owner edits remain uncommitted and excluded from publication. See the PR checks
-and description for final exact-head hosted results; this follow-up also requires all
-checks. Publication does not authorize merge or imply owner Phase 6 acceptance.
+Phase 7 owner acceptance remains pending. Physical phone/Safari/touch/keyboard-inset/storage-
+pressure/OS-kill evidence, final media budgets, independent audits and existing #2/#3 gates remain.
+No hosted Phase 7/native/emulator pass is claimed. Before any later PR merges, require check/
+android-proof/codeql and separate CodeQL results on its exact final head. Local commits separate
+rules/media, UI/browser, empty-store routing and documentation; they do not imply publication,
+merge or deployment.
+
+Run `npm run dev:foundation`, open `http://127.0.0.1:5173/?phase=7` and close other Phase 2–7
+editing tabs first. Prior routes stay at phases 3/4/5/6; Reflection accepts
+`/?phase=5&screen=reflection`. Use disposable data. Continue Phase 7 review/fixes only unless
+the owner explicitly authorizes another phase. Do not start Phase 8 or later ports.
+
+Review commits: `cb11575` (domain/media), `306128e` (UI/browser), `36d667c`
+(empty-store route follow-up), followed by the acceptance/verification/handoff commit.
+Only README.md and DEPLOY.md should remain modified after committing this handoff.

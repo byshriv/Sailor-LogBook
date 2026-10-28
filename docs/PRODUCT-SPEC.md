@@ -72,4 +72,27 @@ markers link to the current task; edits, moves, review and deletion use Undo/30-
 recovery. The Calendar scheduling dock only schedules the same task; the full Calendar
 remains the accepted Calendar port. Editor Date/Time provides a keyboard alternative to
 dragging. These review details are in [Phase 6 architecture](ARCHITECTURE-PHASE-6.md).
-Settings and Phase 7+ ports remain out of scope.
+Phase 6 is now accepted and complete following merged PR #15 at `9debb35`. Phase 7 management/experience is authorized; Phase 8+ remains out of scope.
+
+Phase 6 Tasks/Planner is accepted and complete by explicit owner instruction on
+28 October 2026. Fetched local `main == origin/main`, zero ahead/behind, at
+`9debb35a6dc0ac8f3b0bbc72d8781e7e36f4b395`, the merge of PR #15 (final head `77ecb628`).
+Phase 7 management/experience only is authorized. Phase 8 and later ports remain gated.
+
+Phase 7 management/experience is implemented for review at `/?phase=7`; see
+[architecture](ARCHITECTURE-PHASE-7.md) and [status](PHASE-7-STATUS.md). Preserve
+profile name/photo, the six original starter decks and 16 deck icons, three total
+deck levels, separate disclosure/open/edit controls, descendant records, atomic
+reassignment with Undo, and duration-free presets. Settings overlay migrated
+preferences without rewriting legacy payloads. New photos use digest blobs and the
+existing WebP/original pipeline; original media and archives remain intact.
+
+Cancellable setup saves once at completion. The normal guide uses actual screens;
+optional desktop keyboard practice ends in the complete shortcut reference.
+Search includes entries/tasks, original dates/deck paths, Notebook/Reflection, decks,
+presets, Settings and commands. Typing, focus, Escape and Ctrl/Cmd variants remain
+guarded. Open-tab reminders skip logged days, persist a daily receipt and report
+permission/capability limits honestly. Closed-app reminders, production PWA/data
+tools, Dropbox joining/transport, optional encryption and native widgets remain
+their later phases. Earlier screens and the root/frozen demo remain available.
+Phase 7 owner acceptance is pending; no Phase 8+ implementation is authorized.
