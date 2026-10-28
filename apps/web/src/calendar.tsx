@@ -131,7 +131,15 @@ function Calendar({ projection, db }: { projection: Projection; db: LogbookStore
         : null,
     ),
   };
-  const [date, setDate] = useState(localDate());
+  const [date, setDate] = useState(() => {
+    const linkedDate = new URLSearchParams(location.search).get('date');
+    return linkedDate &&
+      /^\d{4}-\d{2}-\d{2}$/.test(linkedDate) &&
+      Number.isFinite(Date.parse(linkedDate)) &&
+      new Date(linkedDate + 'T00:00Z').toISOString().slice(0, 10) === linkedDate
+      ? linkedDate
+      : localDate();
+  });
   const [view, setView] = useState<View>(() =>
     [1, 2, 3, 4, 7].includes(Number(prefs.dv))
       ? (Number(prefs.dv) as View)
