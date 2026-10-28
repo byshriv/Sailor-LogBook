@@ -206,12 +206,15 @@ test('deck reassignment and linked activity deletion are one reversible command 
 test('durable actor, duplicate receipt across compaction, pending acknowledgement and restart', async () => {
   const f = new IDBFactory();
   let db = await openLogbook(f, 'causal', 'actor');
-  await Promise.all([db.commit(put('a')), db.commit(put('b'))]);
+  const commits = await Promise.all([db.commit(put('a')), db.commit(put('b'))]);
+  // Hashing precedes the transaction: simultaneous requests may commit in either
+  // order. Exercise a noncontiguous acknowledgement using actual causal order.
+  const ordered = commits.sort((a, b) => a.operation.sequence - b.operation.sequence);
   assert.equal((await db.pending()).length, 2);
   assert.deepEqual(await db.checkpoint(), { revision: 0, retained: 2 });
-  await db.acknowledge(['b']);
+  await db.acknowledge([ordered[1]!.operation.id]);
   assert.equal((await db.checkpoint()).revision, 0);
-  await db.acknowledge(['a']);
+  await db.acknowledge([ordered[0]!.operation.id]);
   assert.equal((await db.checkpoint()).revision, 2);
   db.close();
   db = await openLogbook(f, 'causal', 'another-actor');
