@@ -1,0 +1,337 @@
+.calendar {
+  max-width: none;
+  padding: 0;
+  height: 100dvh;
+  display: flex;
+  overflow: hidden;
+}
+.calendar button {
+  margin: 0;
+  padding: 9px 13px;
+  border-radius: 12px;
+}
+.calendar input,
+.calendar select,
+.calendar textarea {
+  font: inherit;
+  color: var(--cream);
+  background: var(--raised);
+  border: 1px solid #5d5853;
+  padding: 10px;
+  border-radius: 10px;
+  width: 100%;
+}
+.calendar input[type='checkbox'] {
+  width: auto;
+}
+.sidebar {
+  width: 215px;
+  flex-shrink: 0;
+  padding: 30px 20px;
+  background: var(--card);
+  overflow: auto;
+}
+.sidebar details {
+  margin: 26px 0;
+}
+.sidebar summary {
+  cursor: pointer;
+}
+.workspace {
+  min-width: 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+.workspace > button {
+  align-self: flex-start;
+  margin: 4px 24px;
+}
+.photos {
+  display: flex;
+  gap: 8px;
+  overflow: auto;
+}
+.photos img {
+  max-width: 160px;
+  max-height: 140px;
+  object-fit: contain;
+  border-radius: 12px;
+}
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding: 20px 24px 10px;
+}
+.toolbar h1 {
+  font-size: 26px;
+  margin: 0 auto 0 0;
+}
+.toolbar input {
+  width: 155px;
+}
+.controls {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+  padding: 8px 24px;
+}
+.controls [role='group'] {
+  display: flex;
+  gap: 3px;
+}
+.controls [aria-pressed='false'] {
+  background: var(--raised);
+  color: var(--cream);
+}
+.controls label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+}
+.controls input {
+  width: 80px;
+  padding: 0;
+}
+.status {
+  margin: 4px 24px;
+  font-size: 13px;
+  min-height: 21px;
+}
+.scroll {
+  overflow: auto;
+  flex: 1;
+  overscroll-behavior: contain;
+  touch-action: pan-y;
+  padding-bottom: 80px;
+}
+.grid {
+  display: grid;
+  min-width: 320px;
+}
+.hours {
+  position: relative;
+}
+.hours small {
+  position: absolute;
+  right: 4px;
+  font-size: 10px;
+}
+.day {
+  position: relative;
+  border-left: 1px solid #393431;
+  background-image: linear-gradient(to bottom, #393431 1px, transparent 1px);
+}
+.dayHeaders {
+  display: grid;
+  padding-right: 14px;
+}
+.dayHeaders > div {
+  text-align: center;
+  padding: 12px 0;
+}
+.dayHeaders small {
+  display: block;
+  font-size: 11px;
+}
+.block {
+  position: absolute;
+  border-radius: 9px;
+  padding: 7px;
+  font-size: 13px;
+  color: var(--cream);
+  overflow: hidden;
+  cursor: grab;
+  user-select: none;
+  touch-action: none;
+  z-index: 2;
+}
+.block small {
+  display: block;
+  color: inherit;
+  font-size: 10px;
+}
+.planned {
+  border: 1.5px solid #226192;
+}
+.edgeStart,
+.edgeEnd {
+  position: absolute;
+  left: 50%;
+  width: 16px;
+  margin-left: -8px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--cream);
+  border: 3px solid var(--accent);
+  cursor: ns-resize;
+  z-index: 4;
+  touch-action: none;
+}
+.edgeStart {
+  top: 0;
+}
+.edgeEnd {
+  bottom: 0;
+}
+.now {
+  position: absolute;
+  width: 100%;
+  border-top: 2px solid var(--danger);
+  pointer-events: none;
+  z-index: 3;
+}
+.ghost {
+  position: absolute;
+  width: 100%;
+  border: 2px dashed var(--cream);
+  border-radius: 12px;
+  background: #22619266;
+  pointer-events: none;
+  z-index: 3;
+}
+.ghost [data-draft-edge] {
+  pointer-events: auto;
+}
+.editor {
+  position: fixed;
+  bottom: 24px;
+  left: calc(50% + 100px);
+  transform: translateX(-50%);
+  width: min(520px, calc(100vw - 32px));
+  max-height: 80dvh;
+  overflow: auto;
+  z-index: 10;
+  padding: 18px;
+  border: 1px solid #5d5853;
+  border-radius: 24px;
+  background: var(--card);
+  box-shadow: 0 12px 60px #0009;
+}
+.editorTitle,
+.editorActions,
+.fields,
+.chips {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.editorTitle input {
+  flex: 1;
+  min-width: 0;
+}
+.editorActions {
+  justify-content: space-between;
+  margin-top: 10px;
+}
+.fields {
+  align-items: flex-start;
+}
+.fields label {
+  flex: 1;
+  min-width: 0;
+}
+.editor label {
+  font-size: 13px;
+  margin: 12px 0 6px;
+}
+.chips {
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+.chips button {
+  color: var(--cream);
+  background: var(--raised);
+  font-size: 12px;
+}
+.editor [aria-pressed='true'] {
+  background: var(--accent);
+  color: var(--cream);
+}
+.month {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  overflow: auto;
+  flex: 1;
+  padding: 12px;
+  gap: 6px;
+}
+.month button {
+  min-height: 100px;
+  background: var(--card);
+  color: var(--cream);
+  text-align: left;
+  overflow: hidden;
+}
+.month small,
+.month span {
+  display: block;
+  font-size: 11px;
+  padding: 2px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.trash {
+  overflow: auto;
+  max-height: 200px;
+  margin: 0;
+  padding: 12px;
+}
+.mobileView,
+.mobileLogo {
+  display: none;
+}
+@media (max-width: 899px) {
+  .calendar:has(.editor) .toolbar,
+  .calendar:has(.editor) .controls {
+    display: none;
+  }
+  .sidebar {
+    display: none;
+  }
+  .mobileLogo {
+    display: block;
+  }
+  .toolbar {
+    padding: 14px 12px 6px;
+    gap: 6px;
+  }
+  .toolbar h1 {
+    font-size: 20px;
+  }
+  .toolbar input {
+    width: 130px;
+  }
+  .controls {
+    padding: 8px;
+    gap: 8px;
+  }
+  .controls button {
+    padding: 8px;
+    font-size: 12px;
+  }
+  .mobileView {
+    display: block;
+  }
+  .editor {
+    left: 50%;
+    bottom: 12px;
+  }
+  .block {
+    padding: 5px 3px;
+    font-size: 11px;
+  }
+  .month {
+    gap: 2px;
+    padding: 3px;
+  }
+  .month button {
+    padding: 4px;
+    min-height: 80px;
+  }
+}

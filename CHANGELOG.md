@@ -14,3 +14,12 @@
 - Add pinned toolchain, checks, contributor/security docs and Phase 1 decision records.
 
 The product remains Demo v8. No production migration, deployment or release is implied.
+
+## Phase 3 Calendar (unreleased review)
+
+- Compose responsive Calendar views/editors, quick syntax/presets, linked midnight and
+  timezone-aware moves/resizes with the Phase 2 domain, IndexedDB and Redux projection.
+- Add atomic multi-entity/media commands, reversible Calendar edits and persistent recovery;
+  preserve the v8 demo, original artwork and earlier proof routes.
+- Add domain/storage and browser regressions. Owner acceptance, hosted exact-head checks
+  and physical-device acceptance remain gates; no later-phase port or deployment.
