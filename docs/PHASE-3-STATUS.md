@@ -1,7 +1,6 @@
 # Phase 3 Calendar status and verification
 
-28 October 2026. Local review branch: `codex/phase-3-calendar`. No PR publication,
-merge, deployment, real-data migration or later-phase port was requested/performed.
+28 October 2026. Published for Calendar review in [PR #12](https://github.com/byshriv/Sailor-LogBook/pull/12), branch `codex/phase-3-calendar`. No merge, deployment, real-data migration or later-phase port occurred. See [publication verification](VERIFICATION-PHASE-3.md) and current PR checks for exact-head hosted results.
 
 ## Repository baseline
 

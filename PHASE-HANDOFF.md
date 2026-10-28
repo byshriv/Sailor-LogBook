@@ -1,8 +1,7 @@
 # Phase handoff — Phase 3 Calendar review
 
 Updated 28 October 2026. Scope: Phase 3 only, explicitly requested after Phase 2 merged.
-Calendar implementation is ready for owner review; acceptance and hosted exact-head checks
-remain pending. Do not start Phase 4 or any later port from this handoff.
+Calendar implementation is published for owner review in [PR #12](https://github.com/byshriv/Sailor-LogBook/pull/12). Owner acceptance remains pending; use PR checks and the PR description for current exact-head hosted results. Do not start Phase 4 or any later port from this handoff.
 
 ## Read first
 
@@ -18,8 +17,7 @@ at `7107798b96137a87328204d0db5576a80ecdc5ad`. GitHub independently confirmed ma
 PR #11's merge at that SHA. PR #11's final head `71cefbd1af670fb4b4ee0727da43324794b498aa`
 passed check/android-proof/codeql in run 40631959812. Phase 2 evidence is not Phase 3 CI.
 
-Local review branch: `codex/phase-3-calendar`, with separate local commits for the domain/storage work and Calendar UI/tests/documents. No main mutation, remote publication,
-merge, force push, production deployment, live data migration or cloud mutation occurred.
+Review branch: `codex/phase-3-calendar`, published in PR #12 with separate domain/storage and Calendar UI/tests commits. GitHub tree hashes match the local reviewed trees. The original local history remains on `codex/phase-3-calendar-local`; the active branch tracks the published history. No main mutation, merge, force push, production deployment, live data migration or cloud mutation occurred.
 The v8 root demo, frozen reference, artwork, fonts, dependencies and proof routes remain.
 No Notebook, Home/Reflection, Planner board, Settings, PWA, sync or native feature port began.
 
@@ -59,7 +57,7 @@ Windows; Node 24.22.0/npm 11.19.1; pinned Playwright 1.64.1.
 - Full Chromium/WebKit suite: all 30 checks pass, covering the earlier foundation/Phase 2
   checks plus 16 Calendar checks. The final Calendar-only rerun passed all 16 checks; the final mobile header/dismissal refinement passed both targeted engine checks.
 - Firefox attempted with `--max-failures=1`: one launch failure (`spawn UNKNOWN`), 14 not
-  run. No Firefox application pass is claimed. Hosted Linux execution remains required.
+  run. No Firefox application pass is claimed. Hosted Linux exact-head execution is recorded in PR #12 checks; do not treat this local launcher failure as a hosted application failure.
 - `npm run check`, `npm run format:check`, `npm run scan:secrets` and 37 frozen hashes pass.
 - Ignored build/calendar-desktop.png and build/calendar-mobile.png are review captures.
   Browser JSON/traces stay in ignored build/test-results paths. Only synthetic fixtures used.
@@ -83,7 +81,7 @@ pinch/slider/Ctrl-wheel zoom, dense overlap lanes, second midnight segment movem
 expanded fields, preset quick-add, photo failure handling and desktop proportions against
 v8. This isolated Calendar does not imply owner approval of a complete new app shell.
 Do not mark the Phase 3 exit gate accepted without owner Calendar review. Before any merge,
-publish through ordinary review and pass all required jobs on that exact head. No protection
+pass all required jobs on the exact PR #12 head and complete owner Calendar review. No protection
 or required check was changed or waived.
 
 Review-only media budgets are 8 MiB input, 16M decoded pixels, 2048px / 1 MiB WebP output.

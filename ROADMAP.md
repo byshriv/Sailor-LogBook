@@ -6,7 +6,7 @@
 | 0.1 | Desktop demo, Dropbox, shortcuts/tours, responsive UI, update notice and final v8 Settings fix | done; demo v8, cache slb-v8-r3; 85 tests pass; physical-device limits documented |
 | 1 | Public GitHub foundation: tooling, CI, MIT/docs, tokens, architecture decisions and storage/sync/encryption/widget feasibility spikes | complete; public foundation, clean CI/browser/emulator proofs, reviewed contracts and active main protection verified; see docs/PHASE-1-STATUS.md |
 | 2 | Shared TypeScript domain, React/state architecture, canonical IndexedDB, durable operations, linked-day/overlap rules, Undo/30-day recovery, WebP media and safe demo migration | merged in PR #11 at 7107798; final required checks passed; see docs/VERIFICATION-PHASE-2.md |
-| 3 | Calendar port: views, +deck quick-add, drag and resize | implemented for local Calendar review; owner acceptance and exact-head hosted checks pending; see docs/PHASE-3-STATUS.md |
+| 3 | Calendar port: views, +deck quick-add, drag and resize | published for Calendar review in PR #12; owner acceptance remains pending; exact-head hosted results are in PR checks; see docs/PHASE-3-STATUS.md |
 | 4 | Notebook port: text, drawing, bottles and Sea adventure | planned |
 | 5 | Home and Reflection port: dashboards, streaks and achievements | planned |
 | 6 | Tasks and Planner port: must-do, rollover, statuses and Voyage progress | planned |
