@@ -1,5 +1,7 @@
 # Phase 3 Calendar status and verification
 
+Accepted Phase 3 follow-up — 28 October 2026: the owner explicitly requested Phase 4 and instructed that Phase 3 be recorded as accepted and complete. GitHub confirms PR #12 merged at `327ad8dfac702377e7b77b9c63226cf34af29cff` on 28 October 2026 at 11:32 IST. Fetched local `main` equals `origin/main` at that SHA (zero ahead/behind), and contains PR #12. Final head `86cd491a80f64f895996c3e0ba09f36f1c1088c4` passed check/android-proof/codeql in [run 40640483228](https://github.com/byshriv/Sailor-LogBook/actions/runs/40640483228), including 45 hosted browser checks and 32 foundation tests. Physical-device and later release gates remain unchanged. The review-era report below is historical. Current Phase 4 work is in [Phase 4 status](PHASE-4-STATUS.md).
+
 28 October 2026. Published for Calendar review in [PR #12](https://github.com/byshriv/Sailor-LogBook/pull/12), branch `codex/phase-3-calendar`. No merge, deployment, real-data migration or later-phase port occurred. See [publication verification](VERIFICATION-PHASE-3.md) and current PR checks for exact-head hosted results.
 
 ## Repository baseline

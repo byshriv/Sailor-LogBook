@@ -1,93 +1,100 @@
-# Phase handoff — Phase 3 Calendar review
+# Phase handoff — Phase 4 Notebook and Sea adventure
 
-Updated 28 October 2026. Scope: Phase 3 only, explicitly requested after Phase 2 merged.
-Calendar implementation is published for owner review in [PR #12](https://github.com/byshriv/Sailor-LogBook/pull/12). Owner acceptance remains pending; use PR checks and the PR description for current exact-head hosted results. Do not start Phase 4 or any later port from this handoff.
+Updated 28 October 2026. Scope: Phase 4 only. Branch: `codex/phase-4-notebook`.
+Implementation and local verification are ready for owner review. Do not start Phase 5
+or any later port. No production deployment, real-data cutover or cloud mutation occurred.
 
-## Read first
+## Baseline and accepted phase
 
-LAUNCH-DECISIONS.md remains authoritative. Read docs/PHASE-3-STATUS.md and
-ARCHITECTURE-PHASE-3.md, then LAUNCH-PLAN.md / ROADMAP.md. ADR 0005 and
-VERIFICATION-PHASE-2.md describe the underlying domain/durable pipeline. Earlier ADRs,
-PRODUCT-SPEC.md and migrations/V8-CUTOVER-CONTRACT.md still apply.
+Read this handoff's Phase 3 predecessor, LAUNCH-DECISIONS.md, LAUNCH-PLAN.md, ROADMAP.md,
+docs/PRODUCT-SPEC.md, Phase 2 status/verification and ADR 0005, and Phase 3 architecture,
+status and verification before implementing. The current owner request explicitly accepts
+Phase 3 as complete and authorizes Phase 4 only. That acceptance is now recorded in the
+launch register/plan, roadmap and Phase 3 status/verification.
 
-## Repository baseline and scope
-
-Started clean on main. Fetched origin and verified main == origin/main, zero ahead/behind,
-at `7107798b96137a87328204d0db5576a80ecdc5ad`. GitHub independently confirmed main and
-PR #11's merge at that SHA. PR #11's final head `71cefbd1af670fb4b4ee0727da43324794b498aa`
-passed check/android-proof/codeql in run 40631959812. Phase 2 evidence is not Phase 3 CI.
-
-Review branch: `codex/phase-3-calendar`, published in PR #12 with separate domain/storage and Calendar UI/tests commits. GitHub tree hashes match the local reviewed trees. The original local history remains on `codex/phase-3-calendar-local`; the active branch tracks the published history. No main mutation, merge, force push, production deployment, live data migration or cloud mutation occurred.
-The v8 root demo, frozen reference, artwork, fonts, dependencies and proof routes remain.
-No Notebook, Home/Reflection, Planner board, Settings, PWA, sync or native feature port began.
+Fetched origin and fast-forwarded local main without rewriting history. Verified
+`main == origin/main`, zero ahead/behind, at `327ad8dfac702377e7b77b9c63226cf34af29cff`;
+PR #12's merge is an ancestor. The GitHub connector independently reports PR #12 merged
+at that SHA on 28 October 2026 at 11:32 IST. Its final head
+`86cd491a80f64f895996c3e0ba09f36f1c1088c4` passed check/android-proof/codeql in
+[run 40640483228](https://github.com/byshriv/Sailor-LogBook/actions/runs/40640483228), with
+45 hosted browser checks and 32 foundation tests. Those are Phase 3 results, not Phase 4 CI.
 
 ## Implementation map
 
-- packages/domain/src/calendar.ts: view/date ranges, quick syntax and deck recency,
-  connected overlap groups across logs/plans, clock-derived statuses, midnight bounds,
-  zone-aware rescheduling and explicit DST gap/fold review.
-- packages/domain/src/logbook.ts: additive atomic `putMany`, one reversible relationship
-  set and detached new-command Undo comparisons. Existing commands retain replay semantics.
-- packages/persistence/src/logbook.ts and apps/web/src/logbook-store.ts: snapshot media
-  before the serialized gateway, then use the existing atomic blob/head/tail/receipt commit.
-- apps/web/src/calendar.tsx and calendar.module.css: isolated React Calendar, responsive
-  Day/2/3/4/Week/Month, Menu B/A, presets, task controls, expanded metadata/photos, linked
-  best things, hold/move/resize/edge scroll/zoom, keyboard alternatives and persistent Undo.
-- tests/foundation/calendar.test.ts: six domain/storage regressions.
-- tests/browser/calendar.spec.ts: eight composed-browser regressions, run in each engine.
+- `packages/domain/src/notebook.ts`: lossless page/line views, shared moments, quick syntax,
+  stroke rendering validation, sent history, eligibility, weighted selection and monthly history.
+- `apps/web/src/notebook.tsx`: isolated responsive Notebook/Sea, in-place writing, doodle
+  editor, guarded free canvas, send/Edit, filters, bottle contents, failure drafts and recovery.
+- `apps/web/src/notebook.module.css` and `notebook-art.ts`: scoped cream spread/Patrick Hand,
+  responsive paper, original logo/ship/bottle/sea-card/water geometry and reduced motion.
+- `apps/web/src/main.tsx`: lazy `/?phase=4` entry. The earlier routes remain compatible.
+- `apps/web/src/calendar.tsx`: only a validated date-link initializer for Notebook links.
+- `tests/foundation/notebook.test.ts`: four added domain/durability/migration/replay cases.
+- `tests/browser/notebook.spec.ts`: six added composed cases per browser engine.
 
-Calendar shares `slb-phase2` and `slb-phase2-editor` with the Phase 2 preview. Redux loads
-only verified state and publishes only committed writes. Failed saves retain drafts.
-Pending operations are not acknowledged or compacted by a fake transport. No legacy
-storage reader, service worker or production namespace was added.
+See [architecture](docs/ARCHITECTURE-PHASE-4.md), [status](docs/PHASE-4-STATUS.md) and
+[verification](docs/VERIFICATION-PHASE-4.md) for behavior and evidence boundaries.
 
-Title-only edits keep exact historical segments/zone/offsets. Movement uses the record's
-original zone; unknown context stays unknown. DST gaps/repeated times require explicit
-start/end offsets in More Options. Midnight segments remain one identity; only the real
-outer edges expose resize handles. A pointer ref captures the final position independent
-of React batching. Draft resizing preserves text and commits only with Done. Outside taps
-dismiss an editor without selecting another item. Alt+arrows move; Alt+Shift+arrows resize.
+The port shares `slb-phase2`, the verified Redux projection, existing commands, durable
+gateway, media store and `slb-phase2-editor` Web Lock with Calendar/Phase 2. It introduces
+no schema or command revision. No legacy storage reader, fake transport acknowledgement,
+service worker, fallback database or content collection was added. Existing record IDs,
+unknown fields, attachment references and raw migration archives are preserved.
+
+New drawing previews are derived SVG views of canonical editable strokes. Imported
+raster-only previews still render, and existing digest blobs remain retained/verified.
+No duplicate raster/data-URL preview is added to each new drawing operation. Vector
+drawing therefore works without claiming that native Blob writes work in engines that
+reject them. Photo encoding/storage behavior and its Phase 3 capability checks are unchanged.
 
 ## Local evidence
 
 Windows; Node 24.22.0/npm 11.19.1; pinned Playwright 1.64.1.
 
-- `npm test`: all 85 demo tests pass.
-- `npm run verify:foundation`: typecheck, boundaries, all 32 tests and preview build pass.
-- Full Chromium/WebKit suite: all 30 checks pass, covering the earlier foundation/Phase 2
-  checks plus 16 Calendar checks. The final Calendar-only rerun passed all 16 checks; the final mobile header/dismissal refinement passed both targeted engine checks.
-- Firefox attempted with `--max-failures=1`: one launch failure (`spawn UNKNOWN`), 14 not
-  run. No Firefox application pass is claimed. Hosted Linux exact-head execution is recorded in PR #12 checks; do not treat this local launcher failure as a hosted application failure.
-- `npm run check`, `npm run format:check`, `npm run scan:secrets` and 37 frozen hashes pass.
-- Ignored build/calendar-desktop.png and build/calendar-mobile.png are review captures.
-  Browser JSON/traces stay in ignored build/test-results paths. Only synthetic fixtures used.
+| Check | Result |
+| --- | --- |
+| `npm test` | All 85 existing demo tests pass |
+| `npm run verify:foundation` | Typecheck, boundaries, all 36 tests and production preview build pass |
+| Full Chromium/WebKit browser suite | All 42 checks pass, including 12 Notebook/Sea and 16 Calendar checks |
+| Firefox, `--max-failures=1` | Launcher fails with `spawn UNKNOWN`; 20 checks not run; no application pass claimed |
+| `npm run check` / `npm run scan:secrets` | Pass |
+| `npm run format:check` / `git diff --check` | Pass |
+| `node scripts/freeze-demo.cjs` | All 37 frozen files verified |
 
-The photo regression independently probes native IndexedDB Blob support. Chromium saves,
-reopens, removes and restores exact original bytes. This Windows WebKit build rejects even
-a standalone Blob put with `UnknownError: Error preparing Blob/File data to be stored in
-object store`; its Calendar regression checks clear failure, retained draft and no partial
-write. WebP encoding can also be unavailable in WebKit; neither case silently relabels or
-changes canonical storage. This is a capability limitation, not claimed Safari acceptance.
+The browser suite covers writing/focus, navigation/restart, drawings/Undo/clear/cancel,
+send/Edit, all filters, monthly seen-history/restart, date review, shared best moments,
+quota failure with retained drafts and blocked navigation, single-write retry, the shared
+editor lock and persistent recovery after reload. The foundation suite additionally
+checks exact migrated bytes/media, unknown fields, older-date weighting, month rollover,
+ten-bottle limits and text/drawing causal replay into another synthetic store.
+
+Inspected ignored captures `build/notebook-desktop-chromium.png`,
+`build/notebook-mobile-chromium.png` and `build/sea-desktop-chromium.png`; corresponding
+WebKit captures also exist. Browser reports/traces live in ignored build/test-results paths.
+The last report is the Firefox launcher attempt; full Chromium/WebKit success is in the
+recorded command output. Only synthetic fixtures were used.
+
+Review commits separate domain/storage regressions (`252fbe3`) from UI/browser interactions
+(`565ea8a`); documentation is a third commit. The branch is local and has not been pushed
+or submitted as a PR. No merge, required-check change or deployment is included.
 
 ## Review and continuation
 
-Use `npm run dev:foundation`, then open `http://127.0.0.1:5173/?phase=3`.
-Default `/` is still Phase 1; `/?phase=2` is the storage preview. Close another Phase 2/3
-tab before editing; the shared Web Lock prevents competing editors. No personal backup,
-credentials or live logbook is needed to review the synthetic Calendar.
+Run `npm run dev:foundation`, then open `http://127.0.0.1:5173/?phase=4`.
+Close another Phase 2/3/4 tab before editing. Calendar remains at `/?phase=3`; Notebook
+best links retain the original day. The root legacy demo and frozen reference are unchanged.
 
-Review mobile Menu A/B/keyboard spacing, stationary hold and visible-edge scrolling,
-pinch/slider/Ctrl-wheel zoom, dense overlap lanes, second midnight segment movement,
-expanded fields, preset quick-add, photo failure handling and desktop proportions against
-v8. This isolated Calendar does not imply owner approval of a complete new app shell.
-Do not mark the Phase 3 exit gate accepted without owner Calendar review. Before any merge,
-pass all required jobs on the exact PR #12 head and complete owner Calendar review. No protection
-or required check was changed or waived.
+Review desktop spread/send placement, mobile keyboard/focus and scrolling, real touch/pen
+cancel/lost capture, guard/ink/width/Undo, imported drawings, sent Edit, bottle sizes and
+filters, older-day selection and monthly history. Enter and blur commit lines; page/section
+navigation and Send wait for drafts to save. Free strokes/Undo/clear save on completion;
+line doodles keep Done/Cancel. Failed saves retain drafts. Recent changes offers 30-day
+recovery after restart; retained media/tombstones are not a physical-erasure promise.
 
-Review-only media budgets are 8 MiB input, 16M decoded pixels, 2048px / 1 MiB WebP output.
-Keep original starts unchecked, retains bytes and explains storage/transfer cost. Physical
-phone/Safari/storage-pressure/OS-kill and final empirical budgets remain release gates.
-Synthetic held-pointer events are not physical touch or Safari evidence. Issues #2/#3,
-production cutover/backup UI, optional encryption and transport/epoch safety remain open.
-Keep recovery, pending operations, tombstones and referenced media conservatively. No
-physical erasure or safe downgrade to older code after new commands is promised.
+This isolated feature review does not accept a complete new shell or Phase 4 visuals on
+the owner's behalf. An eventual Phase 4 PR must pass check/android-proof/codeql on its
+exact head before merge. Physical Safari/phone/storage-pressure/OS-kill tests, empirical
+media budgets, production cutover and issues #2/#3 remain release gates. Synthetic replay
+does not certify production synchronization; real transport remains Phase 9. Do not begin
+Home/Reflection, Planner, Settings, PWA or later ports from this handoff.
