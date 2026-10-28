@@ -19,6 +19,7 @@ import type { Bottle, Line, SeaFilter, Stroke } from '../../../packages/domain/s
 import { openLogbook } from '../../../packages/persistence/src/logbook.ts';
 import type { LogbookStore } from '../../../packages/persistence/src/logbook.ts';
 import { createLogbookProjection } from './logbook-store.ts';
+import { GlobalTools } from './management-ui.tsx';
 import styles from './notebook.module.css';
 import logo from '../../../icons/brand-icon.svg';
 import { seaArt, shipArt, bottleArt, waterTexture } from './notebook-art.ts';
@@ -406,6 +407,11 @@ export function Notebook({ projection, db }: { projection: Projection; db: Logbo
       }}
     >
       <header className={styles.header}>
+        <GlobalTools
+          desktopInline
+          projection={projection}
+          blocked={busy || dirty || !!opened || help || recovery}
+        />
         <img src={logo} alt="Sailor Logbook" width="38" height="38" />
         {sea ? (
           <button onClick={() => setSea(false)}>Back to Notebook</button>

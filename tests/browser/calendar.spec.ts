@@ -236,6 +236,13 @@ test('Mobile held ghost resize preserves typed text and commits only on Done', a
   await page.getByLabel('Activity title').fill('Typed ghost');
   const edge = page.locator('[data-draft-edge="end"]');
   await edge.scrollIntoViewIfNeeded();
+  // This case isolates resizing. Keep the handle away from the separate edge-scroll zone.
+  await page.locator('[data-timeline]').evaluate((scroll) => {
+    const handle = scroll.querySelector('[data-draft-edge="end"]')!;
+    const target = handle.getBoundingClientRect(),
+      viewport = scroll.getBoundingClientRect();
+    scroll.scrollTop += target.top - viewport.top - viewport.height / 2;
+  });
   const r = (await edge.boundingBox())!;
   await edge.dispatchEvent('pointerdown', {
     pointerId: 5,

@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import type { Root } from 'react-dom/client';
 import type { Edit, Entity, Task } from '../../../packages/domain/src/logbook.ts';
-import { loggedMinutes } from '../../../packages/domain/src/logbook.ts';
+import { loggedMinutes, wallDate } from '../../../packages/domain/src/logbook.ts';
 import { shiftDate, taskClockStatus } from '../../../packages/domain/src/calendar.ts';
 import { messages, object } from '../../../packages/domain/src/notebook.ts';
 import {
@@ -28,6 +28,7 @@ import {
 } from '../../../packages/domain/src/reflection.ts';
 import { openLogbook } from '../../../packages/persistence/src/logbook.ts';
 import { createLogbookProjection } from './logbook-store.ts';
+import { Avatar, GlobalTools, ManagementMenus } from './management-ui.tsx';
 import { achievementArt } from './reflection-art.ts';
 import { shipArt } from './notebook-art.ts';
 import logo from '../../../icons/brand-icon.svg';
@@ -149,8 +150,18 @@ function Reflection({ projection }: { projection: Projection }) {
   const state = useSyncExternalStore(projection.store.subscribe, projection.store.getState);
   const [clock, setClock] = useState(() => new Date()),
     today = localDate();
-  const [date, setDate] = useState(today),
-    [screen, setScreen] = useState<'home' | 'reflection' | 'review'>('home');
+  const [date, setDate] = useState(() => {
+      const date = new URLSearchParams(location.search).get('date');
+      try {
+        wallDate(date!);
+        return date!;
+      } catch {
+        return today;
+      }
+    }),
+    [screen, setScreen] = useState<'home' | 'reflection' | 'review'>(
+      new URLSearchParams(location.search).get('screen') === 'reflection' ? 'reflection' : 'home',
+    );
   const [undo, setUndo] = useState(''),
     [busy, setBusy] = useState(false),
     [status, setStatus] = useState('Ready · saved on this device');
@@ -851,8 +862,13 @@ function Reflection({ projection }: { projection: Projection }) {
         >
           Reflection
         </button>
+        <ManagementMenus projection={projection} blocked={busy || !!draft} />
       </aside>
       <div className={styles.workspace}>
+        <GlobalTools
+          projection={projection}
+          blocked={busy || !!draft || feature !== null || custom || recovery}
+        />
         <header className={styles.toolbar}>
           <span>{dateLabel(today)}</span>
           <button disabled={busy} onClick={() => setRecovery(true)}>
@@ -878,14 +894,7 @@ function Reflection({ projection }: { projection: Projection }) {
                 ? 'Review'
                 : 'Reflection'}
           </h1>
-          <img
-            src={
-              typeof pref.av === 'string' && /^data:image\/(png|jpeg|webp);base64,/.test(pref.av)
-                ? pref.av
-                : logo
-            }
-            alt=""
-          />
+          <Avatar projection={projection} />
         </header>
         {screen !== 'review' && (
           <label className={styles.date}>
