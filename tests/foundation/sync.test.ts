@@ -433,3 +433,44 @@ test('edit or cancellation after upload keeps receipts pending and never reports
   await assert.rejects(f.apply(await f.preview(), {}, undefined, signal.signal), /interrupted/);
   assert.equal((await b.pending()).length, 1);
 });
+test('featured overflow retains every moment and lets unrelated sync complete before Home selection', async () => {
+  const a = await db(),
+    b = await db(),
+    c = new Cloud();
+  for (const [d, prefix] of [
+    [a, 'a'],
+    [b, 'b'],
+  ] as const) {
+    await d.commit({
+      id: 'moments-' + prefix,
+      at: 1,
+      edit: {
+        type: 'putMany',
+        entities: [1, 2, 3].map((n) => ({
+          kind: 'moment' as const,
+          id: prefix + n,
+          date: '2026-10-29',
+          text: prefix + ' retained ' + n,
+          activity: null,
+          featured: true,
+        })),
+      },
+    });
+  }
+  await sync(a, c);
+  await put(b, 'unrelated', 'keep');
+  const e = new SyncEngine(b, c),
+    p = await e.preview(),
+    plan = e.plan(p);
+  assert.deepEqual(plan.featureReview, ['2026-10-29']);
+  assert.equal(plan.error, '');
+  await e.apply(p);
+  const state = await b.load();
+  assert.equal(Object.values(state.entities).filter((v) => v.kind === 'moment').length, 6);
+  assert.equal(
+    Object.values(state.entities).filter((v) => v.kind === 'moment' && v.featured).length,
+    0,
+  );
+  assert.equal(state.entities['history:unrelated']?.value, 'keep');
+  assert.equal((await b.pending()).length, 0);
+});

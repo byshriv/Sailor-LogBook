@@ -136,7 +136,13 @@ export class SyncEngine {
     };
   }
   plan(p: SyncPreview, choices: Record<string, 'local' | 'cloud'> = {}) {
-    if (!p.cloud) return { state: p.local.state, conflicts: [] as string[], error: '' };
+    if (!p.cloud)
+      return {
+        state: p.local.state,
+        conflicts: [] as string[],
+        error: '',
+        featureReview: [] as string[],
+      };
     const base = p.anchor?.base ?? null;
     const merged = reconcile(
       p.local.state.entities,
@@ -164,6 +170,15 @@ export class SyncEngine {
     }
     const state = structuredClone(p.local.state);
     state.entities = merged.entities;
+    const featured = new Map<string, number>();
+    for (const entity of Object.values(state.entities))
+      if (entity.kind === 'moment' && entity.featured)
+        featured.set(entity.date, (featured.get(entity.date) ?? 0) + 1);
+    const featureReview = [...featured].filter(([, count]) => count > 4).map(([date]) => date);
+    // Preserve every text. The existing Home chooser can feature four after sync;
+    // an overflow cannot block unrelated cloud changes or silently discard a moment.
+    for (const entity of Object.values(state.entities))
+      if (entity.kind === 'moment' && featureReview.includes(entity.date)) entity.featured = false;
     state.tombstones = {
       ...p.anchor?.base.tombstones,
       ...p.cloud.state.tombstones,
@@ -196,7 +211,7 @@ export class SyncEngine {
     } catch (e) {
       error = (e as Error).message;
     }
-    return { state, conflicts: merged.conflicts, error };
+    return { state, conflicts: merged.conflicts, error, featureReview };
   }
   async apply(
     p: SyncPreview,

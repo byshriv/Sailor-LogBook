@@ -367,6 +367,12 @@ export function SyncTools({
       {preview && plan && (
         <Modal title="Dropbox sync preview" close={close}>
           <p role="status">{status}</p>
+          {!!plan.featureReview.length && (
+            <p>
+              All moment text will be retained in Notebook. Choose up to four featured moments in
+              Home after sync for: {plan.featureReview.join(', ')}. Other changes can sync now.
+            </p>
+          )}
           <p>
             Local: {Object.keys(preview.local.state.entities).length} · Dropbox:{' '}
             {Object.keys(preview.cloud?.state.entities ?? {}).length} · Result:{' '}
