@@ -64,3 +64,13 @@ stays unknown. Do not reinterpret it through the importing device's timezone.
 The reader deliberately rejects encrypted and slb-records cloud envelopes. Their later
 readers must unlock/materialize/validate them before the same preview/recovery policy.
 No legacy cloud transport, automatic live-origin migration or lossless downgrade is shipped.
+
+## Phase 9 continuation
+
+Phase 8 accepted by owner instruction on 29 October 2026. Phase 9 uses a separate
+`/sailor-logbook/v2/logbook.json` baseline protocol; it never writes the legacy file.
+The unchanged demo must unlock/materialize its own encrypted record file and export a
+state backup for the existing converter. New clients read legacy metadata revisions and
+require explicit stop-old-writers/latest-backup review when that revision changes. No
+remote retirement or automatic reconciliation of two continuously edited formats is
+claimed. See ../ARCHITECTURE-PHASE-9.md for exact protocol, recovery and remaining gates.

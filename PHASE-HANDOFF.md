@@ -1,125 +1,113 @@
-# Phase handoff — Phase 8 offline, backups and recovery
+# Phase handoff — Phase 9 Dropbox and optional encryption
 
-Updated 28 October 2026. Branch `codex/phase-8-recovery`. Phase 8 implemented for owner
-review at `/?phase=8`; Phase 8 acceptance remains pending. Phase 9 and later ports remain
-gated. No production deployment, real-data cutover, Dropbox connection or main push.
+29 October 2026. Branch `codex/phase-9-sync`. Phase 8 is accepted and complete by
+explicit owner instruction. Phase 9 is implemented for review; acceptance and real
+Dropbox/device exit evidence remain pending. Phase 10 and deployment are not started.
 
-## Acceptance and baseline
+## Read and baseline
 
-The owner's continuation explicitly accepts Phase 7 as complete and authorizes Phase 8
-only. Acceptance is recorded in launch decisions, plan, roadmap, product spec and Phase 7
-status/verification. Earlier review-era pending-acceptance text is historical. The previous
-handoff is retained in [Phase 7 handoff](docs/PHASE-7-HANDOFF.md).
+Read LAUNCH-DECISIONS.md, LAUNCH-PLAN.md, ROADMAP.md, docs/PRODUCT-SPEC.md, earlier
+architecture/ADRs/verification, then docs/ARCHITECTURE-PHASE-9.md,
+docs/PHASE-9-STATUS.md and docs/VERIFICATION-PHASE-9.md. Historical Phase 8 handoff
+is retained at docs/PHASE-8-HANDOFF.md.
 
-Read this handoff, LAUNCH-DECISIONS.md, LAUNCH-PLAN.md, ROADMAP.md, docs/PRODUCT-SPEC.md,
-earlier architecture/ADRs/verification, then the Phase 8 documents before continuing.
-Fetched origin at start and finish. Local `main == origin/main`, zero ahead/behind, at
-`887fcdda9855e6fad62f5c05589110f8b25412aa`, PR #16's merge, with final head
-`e7b77bbfb11429ee48c48ed4a5b8dbebe89cc5af` an ancestor. Merge recorded 23:14:48 IST.
-No hosted Phase 8 result is claimed; Phase 7 acceptance does not substitute for it.
+Fetched origin; fast-forwarded local `main == origin/main`, zero ahead/behind, to
+`df2310d7d6cc9dd09830724fc1d37bcc3ad48007`, PR #17 merge, including final published
+head `9d01b6c09bb9d0275ff83f021e38ed0d10abad34`. PR #17 merge time is 29 October
+2026 00:15:20 IST. Owner README.md/DEPLOY.md edits remain intact and excluded.
+No real account/data, production migration, publication, deployment or native work.
 
-README.md and DEPLOY.md retain the exact pre-existing owner changes and remain uncommitted.
-They are excluded from Phase 8 commits. All 37 frozen reference files and the root demo
-remain unchanged. Phase 13 final owner review and Phase 14 deployment gates remain.
+## Review map
 
-## Implementation map
+- `packages/sync-providers/src/dropbox.ts`: injected real HTTP port, PKCE/state/code
+  exchange, exact-revision or create-only upload, metadata check of unchanged legacy file.
+- `packages/sync-core/src/reconcile.ts`: conservative three-way entity/field merge.
+- `packages/crypto/src/content.ts`: Argon2id/AES-GCM full-content codec, independent
+  wrappers, version/checksum recovery code, session unlock. Existing Phase 1 proof untouched.
+- `packages/persistence/src/logbook.ts`: durable upload intent/anchor/acknowledgement,
+  encryption policy, retained cloud sources, reviewed rejoin archive. No schema upgrade.
+- `apps/web/src/sync-engine.ts`: verified preview/recovery/merge/CAS/read-back composition.
+- `sync-tools.tsx`: Settings connect/preview/conflict/recovery-kit/unlock/Lock/Disconnect,
+  encrypted backup and independent backup unlock, minute checks, backup-verified device rejoin.
+- Existing DataTools accepts verified decrypted backups and exposes retained Dropbox
+  copies for recovery. Parent guards keep sync/data previews separate from active drafts.
 
-- `packages/persistence/src/backup.ts`: version 1/schema 2 plaintext backup, whole payload
-  and media verification, existing v8 converter, read-only preview, Merge/Replace planning,
-  collision/deletion choices, revalidation and stale-preview checks.
-- `packages/persistence/src/logbook.ts`: expected-baseline commit guard, recovery read-back
-  before mutation, media-verified recovery snapshots and explicit damaged-store rescue with
-  retained forensic history. Existing causal commands remain unchanged.
-- `apps/web/src/data-tools.tsx`, `recovery-screen.tsx`: Settings tools, previews, quota retry,
-  recovery/health and startup forensic export/rescue. Projection adds db/refresh composition.
-- `apps/web/src/pwa.tsx`, `scripts/production-pwa.cjs`: production browser bootstrap,
-  original-icon manifest, complete artifact cache, waiting update/status and owned cleanup.
-- `main.tsx`: Phase 8 route and production browser root. Existing Capacitor proof/default
-  native entry stays Phase 1, with no web worker registration. No Phase 10 port.
-- Foundation/browser/PWA tests, standalone PWA config/script, and CI PWA check after build.
+Review: `npm run dev:foundation`, then
+`http://127.0.0.1:5173/?phase=9&tool=help#sync` with disposable synthetic profiles.
+All earlier phase routes and original demo/reference remain. Production browser root
+includes these Settings tools; native proof entry is unchanged.
 
-See [architecture](docs/ARCHITECTURE-PHASE-8.md), [status](docs/PHASE-8-STATUS.md),
-[user guide](docs/PHASE-8-DATA-GUIDE.md) and [verification](docs/VERIFICATION-PHASE-8.md).
-All accepted screens retain the same schema 2 store, media pipeline and editing Web Lock.
+## Important behavior
 
-## Reviewable interactions and limits
+Ordinary sync works first without encryption setup. Production namespace is
+`/sailor-logbook/v2/logbook.json`; the old `/sailors-logbook.json` is never changed.
+Configure a real public App Folder app key and exact callback before live testing;
+see architecture for scopes/redirect. No credentials or new app registration supplied.
+Browser tokens/keys are memory-only; reload/navigation requires reconnect/unlock.
+No background sync while closed; minute checks are open-Settings previews only.
 
-Settings → Storage & data provides explicitly labelled plaintext download, file preview,
-Merge/Replace, per-ID collision choices, manual point, health/list and confirmed restore.
-Selecting/cancelling writes nothing. Invalid combined references/featured limits block Apply.
-Legacy exclusions/orphan references require explicit review; exact source/unknown fields stay
-archived. Missing/future/corrupt files fail closed. Source and baseline are checked again at
-Apply; recovery, blobs, head, receipt and tail commit atomically. Failure retains the preview.
+The wire uses complete verified baselines, not remote operation-tail replay. Local
+commands/receipts remain durable and pending until verified cloud read-back and an
+atomic local acknowledgement. No automatic compaction. Whole backup limit 64 MiB,
+encrypted wire 96 MiB; memory-based transfer is not a proven mobile budget.
 
-Backups include full current state and all retained media without recompression. Whole-file
-transfer is provisionally limited to 64 MiB and uses memory; larger files are rejected without
-trimming content. Imported trash/tombstones/history stay in the complete source archive rather
-than impersonating local causal operations. Existing local recovery/trash/media remain retained.
-Downloads cannot prove disk writes; verify the actual file with Preview import. Encryption/key
-setup and Dropbox remain Phase 9. No production key policy is configured or downgraded here.
+Two nonempty copies require preview. Conflicts/deletion barriers and relationship
+errors block apply. Every merge verifies local recovery and retains the incoming copy
+before mutation. Interrupted uploads never report Synced on response/timeout alone.
+A byte-exact reread can recover an uncertain successful upload. CAS/local changes
+retain pending work. Retained cloud alternatives are recoverable through Storage & data.
+Archives deduplicate instead of nesting on every alternating-device sync.
 
-Five ordinary local points share browser storage and do not replace an external copy. Healthy
-restore is a causal recover command plus pre-restore point; referenced media hashes must verify.
-A damaged Phase 8 startup offers forensic retained-store export and verified snapshots. Explicit
-rescue archives every damaged store before creating a new actor/baseline; it never acknowledges
-or uploads old operations. **Phase 9 must treat rescue as a new local generation requiring
-join/review.** No valid point means retain/export data for manual recovery, never auto-clear.
+Legacy revision changes require stop-old-writers/import-latest-backups confirmation;
+a change during transfer prevents acknowledgement. Export materialized state from the
+unchanged demo (unlock there if encrypted), then use the existing v8 import preview.
+Offline old writers cannot be remotely retired. Unknown versions fail closed.
 
-Production uses a dedicated secure origin, separate from Demo v8. Dev registers no worker.
-All screen chunks/fonts/icons are precached. No skipWaiting/claim/forced reload: save drafts,
-close **all controlled old tabs/windows**, then reopen to activate a waiting update. A failed
-required-asset install retains the active shell. Cache cleanup touches only owned production
-caches; unknown/demo workers are refused. No database migration was introduced. Future schema
-rollback still requires explicit compatibility checks; frontend rollback is not a DB downgrade.
+Phase 8 rescue starts a new actor and clears sync continuity. Rescued/stale copies
+must join/review, including tombstone conflicts. Missing/changed known cloud generations
+never automatically recreate cloud data. Review device join requires a matching external
+backup, verified local point and typed JOIN; it archives old journal/keeps pending work.
+Encryption policy survives ordinary rejoin and prevents silent plaintext fallback.
 
-Browser install UI/persistence/estimates/notifications vary. OS clearing, unsaved OS-kill loss,
-physical Safari/phone/storage-pressure, keyboard/insets, empirical media budgets, independent
-accessibility/security review and existing #2/#3 gates remain. No cloud/native/device pass or
-audit is inferred from headless tests. Required hosted check/android-proof/codeql and separate
-CodeQL results must pass on a published PR's exact final head before merge.
+Recovery setup requires actual saved-code reentry and cryptographic verification before
+policy persistence. New encrypted backups are the recommended default; plaintext export
+stays explicit. Old encrypted backup files can unlock independently without Dropbox.
+Local IndexedDB, recovery sources and prior plaintext provider versions remain plaintext.
+Lock forgets session key; Disconnect forgets provider token; neither erases local data.
+No diagnostics/telemetry containing content, credentials or keys is added.
 
-## Verification and continuation
+## Remaining Phase 9 and release work
 
-Use synthetic fixtures/disposable profiles only. Exact commands/results and corrected fixture
-findings are recorded in docs/VERIFICATION-PHASE-8.md. Local Firefox currently fails before
-application launch with Windows `spawn UNKNOWN`; no Firefox application pass is claimed.
-Chromium/WebKit native media capability tests retain their explicit failure paths.
+Do not declare the Phase 9 launch gate complete. Real two-device Dropbox consent,
+app-folder permissions/CORS, expiry/offline/races and owner interaction review remain.
+Physical Android/Safari/WASM/memory/storage and independent security review are unverified.
+Local Firefox previously fails before app launch; record fresh verification honestly.
 
-Data-tool review: `npm run dev:foundation`, then `http://127.0.0.1:5173/?phase=8`.
-Offline review: `npm run build:foundation`, then
-`npx vite preview apps/web --outDir ../../build/foundation --host 127.0.0.1 --port 5175`.
-Use `http://127.0.0.1:5175/?phase=8&tool=help` to bypass empty-store setup for review.
-`npm run test:pwa` requires the build first and tests a disposable localhost origin. It
-stages test releases in the ignored build and restores files in finally; no deployment.
+Passphrase/recovery/content-key rotation UI and lost-device workflows are not implemented.
+Delete everywhere/local erase are not shipped; erasure must prove generation barriers and
+partial failures before making stale-device guarantees. Trusted native Android unlock
+requires the later Phase 10 adapter; no Keystore/trust behavior is simulated here.
+Full-screen automatic scheduling/large streaming transfers are also not implemented.
+Continue Phase 9 review/gaps only. Phase 13 owner review and Phase 14 deployment remain.
 
-Continue Phase 8 review/fixes only. Do not start Phase 9, connect Dropbox, activate production
-migration, erase owner data, publish/merge/deploy or change native platform scope without
-appropriate authorization. Owner visual/interaction acceptance is still needed for this phase.
+Final local command outcomes and review commits follow in docs/VERIFICATION-PHASE-9.md.
+No hosted CI, live-device pass or independent audit is inferred from local tests.
 
 ## Final local review record
 
-Review commits: `272fbf8` (backup/import/recovery persistence and 11 regressions),
-`9625445` (PWA/data UI, browser/production tests and CI), followed by the documentation
-commit containing this handoff. Commits are local; no PR was created or pushed.
+Source review commits: `8a4be8c` core, `7a872c5` guarded UI/browser flows, `7102eb7`
+featured-overflow preservation. Documentation follows. Local only; no PR/push/deploy.
+Final fetch: main and origin/main remain equal at `df2310d`.
 
-Final local evidence: all 85 unchanged demo tests; all 68 foundation tests; typecheck,
-boundaries and production build; full Chromium/WebKit suite 102 pass/zero skips; final
-Phase 8 follow-up 8 pass; production PWA 2 pass. Formatting, whitespace, narrow secret
-scan and all 37 frozen hashes pass. Firefox remains a pre-launch Windows failure.
-Full and final focused browser reports are retained under ignored `build/`; see verification.
+Evidence: 85 foundation and 85 unchanged demo tests; 110-case full Chromium/WebKit run;
+after the narrow overflow follow-up, eight focused sync browser checks and both final
+production PWA checks pass. Typecheck, boundaries, formatting, whitespace, narrow secret
+scan and all 37 frozen hashes pass. Firefox remains a pre-launch Windows spawn failure.
+Exact commands, artifact hashes, separate full/focused reports and unresolved platform /
+security limits are in docs/VERIFICATION-PHASE-9.md. Current worker cache:
+`slb-production-2bf69b6973e020b2`. No artifact was promoted.
 
-The tested final shell cache is `slb-production-ffe8e2dd6d2e0ae9`. No production artifact
-was promoted. Only README.md and DEPLOY.md should remain modified after these commits.
-
-## Draft publication follow-up
-
-Published at the owner's next-step request in [draft PR #17](https://github.com/byshriv/Sailor-LogBook/pull/17).
-The three published full trees exactly match the tested local storage, UI/PWA and documentation
-snapshots; see the verification table. Original history is retained on
-`codex/phase-8-recovery-local`; the active branch tracks the published history. README/DEPLOY
-owner edits remain uncommitted and excluded. No terminal credentials, force push, main push,
-merge, real-data cutover or deployment was used. Phase 8 owner acceptance remains pending.
-
-This publication record also requires fresh checks on its final head. Use PR #17 checks and
-description for the exact revision/run results; earlier local or hosted runs do not substitute
-for a later revision. Phase 9 and later ports remain gated.
+Shared deletion barriers survive empty joins and same-generation rollback requires review.
+When combined featured moments exceed four, every text is retained in Notebook and that
+day becomes unfeatured for the existing Home chooser; unrelated sync continues.
+README.md and DEPLOY.md should be the only dirty files after documentation is committed.

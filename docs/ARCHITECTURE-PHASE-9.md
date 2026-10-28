@@ -1,0 +1,149 @@
+# Phase 9 — Dropbox, joining and optional encryption
+
+29 October 2026. Base: PR #17 merge `df2310d`, including `9d01b6c`. Phase 8
+accepted by owner instruction. Only Phase 9 is authorized. No deployment, personal
+data, live Dropbox consent or Phase 10 native work occurred.
+
+## Composition
+
+`/?phase=9&tool=help#sync` opens Settings with Dropbox synchronization. Earlier
+routes/screens, domain schema 2, `slb-phase2`, editor Web Lock, Redux projection,
+media pipeline, operation receipts and recovery tools remain. Production browser
+root includes the same tools; native entry remains the existing proof. README and
+DEPLOY owner diffs are excluded. No frozen demo files change.
+
+`packages/sync-providers/src/dropbox.ts` injects HTTP/token access and implements
+PKCE S256 and Dropbox download/upload with create-only or the caller's exact `rev`.
+No autorename, force overwrite, fresh-revision substitution or token persistence.
+The callback verifier/state live in tab session storage for at most ten minutes;
+callback processing consumes them and removes code/state from the address bar.
+Access tokens and nonextractable content keys live in memory. Reload/navigation
+requires reconnection. Browser public clients request short-lived online access;
+there is no browser refresh-token flow or embedded client secret.
+
+Configure a public **App Folder** Dropbox app key through
+`VITE_DROPBOX_APP_KEY` or the review field. Register the exact secure-origin callback
+`/?phase=9&tool=help`, and grant `files.content.read`, `files.content.write` and
+`files.metadata.read`. App registration/permissions and a real two-device rehearsal
+must be verified before accepting production readiness. No app was registered here.
+
+API references checked during implementation:
+[Dropbox OAuth](https://docs.dropboxapi.com/dropbox-api/docs/oauth),
+[upload revision semantics](https://docs.dropboxapi.com/dropbox-api/api-reference/user-endpoints/files/upload).
+
+## Transport and durable operations
+
+Production exclusively writes `/sailor-logbook/v2/logbook.json`; it never writes,
+renames or deletes `/sailors-logbook.json`. Manifest format `slb-sync`, protocol and
+reader floor 2, random generation, explicit plain/encrypted mode, optional wrappers
+and complete backup payload. Unknown versions fail closed. A known generation
+disappearing/changing never causes automatic cloud recreation.
+
+This first transport deliberately uses **complete verified baselines**, rather than
+replaying another device's local causal commands. Each local mutation still uses
+the existing durable command/receipt pipeline. A merged baseline becomes one
+recover command with expected-state protection and Undo. Local pending operations
+remain until their represented state has been uploaded and verified. Nothing calls
+checkpoint automatically. This does not establish cross-device operation-tail
+compaction interoperability or use the Phase 1 fake envelope as a production format.
+
+The app composition `sync-engine.ts` joins framework-independent provider, crypto,
+merge and persistence ports. `sync-core/reconcile.ts` has no domain/browser imports.
+It compares local/cloud entities against this device's last verified baseline.
+Independent top-level field changes merge; arrays/opaque nested fields conflict.
+Delete versus edit conflicts require a choice. A first join checks tombstone
+barriers even without a shared baseline. Safe deletion from a known baseline stays
+deleted on a stale device. Relationships validate before apply. If combining copies
+produces more than four featured moments on a day, every text remains in Notebook
+and all moments for that day become unfeatured pending the existing Home chooser.
+The preview asks the user to choose up to four after sync; unrelated changes continue.
+Source recovery retains both original selections. No moment text is discarded.
+
+Foreign deletion barriers travel in the verified shared payload and durable anchor,
+separately from the unchanged local actor's reducer/tombstones. An empty joining device
+preserves those barriers in its next upload. Live content crossing any known deletion
+barrier requires explicit review, including a Dropbox historical rollback under the same
+generation. The upload intent retains the shared baseline for interrupted acknowledgement
+recovery. This preserves old operation replay semantics without allowing an empty join
+to remove shared deletion history. Ordinary local backups retain local causal history;
+the incoming cloud source/anchor separately retain foreign barriers.
+
+Every apply re-reads Dropbox, re-creates/compares the preview, checks local actor/state,
+verifies a media-complete local recovery point, and retains the verified incoming
+backup in unaged `migration` records keyed by payload digest. Those cloud copies
+retain remote trash, opaque history and conflict alternatives without pretending
+their local causal receipts belong to this device. Review retained Dropbox copies
+in Storage & data to preview/recover them. Ordinary backups cover current state and
+all retained blobs; retained incoming snapshots are separately recoverable and are
+also included in the retained-store forensic export. They are not aged out here;
+quota failure aborts further merging. Distinct opaque archives use a deduplicated,
+sorted set so alternating devices cannot recursively nest archives every sync.
+
+A durable sync journal records exact upload bytes, represented local baseline,
+included pending IDs, actor and generation **before** the revision-checked upload.
+After upload, a second download must match both returned revision and exact bytes.
+Payload/media are validated again. A serialized local transaction checks actor and
+state and atomically records the anchor plus acknowledgements. Only then may UI show
+Synced, and later local edits invalidate that status. Cancellation, read-back failure,
+CAS races, quota and expired auth keep operations pending. An uncertain successful
+upload can recover its receipt from byte-exact read-back after restart; a timeout
+alone cannot acknowledge anything. No blind automatic overwrite/retry loop exists.
+
+Sync is manual by default. Optional minute checks run only on this open Settings
+screen, stop for drafts/modals and open a preview. They never apply a nonempty merge
+without review. There is no closed-app/background transfer guarantee. Other screens
+continue local editing; they do not secretly sync. Parent draft/navigation guards and
+mutual data-tool/sync busy guards protect active drafts. Closing/OS killing an unsaved
+draft still has the documented browser limitations.
+
+## Keys and backups
+
+`crypto/content.ts` uses pinned hash-wasm Argon2id (19,456 KiB, two iterations, one
+lane, 16-byte salt) and WebCrypto AES-256-GCM. Fresh 256-bit master and recovery secret,
+independent passphrase/recovery wrappers and random 96-bit nonces. An allowlisted KDF
+identifier prevents attacker-selected memory/iteration costs. Content AAD binds format,
+logbook generation and the complete wrapper setup/key ID. Ciphertext includes all
+backup content/media, not only selected text fields. Wrong secrets and tampering fail.
+
+The recovery file and printable, versioned/checksummed code represent the same random
+secret. Users must save/print and re-enter it; an encrypt/decrypt probe proves it unlocks
+the same key before wrappers are persisted. Wrappers/encryption policy stay in local
+metadata independently of the session key. Configured/previously encrypted copies fail
+closed while locked. No secret is uploaded in plaintext or added to diagnostics.
+
+Configured users are directed to encrypted backup download by default; plaintext export
+remains explicitly labelled. Encrypted backup selection decrypts/verifies before entering
+the existing Phase 8 Merge/Replace preview. Backups carry their own wrappers, so older
+backups can unlock with their original passphrase/recovery code without Dropbox or a
+current session key. Unlocking an old backup does not replace current sync key policy.
+
+Lock forgets this tab's key; it does not encrypt/hide IndexedDB or clear local content.
+Disconnect only forgets this tab's provider token. No local/cloud erasure flow is shipped.
+Passphrase/recovery/content-key rotation UI, lost-device revocation and Delete everywhere
+remain unimplemented security requirements, not implied guarantees. The code refuses
+unreviewed remote generation changes; explicit device rejoin needs a matching external
+backup, verified local recovery, typed JOIN and retained old sync journal. Encryption
+policy remains enforced. Phase 8 damaged-store rescue clears sync metadata and creates
+a new actor; returning rescued data always enters first-join/tombstone review.
+
+## Compatibility and limits
+
+Legacy metadata revision is read on preview, before upload and after read-back.
+A first/new legacy revision requires explicit confirmation that old writers stopped and
+their latest verified backups were reviewed/imported. A change during transfer prevents
+acknowledgement. The unchanged demo exports its materialized state, including when its
+cloud file is encrypted; use that export through Phase 8's v8 converter. New transport
+never interprets legacy encrypted/record envelopes as empty state or rewrites them.
+There is no automatic cross-format live reconciliation. Offline old browsers cannot be
+remotely retired; collect each one's unsynced export, stop both-way editing, then review.
+
+Whole-file backup limit is 64 MiB; encrypted wire limit 96 MiB including base64 overhead.
+Transfers are memory based and include retained media. No streaming/large-logbook or mobile
+memory budget is claimed. Metadata, lengths, account and timings remain visible. Earlier
+plaintext Dropbox versions/downloads are not retroactively protected. IndexedDB/recovery
+archives are plaintext. JS/runtime copies cannot be guaranteed securely erased.
+
+This is an independently implemented protocol/codec using vetted primitives, not an
+independent audit. Real Dropbox grant/expiry/CORS/app-folder scope, real network races,
+physical Android/Safari resources, Firefox and secure native key storage still require
+actual evidence. No Keystore adapter or native trust is simulated. Phase 10 is unstarted.
