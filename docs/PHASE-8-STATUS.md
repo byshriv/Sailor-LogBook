@@ -1,8 +1,8 @@
 # Phase 8 status
 
-Implemented for review on `codex/phase-8-recovery` at `/?phase=8`, after owner acceptance
-of Phase 7 and verified merge PR #16 at `887fcdd`. Phase 8 owner acceptance is pending.
-Phase 9 and later ports remain unstarted. No deployment, cloud connection or real-data cutover.
+Accepted and complete by owner instruction on 29 October 2026 after merged PR #17
+at `df2310d`. The review surface remains `/?phase=8`. Phase 9 only is now authorized;
+see [Phase 9 status](PHASE-9-STATUS.md). No deployment or real-data cutover occurred.
 
 Production offline shell/update waiting, plaintext versioned backups, Merge/Replace preview,
 legacy backup review, verified pre-import points, local restore, damaged-store rescue and
@@ -22,3 +22,11 @@ pressure/eviction/OS-kill and interrupted-browser tests with owner data rehearsa
 media/transfer budgets; independent accessibility/security reviews and existing #2/#3 gates.
 WebKit Blob restrictions and Windows Firefox launch limits must remain explicit. Browser mocks,
 headless engines and synthetic fixtures cannot satisfy these device/owner gates.
+
+## Acceptance — 29 October 2026
+
+Phase 8 is accepted and complete by explicit owner instruction. PR #17 merged as
+`df2310d7d6cc9dd09830724fc1d37bcc3ad48007`, including its final published head
+`9d01b6c09bb9d0275ff83f021e38ed0d10abad34`. Fetched local main equals origin/main,
+zero ahead/behind. Phase 9 only is authorized. Historical pending-acceptance text
+above is superseded; earlier physical-device limits remain documented.

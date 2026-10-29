@@ -119,3 +119,9 @@ credentials, force push, main push, merge or deployment occurred. This publicati
 needs all required jobs and separate CodeQL results on its own final head. Consult PR #17's
 checks/description for the exact result; pending jobs are not a hosted pass. Draft publication
 does not accept Phase 8 or authorize Phase 9, deployment or a merge.
+
+## Owner acceptance — 29 October 2026
+
+Phase 8 is accepted and complete by explicit owner instruction after PR #17 merged
+as `df2310d7d6cc9dd09830724fc1d37bcc3ad48007`. This acceptance does not invent new
+hosted/device results or waive Phase 9's own exit gates. See PHASE-9-STATUS.md.

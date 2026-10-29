@@ -7,6 +7,7 @@ import type { LogbookStore } from '../../../packages/persistence/src/logbook.ts'
 
 // Composition seam for later screens; Redux only publishes committed IndexedDB state.
 export async function createLogbookProjection(db: LogbookStore, schedule: () => void) {
+  const durability = new EventTarget();
   const projection = createSlice({
     name: 'logbook',
     initialState: blankLogbook(),
@@ -17,10 +18,18 @@ export async function createLogbookProjection(db: LogbookStore, schedule: () => 
   const pipeline = new OperationPipeline(
     db,
     (state) => store.dispatch(projection.actions.durable(state)),
-    schedule,
+    () => {
+      durability.dispatchEvent(new Event('saved'));
+      schedule();
+    },
   );
   return {
     db,
+    onDurable: (listener: () => void) => {
+      durability.addEventListener('saved', listener);
+      return () => durability.removeEventListener('saved', listener);
+    },
+    erasure: await db.erasureStatus(),
     refresh: async () => store.dispatch(projection.actions.durable(await db.load())),
     store,
     pipeline,

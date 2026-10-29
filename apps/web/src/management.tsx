@@ -1,5 +1,6 @@
 import { RecoveryScreen } from './recovery-screen.tsx';
 import { DataTools } from './data-tools.tsx';
+import { SyncTools } from './sync-tools.tsx';
 import React, { useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import type { Root } from 'react-dom/client';
 import type { Deck, Edit, Json, Preset } from '../../../packages/domain/src/logbook.ts';
@@ -128,6 +129,7 @@ function Management({ projection }: { projection: Projection }) {
   const [welcome, setWelcome] = useState(() => {
       const route = new URLSearchParams(location.search);
       return (
+        !projection.erasure &&
         !Object.keys(state.entities).length &&
         !['tour', 'tool', 'new', 'editDeck', 'editPreset', 'deck'].some((key) => route.has(key))
       );
@@ -145,9 +147,12 @@ function Management({ projection }: { projection: Projection }) {
     [priorities, setPriorities] = useState<string[]>(['home']);
   const saving = useRef(false),
     initial = useRef(false);
+  const [syncActive, setSyncActive] = useState(!!projection.erasure),
+    [dataActive, setDataActive] = useState(false);
+  const [decrypted, setDecrypted] = useState<{ raw: string } | null>(null);
   const dirty =
     !!deck || !!preset || panel === 'profile' || panel === 'preferences' || welcome || !!remove;
-  const blocked = busy || dirty || !!inspect || !!panel;
+  const blocked = busy || dirty || !!inspect || !!panel || syncActive || dataActive;
   useEffect(() => {
     const before = (e: BeforeUnloadEvent) => {
       if (dirty || saving.current) e.preventDefault();
@@ -371,6 +376,7 @@ function Management({ projection }: { projection: Projection }) {
           Search settings
           <input
             value={query}
+            disabled={syncActive || dataActive || busy}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Profile, decks, reminders, help…"
           />
@@ -542,8 +548,26 @@ function Management({ projection }: { projection: Projection }) {
                   Request persistent storage
                 </button>
               </div>
-              <DataTools projection={projection} blocked={blocked} />
+              <DataTools
+                projection={projection}
+                blocked={busy || dirty || !!inspect || !!panel || syncActive}
+                onActive={setDataActive}
+                decrypted={decrypted}
+              />
             </section>
+          )}
+          {show(
+            'capabilities platform sync dropbox encryption widgets install ios android sound haptics',
+          ) && (
+            <SyncTools
+              projection={projection}
+              blocked={busy || dirty || !!inspect || !!panel || dataActive}
+              onActive={setSyncActive}
+              onBackup={(copy) => {
+                setQuery('');
+                setDecrypted(copy);
+              }}
+            />
           )}
           {show(
             'capabilities platform sync dropbox encryption widgets install ios android sound haptics',
@@ -572,17 +596,16 @@ function Management({ projection }: { projection: Projection }) {
                 .
               </p>
               <p>
-                Dropbox transport and existing-logbook joining arrive in Phase 9. Ordinary sync
-                comes first, with no encryption setup required.
+                Dropbox is optional. Review both copies in Dropbox synchronization before joining.
+                Ordinary sync works without encryption setup.
               </p>
               <details>
-                <summary>Optional encryption (later)</summary>
+                <summary>Optional encryption</summary>
                 <p>
-                  Secondary cloud/backup protection, implemented in Phase 9. This review does not
-                  encrypt content. Unencrypted Dropbox content can be read by Dropbox. Browser
-                  unlock will be session-only; trusted Android unlock requires platform protection.
-                  Lock, Disconnect, Erase local and Delete logbook everywhere are distinct later
-                  flows.
+                  Secondary cloud/backup protection is available in Dropbox synchronization.
+                  Unencrypted Dropbox content can be read by Dropbox. Browser unlock is
+                  session-only; trusted Android unlock requires platform protection. Lock,
+                  Disconnect, Erase local and Delete logbook everywhere are distinct actions.
                 </p>
               </details>
             </section>
@@ -1111,9 +1134,9 @@ function Management({ projection }: { projection: Projection }) {
           <Modal title="Bring your logbook aboard" close={close}>
             <p>
               Use the same Dropbox account as your other device, or restore a local backup. Use
-              Backup and recovery in Storage & data to preview a local file. Dropbox joining arrives
-              in Phase 9. No connection is made here. Your existing data stays on its current device
-              and in the demo.
+              Backup and recovery in Storage & data to preview a local file. Close this guide and
+              open Dropbox synchronization to connect and review both copies. Retire old demo
+              writers and import their latest backups separately; the old file is preserved.
             </p>
             <button onClick={close}>Back to Settings</button>
           </Modal>

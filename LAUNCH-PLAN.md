@@ -1,14 +1,14 @@
 # Sailor Logbook — open-source 1.0 launch plan
 
-## Current acceptance — Phase 8 continuation
+## Current acceptance — Phase 9 continuation
 
-Phase 7 is accepted and complete by explicit owner instruction on 28 October 2026.
-Fetched local `main == origin/main` (zero ahead/behind) at
-`887fcdda9855e6fad62f5c05589110f8b25412aa`, the PR #16 merge, including final head
-`e7b77bbfb11429ee48c48ed4a5b8dbebe89cc5af`. Phase 8 only is authorized.
-Phase 9 and later ports, real-data cutover and deployment remain gated.
+Phase 8 is accepted and complete by explicit owner instruction on 29 October 2026.
+Fetched origin and fast-forwarded local `main == origin/main`, zero ahead/behind,
+at `df2310d7d6cc9dd09830724fc1d37bcc3ad48007`, PR #17's merge, including final
+head `9d01b6c09bb9d0275ff83f021e38ed0d10abad34`. Only Phase 9 is authorized.
+Implementation/review status: [Phase 9](docs/PHASE-9-STATUS.md). Phase 10+, real-data
+cutover and deployment remain gated. Earlier pending-acceptance text is historical.
 
-Earlier review-era status below is historical where it differs.
 
 Planning baseline: 27 October 2026; execution updated 28 October 2026. Owner: **byshriv**.
 Public repository: [byshriv/Sailor-LogBook](https://github.com/byshriv/Sailor-LogBook) (the
@@ -58,8 +58,8 @@ The demo remains **Demo v8**, with final cache revision `slb-v8-r3`. The final S
 | 5 | Home and Reflection port: bento composition, greeting, progress, moods, streaks, achievements, review, sharing and customization. | All metrics match agreed rules; responsive layout and ordering are stable. | Accepted and complete by owner instruction; PR #14 merged as 5792285; final hosted run 40682341891 passes required jobs and separate CodeQL results |
 | 6 | Tasks/Planner port: day columns, moves, timed/untimed tasks, Must-do, rollover/skipped states, Waiting on, Low energy and Voyage progress. | No duplicate/lost tasks after moves, rollover, drag cancellation or date changes. | Accepted and complete by owner instruction; PR #15 merged as 9debb35 |
 | 7 | Settings/profile/deck/preset management, onboarding, normal and keyboard walkthroughs, reminders, global search, accessibility and platform-specific capability copy. | Every setting persists correctly; no replayed animations or dead controls; optional flows are understandable. | Accepted and complete; PR #16 merged as 887fcdd |
-| 8 | Production PWA/offline/update behavior, versioned backups, export/import, local recovery and storage health. | Install/offline/reopen/update/restore works with real data and active drafts; upgrade failure leaves a recoverable version. | Implemented for review at /?phase=8; see docs/PHASE-8-STATUS.md; physical/owner acceptance pending |
-| 9 | Production Dropbox operation transport, optional full-content encryption after initial sync, guided key/recovery setup, first-device join, conflict review and mixed-version migration. | Real multi-device, race, expiry, offline, recovery and encryption scenarios pass; no false Synced status. | Planned; architecture starts in Phases 1–2 |
+| 8 | Production PWA/offline/update behavior, versioned backups, export/import, local recovery and storage health. | Install/offline/reopen/update/restore works with real data and active drafts; upgrade failure leaves a recoverable version. | Accepted and complete by owner instruction; PR #17 merged as df2310d; physical platform limits stay documented |
+| 9 | Production Dropbox operation transport, optional full-content encryption after initial sync, guided key/recovery setup, first-device join, conflict review and mixed-version migration. | Real multi-device, race, expiry, offline, recovery and encryption scenarios pass; no false Synced status. | Implemented for review; live-account/device/security exit evidence pending; see docs/PHASE-9-STATUS.md |
 | 10 | Android Capacitor shell, app links/OAuth return, native reminders, secure unlock, backups and required native widgets; GitHub Actions signed APK builds. | APK installs/upgrades and both widgets work on real Android devices, including offline and process restart. | Required for 1.0 |
 | 11 | Dedicated owner-led UI refinement, bug fixing and release hardening: browser/device matrix, accessibility, performance, storage stress, dependency/security review and soak tests. | Owner accepts the experience; no unresolved release blockers or known broken required flows. | Planned; feedback tracked throughout all phases |
 | 12 | Launch documentation, MIT/third-party notices, privacy/security/support material, repository polish, migration guide and signed release assets. | Fresh contributor can build; user can install, recover data and report issues; all links/assets are real. | Planned |
@@ -274,4 +274,4 @@ Phase 8 implementation is reviewable at `/?phase=8` on the existing canonical st
 See [Phase 8 status](docs/PHASE-8-STATUS.md) for scope, review instructions and remaining
 platform evidence. Production offline updates wait for all old tabs to close; data tools
 provide versioned plaintext backups, Merge/Replace preview and verified recovery before
-mutation. Phase 8 acceptance remains pending; Phase 9+ is not started.
+mutation. Phase 8 is accepted and complete. Phase 9 is implemented for review; see its status and verification for remaining gates.

@@ -48,6 +48,16 @@ export interface RecoveryPoint {
   snapshot: Snapshot;
   reason: string;
 }
+export interface ErasureJob {
+  id: string;
+  scope: 'local' | 'everywhere';
+  actor: string;
+  localDigest: string;
+  phase: 'pending' | 'barrier' | 'complete';
+  marker: string;
+  expectedRevision: string | null;
+  targets: { path: string; revision: string }[];
+}
 const stores = ['meta', 'tail', 'receipts', 'recovery', 'blobs', 'migration'];
 const req = <T>(r: IDBRequest<T>) =>
   new Promise<T>((resolve, reject) => {
@@ -95,13 +105,21 @@ export async function openLogbook(
   };
   const db = await req(opening);
   db.onversionchange = () => db.close();
+  let handleEpoch: string | undefined;
   async function transaction<T>(
     mode: IDBTransactionMode,
     run: (tx: IDBTransaction) => Promise<T>,
+    erasureControl = false,
   ): Promise<T> {
     const tx = db.transaction(stores, mode),
       done = complete(tx);
     try {
+      if (mode === 'readwrite' && handleEpoch !== undefined && !erasureControl) {
+        if (((await req(tx.objectStore('meta').get('handle-epoch'))) ?? '') !== handleEpoch)
+          throw Error('Local session was erased; reopen the logbook');
+        if (await req(tx.objectStore('meta').get('erasure-gate')))
+          throw Error('Erasure pending or complete; editing and sync are paused');
+      }
       const result = await run(tx);
       await done;
       return result;
@@ -179,6 +197,22 @@ export async function openLogbook(
     )
       tx.objectStore('meta').put(await readHead(tx), 'head');
   });
+  handleEpoch = await transaction(
+    'readonly',
+    async (tx) => (await req(tx.objectStore('meta').get('handle-epoch'))) ?? '',
+  );
+  async function verifyErased(tx: IDBTransaction) {
+    const head = await verify(tx);
+    if (
+      canonical(head.state) !== canonical(blankLogbook()) ||
+      canonical((await req(tx.objectStore('meta').getAllKeys())).sort()) !==
+        canonical(['checkpoint', 'erasure-gate', 'handle-epoch', 'head'])
+    )
+      throw Error('Erasure result inconsistent; recovery required');
+    for (const name of stores.filter((name) => name !== 'meta'))
+      if (await req(tx.objectStore(name).count()))
+        throw Error('Erasure result contains retained data; recovery required');
+  }
   return {
     close: () => db.close(),
     async load() {
@@ -201,6 +235,239 @@ export async function openLogbook(
       return loaded.state;
     },
     actor: () => transaction('readonly', async (tx) => (await readHead(tx)).actor),
+    erasureStatus: () =>
+      transaction('readonly', async (tx) => {
+        const job = (await req(tx.objectStore('meta').get('erasure-gate'))) as
+          ErasureJob | undefined;
+        if (
+          job &&
+          (!['local', 'everywhere'].includes(job.scope) ||
+            !['pending', 'barrier', 'complete'].includes(job.phase))
+        )
+          throw Error('Unsupported erasure job; recovery required');
+        if (job?.phase === 'complete') await verifyErased(tx);
+        return job;
+      }),
+    syncAllowed: () =>
+      transaction('readonly', async (tx) => {
+        if (
+          ((await req(tx.objectStore('meta').get('handle-epoch'))) ?? '') !== handleEpoch ||
+          (await req(tx.objectStore('meta').get('erasure-gate')))
+        )
+          throw Error('Erasure pending or complete; editing and sync are paused');
+      }),
+    beginErasure: (job: ErasureJob, baseline: string) =>
+      transaction(
+        'readwrite',
+        async (tx) => {
+          const prior = (await req(tx.objectStore('meta').get('erasure-gate'))) as
+            ErasureJob | undefined;
+          if (
+            ((await req(tx.objectStore('meta').get('handle-epoch'))) ?? '') !== handleEpoch ||
+            prior?.phase === 'complete' ||
+            (prior &&
+              (prior.id !== job.id || prior.marker !== job.marker || prior.scope !== job.scope))
+          )
+            throw Error('Erasure session changed; reopen the review');
+          const head = await verify(tx);
+          if (head.actor !== job.actor || canonical(head.state) !== baseline)
+            throw Error('Local copy changed; review erasure again');
+          tx.objectStore('meta').put(structuredClone(job), 'erasure-gate');
+        },
+        true,
+      ),
+    erasureBarrierVerified: (id: string) =>
+      transaction(
+        'readwrite',
+        async (tx) => {
+          const job = (await req(tx.objectStore('meta').get('erasure-gate'))) as
+            ErasureJob | undefined;
+          if (!job || job.id !== id || job.phase === 'complete')
+            throw Error('Erasure session changed');
+          tx.objectStore('meta').put({ ...job, phase: 'barrier' }, 'erasure-gate');
+        },
+        true,
+      ),
+    async finishErasure(id: string) {
+      const state = await this.load(),
+        job = await this.erasureStatus();
+      if (!job || job.id !== id) throw Error('Erasure session changed');
+      if (job.phase === 'complete') return;
+      if (job.scope === 'everywhere' && job.phase !== 'barrier')
+        throw Error('Cloud erasure not verified; local data retained');
+      if ((await textDigest(canonical(state))) !== job.localDigest)
+        throw Error('Local copy changed; review erasure again');
+      await transaction(
+        'readwrite',
+        async (tx) => {
+          const current = (await req(tx.objectStore('meta').get('erasure-gate'))) as ErasureJob;
+          const head = await verify(tx);
+          if (
+            current?.id !== id ||
+            current.phase !== job.phase ||
+            head.actor !== job.actor ||
+            canonical(head.state) !== canonical(state)
+          )
+            throw Error('Erasure session changed; local data retained');
+          for (const name of stores) tx.objectStore(name).clear();
+          const snapshot = { state: blankLogbook(), clock: {}, revision: 0 };
+          tx.objectStore('meta').put({ ...snapshot, actor: crypto.randomUUID() }, 'head');
+          tx.objectStore('meta').put(snapshot, 'checkpoint');
+          tx.objectStore('meta').put(crypto.randomUUID(), 'handle-epoch');
+          tx.objectStore('meta').put(
+            {
+              id: job.id,
+              scope: job.scope,
+              phase: 'complete',
+              marker: job.marker,
+              expectedRevision: null,
+              targets: [],
+              actor: '',
+              localDigest: '',
+            } satisfies ErasureJob,
+            'erasure-gate',
+          );
+        },
+        true,
+      );
+    },
+    startAfterErasure: (id: string) =>
+      transaction(
+        'readwrite',
+        async (tx) => {
+          const job = (await req(tx.objectStore('meta').get('erasure-gate'))) as
+            ErasureJob | undefined;
+          const head = await verify(tx);
+          await verifyErased(tx);
+          if (
+            job?.id !== id ||
+            job.phase !== 'complete' ||
+            head.revision ||
+            canonical(head.state) !== canonical(blankLogbook())
+          )
+            throw Error('Erasure not complete; new session refused');
+          tx.objectStore('meta').delete('erasure-gate');
+        },
+        true,
+      ),
+    // Phase 9 protocol journal shares the durable database, but is never content/exported credentials.
+    syncJournal: () => transaction('readonly', (tx) => req(tx.objectStore('meta').get('sync-v2'))),
+    keyPolicy: () =>
+      transaction('readonly', (tx) => req(tx.objectStore('meta').get('content-key-v1'))),
+    resetSyncJoin: (expected: string) =>
+      transaction('readwrite', async (tx) => {
+        const head = await verify(tx);
+        if (canonical(head.state) !== expected)
+          throw Error('Local copy changed; verify backup again');
+        const journal = await req(tx.objectStore('meta').get('sync-v2'));
+        const id = 'rejoin:' + crypto.randomUUID();
+        tx.objectStore('migration').add(
+          { id, journal, actor: head.actor, reason: 'Explicit reviewed device rejoin' },
+          id,
+        );
+        if ((await req(tx.objectStore('migration').get(id)))?.id !== id)
+          throw Error('Join archive verification failed');
+        tx.objectStore('meta').delete('sync-v2');
+      }),
+    saveKeyPolicy: (value: unknown) =>
+      transaction('readwrite', async (tx) => {
+        const intent = (await req(tx.objectStore('meta').get('sync-v2')))?.intent;
+        if (intent?.transition === 'new-cloud' && canonical(value) !== canonical(intent.policy))
+          throw Error('New cloud creation pending; encryption policy changes are paused');
+        tx.objectStore('meta').put(structuredClone(value), 'content-key-v1');
+        if (canonical(await req(tx.objectStore('meta').get('content-key-v1'))) !== canonical(value))
+          throw Error('Key policy persistence failed');
+      }),
+    async retainSyncSource(raw: string) {
+      const id = 'cloud:' + (await textDigest(canonical(JSON.parse(raw).payload)));
+      await transaction('readwrite', async (tx) => {
+        if (await req(tx.objectStore('migration').get(id))) return;
+        tx.objectStore('migration').put(
+          { id, source: raw, reason: 'Verified incoming Dropbox copy' },
+          id,
+        );
+        if ((await req(tx.objectStore('migration').get(id)))?.source !== raw)
+          throw Error('Cloud recovery archive failed');
+      });
+    },
+    syncSources: () =>
+      transaction('readonly', async (tx) =>
+        (await req(tx.objectStore('migration').getAll()))
+          .filter(
+            (v) =>
+              typeof v?.id === 'string' &&
+              v.id.startsWith('cloud:') &&
+              typeof v.source === 'string',
+          )
+          .map((v) => ({ id: v.id as string, source: v.source as string })),
+      ),
+    saveSyncJournal: (value: unknown, expectedActor: string, freshCloudPolicy?: unknown) =>
+      transaction('readwrite', async (tx) => {
+        const head = await verify(tx);
+        if (head.actor !== expectedActor) throw Error('Local generation changed; join again');
+        if (freshCloudPolicy !== undefined) {
+          const meta = tx.objectStore('meta');
+          if (
+            head.revision ||
+            Object.keys(head.clock).length ||
+            canonical(head.state) !== canonical(blankLogbook()) ||
+            (await req(meta.get('sync-v2'))) ||
+            canonical((await req(meta.get('content-key-v1'))) ?? null) !==
+              canonical(freshCloudPolicy)
+          )
+            throw Error(
+              'Fresh local copy or encryption policy changed; review new-cloud setup again',
+            );
+          for (const name of ['blobs', 'tail', 'receipts', 'recovery', 'migration'])
+            if (await req(tx.objectStore(name).count()))
+              throw Error('Retained history changed; review new-cloud setup again');
+        }
+        tx.objectStore('meta').put(structuredClone(value), 'sync-v2');
+      }),
+    finishSync: (
+      value: unknown,
+      expectedActor: string,
+      expectedState: string,
+      ids: string[],
+      keyPolicy?: unknown,
+      expectedKeyPolicy?: unknown,
+    ) =>
+      transaction('readwrite', async (tx) => {
+        const head = await verify(tx);
+        if (head.actor !== expectedActor || canonical(head.state) !== expectedState)
+          throw Error('Local copy changed; sync again');
+        if (
+          expectedKeyPolicy !== undefined &&
+          canonical((await req(tx.objectStore('meta').get('content-key-v1'))) ?? null) !==
+            canonical(expectedKeyPolicy)
+        )
+          throw Error('Encryption policy changed; verify the cloud request again');
+        if (keyPolicy !== undefined) {
+          const previous = await req(tx.objectStore('meta').get('content-key-v1'));
+          const id = 'key-policy:' + crypto.randomUUID();
+          tx.objectStore('migration').add(
+            {
+              id,
+              previous,
+              replacement: structuredClone(keyPolicy),
+              reason: 'Verified credential rotation',
+            },
+            id,
+          );
+          tx.objectStore('meta').put(structuredClone(keyPolicy), 'content-key-v1');
+          if (
+            canonical(await req(tx.objectStore('meta').get('content-key-v1'))) !==
+            canonical(keyPolicy)
+          )
+            throw Error('Key policy persistence failed');
+        }
+        for (const id of ids) {
+          const r = await req(tx.objectStore('receipts').get(id));
+          if (!r) throw Error('Unknown sync acknowledgement');
+          tx.objectStore('receipts').put({ ...r, pending: false }, id);
+        }
+        tx.objectStore('meta').put(structuredClone(value), 'sync-v2');
+      }),
     async commit(
       input: EditCommand,
       remote?: CausalOperation,

@@ -1,14 +1,13 @@
 # Phase 1 product preservation specification
 
-## Current acceptance — Phase 8 continuation
+## Current acceptance — Phase 9 continuation
 
-Phase 7 is accepted and complete by explicit owner instruction on 28 October 2026.
-Fetched local `main == origin/main` (zero ahead/behind) at
-`887fcdda9855e6fad62f5c05589110f8b25412aa`, the PR #16 merge, including final head
-`e7b77bbfb11429ee48c48ed4a5b8dbebe89cc5af`. Phase 8 only is authorized.
-Phase 9 and later ports, real-data cutover and deployment remain gated.
-
-Earlier review-era status below is historical where it differs.
+Phase 8 is accepted and complete by explicit owner instruction on 29 October 2026.
+Fetched origin and fast-forwarded local `main == origin/main`, zero ahead/behind,
+at `df2310d7d6cc9dd09830724fc1d37bcc3ad48007`, PR #17's merge, including final
+head `9d01b6c09bb9d0275ff83f021e38ed0d10abad34`. Only Phase 9 is authorized.
+Implementation/review status: [Phase 9](PHASE-9-STATUS.md). Phase 10+, real-data
+cutover and deployment remain gated. Earlier pending-acceptance text is historical.
 
 Authority: LAUNCH-DECISIONS.md and LAUNCH-PLAN.md section 3. The accepted decisions override
 historical questionnaire recommendations. All demo features remain required at 1.0.
@@ -111,4 +110,4 @@ Phase 8 implementation is reviewable at `/?phase=8` on the existing canonical st
 See [Phase 8 status](PHASE-8-STATUS.md) for scope, review instructions and remaining
 platform evidence. Production offline updates wait for all old tabs to close; data tools
 provide versioned plaintext backups, Merge/Replace preview and verified recovery before
-mutation. Phase 8 acceptance remains pending; Phase 9+ is not started.
+mutation. Phase 8 is accepted and complete. Phase 9 is implemented for review; see its status and verification for remaining gates.

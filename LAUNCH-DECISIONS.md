@@ -1,14 +1,14 @@
 # Accepted launch decisions — 27 October 2026
 
-## Current acceptance — Phase 8 continuation
+## Current acceptance — Phase 9 continuation
 
-Phase 7 is accepted and complete by explicit owner instruction on 28 October 2026.
-Fetched local `main == origin/main` (zero ahead/behind) at
-`887fcdda9855e6fad62f5c05589110f8b25412aa`, the PR #16 merge, including final head
-`e7b77bbfb11429ee48c48ed4a5b8dbebe89cc5af`. Phase 8 only is authorized.
-Phase 9 and later ports, real-data cutover and deployment remain gated.
+Phase 8 is accepted and complete by explicit owner instruction on 29 October 2026.
+Fetched origin and fast-forwarded local `main == origin/main`, zero ahead/behind,
+at `df2310d7d6cc9dd09830724fc1d37bcc3ad48007`, PR #17's merge, including final
+head `9d01b6c09bb9d0275ff83f021e38ed0d10abad34`. Only Phase 9 is authorized.
+Implementation/review status: [Phase 9](docs/PHASE-9-STATUS.md). Phase 10+, real-data
+cutover and deployment remain gated. Earlier pending-acceptance text is historical.
 
-Earlier review-era status below is historical where it differs.
 
 All 24 launch questions are answered. This register records the owner's answers and the choices delegated by “your call.” **It supersedes earlier proposals wherever they differ.** Phase 1 subsequently started at the owner's request; current execution status is in [docs/PHASE-1-STATUS.md](docs/PHASE-1-STATUS.md).
 

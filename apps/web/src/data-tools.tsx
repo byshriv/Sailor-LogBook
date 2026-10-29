@@ -45,7 +45,17 @@ export function downloadText(raw: string, name: string) {
   a.click();
   setTimeout(() => URL.revokeObjectURL(url), 30000);
 }
-export function DataTools({ projection, blocked }: { projection: Projection; blocked: boolean }) {
+export function DataTools({
+  projection,
+  blocked,
+  onActive,
+  decrypted,
+}: {
+  projection: Projection;
+  blocked: boolean;
+  onActive?: (active: boolean) => void;
+  decrypted?: { raw: string } | null;
+}) {
   const [incoming, setIncoming] = useState<ImportPreview | null>(null),
     [mode, setMode] = useState<'merge' | 'replace'>('merge'),
     [baseline, setBaseline] = useState(''),
@@ -56,6 +66,11 @@ export function DataTools({ projection, blocked }: { projection: Projection; blo
     [restore, setRestore] = useState(''),
     [exclusions, setExclusions] = useState<Record<string, boolean>>({}),
     [orphans, setOrphans] = useState<Record<string, string | null>>({});
+  const [cloudSources, setCloudSources] = useState<{ id: string; source: string }[]>([]);
+  useEffect(() => {
+    onActive?.(busy || !!incoming || !!restore);
+    return () => onActive?.(false);
+  }, [busy, incoming, restore, onActive]);
   useEffect(() => {
     const guard = (e: BeforeUnloadEvent) => {
       if (busy || incoming || restore) e.preventDefault();
@@ -85,15 +100,18 @@ export function DataTools({ projection, blocked }: { projection: Projection; blo
     setChoices({});
     setStatus('Preview only · no logbook data changed');
   };
+  useEffect(() => {
+    if (decrypted) void run(() => preview(decrypted.raw));
+  }, [decrypted]);
   return (
     <section className={styles.dataTools} aria-label="Backup and recovery">
       <h3>Backup and recovery</h3>
       <PwaStatus />
       <p>
         Plaintext files include your journal, settings, original media and archived data. Store them
-        privately. Optional encrypted backups arrive with key setup in Phase 9. Transfer limit: 64
-        MiB. A download request cannot prove the file was saved; reopen it with Preview import to
-        verify your copy.
+        privately. With a configured key, use Download encrypted backup in Dropbox synchronization
+        by default; this plaintext export is explicit. Transfer limit: 64 MiB. A download request
+        cannot prove the file was saved; reopen it with Preview import to verify your copy.
       </p>
       <button
         disabled={blocked || busy || !!incoming || !!restore}
@@ -125,6 +143,30 @@ export function DataTools({ projection, blocked }: { projection: Projection; blo
           }}
         />
       </label>
+      <button
+        disabled={blocked || busy || !!incoming || !!restore}
+        onClick={() =>
+          void run(async () => {
+            setCloudSources(await db.syncSources());
+            setStatus(
+              'Retained Dropbox copies listed · preview a copy to recover alternatives; nothing applied',
+            );
+          })
+        }
+      >
+        Review retained Dropbox copies
+      </button>
+      {cloudSources.map((copy) => (
+        <div key={copy.id}>
+          Dropbox recovery copy {copy.id.slice(6, 18)}{' '}
+          <button
+            disabled={blocked || busy || !!incoming || !!restore}
+            onClick={() => void run(() => preview(copy.source))}
+          >
+            Preview retained copy {copy.id.slice(6, 18)}
+          </button>
+        </div>
+      ))}
       <button
         disabled={blocked || busy || !!incoming || !!restore}
         onClick={() =>
