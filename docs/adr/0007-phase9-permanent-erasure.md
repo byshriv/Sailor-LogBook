@@ -58,8 +58,7 @@ a returning cooperative client cannot upload past it. Legacy demos do not read t
 barrier and may recreate their old file later. Malicious writers with valid provider access
 can also alter files outside this protocol. Retire those clients and revoke access manually;
 no remote wipe or universal non-resurrection claim is made. Provider deleted-file/history
-retention and offline/downloaded copies remain outside the application's control. A new
-cloud-logbook initialization after erasure is not implemented; the available restart is local.
+retention and offline/downloaded copies remain outside the application's control. Explicit empty-cloud restart is now defined in [ADR 0008](0008-phase9-explicit-cloud-restart.md); ordinary sync still refuses the marker.
 
 Primary API evidence: [Dropbox conditional delete](https://docs.dropboxapi.com/dropbox-api/api-reference/user-endpoints/files/delete-v-2)
 and [folder inventory](https://docs.dropboxapi.com/dropbox-api/api-reference/user-endpoints/files/list-folder).

@@ -248,3 +248,48 @@ Index SHA-256 `070e806acf563f55c215f82c875b0348b00bdab063b90c25bd4540d1d1c68cdd`
 worker SHA-256 `adb4dff8ffbc798c7bf2f647fd65256f3984fcf3c6f322efd1dabed7dcc616ff`.
 Commits are local only; no PR publication or hosted checks are claimed. Phase 9 acceptance is
 still pending. Do not advance to Phase 10 or deploy.
+
+## Explicit cloud restart follow-up — 29 October 2026
+
+Source review commit: `5cf77d4`. After verified erasure, ordinary sync still refuses the
+cloud deletion marker. A separate typed/acknowledged preview can create a fresh empty
+cloud generation from an empty local session with no retained history or previous sync
+journal. Changed markers, legacy revival, owned leftovers and competing requests fail
+without overwriting the winning cloud copy. Configured encryption requires matching unlock.
+Intent persistence atomically checks fresh state, retained stores and the expected policy.
+
+The exact empty request is durable before upload. Uncertain results/reload block ordinary
+sync and policy changes; explicit review verifies identical already-uploaded bytes or
+retries only against the original marker revision. Read-back, inventory, backup/decryption
+and an atomic local receipt precede success. No operation IDs are acknowledged: later local
+edits stay pending for separate sync review. A changed old-device generation stays blocked.
+No live account or personal erasure/restore was performed. See [ADR 0008](adr/0008-phase9-explicit-cloud-restart.md).
+This supersedes the cloud-restart limitation recorded in the earlier erasure follow-up.
+
+Validation:
+
+- `npm run verify:foundation`: typecheck, dependency boundaries, **116 foundation cases**
+  and final production build pass.
+- Nine new core cases cover read-only review, empty/history checks, erased-handle fences,
+  encryption enforcement, changed markers/legacy/leftovers/competitors, uncertain uploads,
+  newer local edits, mismatched read-back, cancellation, atomic receipt quota failure,
+  stale generations and cross-tab intent-persistence races.
+- Final sync/erasure/backup Chromium/WebKit suite: **30 pass**, zero failure/skip. Report:
+  `build/browser-phase9-new-cloud-final.json`.
+- Initial and repeated runs each had 29 passes and an existing WebKit download/import
+  fixture timeout. The downloaded-file event precedes completion of export UI work;
+  `setInputFiles` does not wait for an enabled input. Explicitly waiting for import readiness
+  fixes the fixture; assertions and page-error checks remain enabled. Reports retained as
+  `build/browser-phase9-new-cloud-initial.json` and `build/browser-phase9-new-cloud-pre-readiness.json`.
+- Final production offline/update Chromium/WebKit: **2 pass**, zero failure/skip; report
+  `build/pwa-results.json`. Production artifact restored after update simulation.
+- Formatting, whitespace, narrow secret scan and all 37 frozen demo hashes pass.
+  The existing 85-case demo pass remains the preceding follow-up's evidence; no demo source changed.
+- Owner README/DEPLOY hashes remain byte-identical to the preceding records and excluded
+  from commits. No new Firefox, actual Safari/physical device, live Dropbox or independent
+  security result is claimed. Phase 9 owner/live acceptance remains pending.
+
+Final artifact cache: `slb-production-ccb88786f62c6cd6`, 28 assets.
+Index SHA-256 `ab2b39f3d03765fdbb3733b579ee32f0e17d76b4a843003d21aed8dc2f447441`;
+worker SHA-256 `59de7a03a435ac0219b06b3a4795ac636dfcaa885274f48b57f5a8ada3fbaf32`.
+Local commits only. No PR publication, deployment or Phase 10 work.

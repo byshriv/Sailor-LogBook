@@ -36,3 +36,23 @@ copies and provider-managed retention remain; legacy/malicious writers can recre
 Native trusted
 unlock belongs to the authorized-later Phase 10 adapter and is not claimed here.
 Do not label the Phase 9 launch gate complete based on synthetic tests alone.
+
+## Explicit cloud restart follow-up — 29 October 2026
+
+Implemented: separate read-only/typed new-cloud review after erasure, fresh local/history
+requirements, owned-namespace/legacy checks and exact marker-revision CAS. The new cloud
+has an independently generated ID and a verified empty baseline. Configured encryption
+requires unlock; intent persistence atomically checks state/history/policy and excludes
+competing requests. Ordinary sync and policy changes pause during uncertain creation.
+
+Reload/retry can verify exact already-uploaded bytes without uploading again. Read-back,
+backup/decryption, namespace and atomic local receipt verification must all succeed.
+Later local edits remain pending for a separate ordinary sync preview. Old anchored
+devices cannot silently cross the new generation. No Synced status is inferred from
+creation. This supersedes the earlier unimplemented cloud-restart limitation in the
+historical handoff/verification entries. See [ADR 0008](adr/0008-phase9-explicit-cloud-restart.md).
+
+Remaining Phase 9 work: broader sync scheduling, real multi-device Dropbox OAuth/expiry /
+race/offline/migration rehearsal, owner acceptance and physical-device/resource/security
+review. Firefox and real Safari evidence remain pending. No live account, Phase 10 or
+deployment work was performed. Final test evidence/build hashes are in VERIFICATION-PHASE-9.

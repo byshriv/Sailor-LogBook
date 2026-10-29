@@ -190,8 +190,8 @@ profiles/devices, downloaded backups and application-shell caches are preserved.
 No physical secure-wipe or Dropbox history purge is claimed. Cooperative stale uploads
 lose the old-revision race or refuse the barrier. Legacy demos can recreate their old
 file later; malicious authorized writers can also alter cloud files outside this protocol.
-Retire/revoke those writers manually. New-cloud initialization after this erasure barrier
-is not implemented; the offered restart is a new local logbook. Exact ownership grammar,
+Retire/revoke those writers manually. Ordinary sync remains blocked by the barrier; the
+separate explicit empty-cloud restart is described below. Exact ownership grammar,
 limits and verification sequence are in [ADR 0007](adr/0007-phase9-permanent-erasure.md).
 
 ## Compatibility and limits
@@ -215,3 +215,19 @@ This is an independently implemented protocol/codec using vetted primitives, not
 independent audit. Real Dropbox grant/expiry/CORS/app-folder scope, real network races,
 physical Android/Safari resources, Firefox and secure native key storage still require
 actual evidence. No Keystore adapter or native trust is simulated. Phase 10 is unstarted.
+
+## Explicit cloud restart after erasure
+
+A separate typed/acknowledged new-cloud preview can now replace the reviewed deletion
+marker with a fresh empty generation. Initial local content and all retained personal
+history must be empty; no prior sync journal or owned cloud leftovers/legacy file may
+remain. Fresh state and configured encryption policy are checked atomically when the
+exact request is persisted. Configured encryption requires unlock and cannot downgrade.
+The production marker's exact revision is the CAS precondition; no files are deleted.
+
+A persisted uncertain request blocks ordinary sync and policy changes. Explicit retry
+verifies or retransmits only the original empty baseline. Read-back, namespace and backup
+verification precede the atomic anchor receipt; no local operation IDs are acknowledged.
+Later local edits remain pending for separate sync review. Known old-generation devices
+stay blocked and keep their unsynced edits. This replaces the earlier local-only restart
+limitation; [ADR 0008](adr/0008-phase9-explicit-cloud-restart.md) defines the boundary.

@@ -190,3 +190,39 @@ Local commits only; Phase 9 owner/live exit acceptance remains pending. Continue
 Remaining work includes explicit new-cloud initialization after erasure, broader sync scheduling,
 real multi-device Dropbox rehearsal, physical/resource/security review and later native trust.
 No Phase 10 or deployment.
+
+## Explicit cloud restart follow-up — 29 October 2026
+
+Source `5cf77d4` implements the next Phase 9 step: after erasure and an explicit new local
+session, connect/check Dropbox, then Review new cloud logbook. Typed NEW CLOUD and an
+empty-baseline acknowledgement are required. Initial content, retained history and prior
+sync state must be empty. The cloud must contain only the unchanged deletion marker in
+its owned namespace; legacy recreation/owned leftovers require review. Unrelated files
+remain untouched. Configured encryption requires unlock and cannot fall back to plaintext.
+
+The exact verified empty request is persisted with atomic fresh-state/history/policy checks
+before CAS upload to a random new generation. Interrupted/uncertain results block ordinary
+sync and policy changes across reload; reconnect/unlock and explicitly re-review to retry
+or verify the identical upload. No newer local records are uploaded or acknowledged by
+that retry. Later edits remain pending for a separate ordinary sync preview. Exact read-back,
+inventory, backup/decryption and atomic receipt verification precede success. Old anchored
+devices retain unsynced edits and cannot upload automatically into the replacement generation.
+
+This supersedes the earlier unimplemented cloud-restart limitation. See
+`docs/adr/0008-phase9-explicit-cloud-restart.md` and updated Phase 9 architecture/status.
+The protocol cannot remotely erase downloaded/offline copies or provider history, retire
+legacy writers, revoke tokens or prevent malicious authorized provider writes. Inventory
+checks cannot lock the entire Dropbox namespace. No new live-account/security guarantee.
+
+Evidence: 116 foundation cases; final targeted Chromium/WebKit sync/erasure/backup 30/30;
+final production PWA 2/2. Typecheck, boundaries, formatting, whitespace, narrow secret scan
+and all 37 frozen hashes pass. A repeated existing WebKit import fixture race was fixed by
+waiting for input readiness after export; final suite passes without suppressing assertions.
+Reports and final artifact hashes are in `docs/VERIFICATION-PHASE-9.md`.
+Current cache: `slb-production-ccb88786f62c6cd6`. README/DEPLOY owner edits remain identical
+and excluded. Local review commits only; no push/PR/deployment/live owner data changes.
+
+Next Phase 9 work: broader sync scheduling, real multi-device Dropbox grant/expiry/race /
+offline/migration rehearsal, owner interaction acceptance and physical-device/resource /
+security review. Firefox and real Safari evidence remain pending. Native trusted unlock
+belongs to later Phase 10 and is unstarted. Phase 9 is not yet accepted; do not deploy.
