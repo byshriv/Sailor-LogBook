@@ -10,7 +10,8 @@ flow now authenticates the current wrapper, verifies a current external backup a
 kit, then re-encrypts the complete shared backup under an independent master/new cloud
 generation using CAS/read-back and a recoverable transition intent. Stale generations
 cannot automatically upload. Provider token/device revocation remains manual; old copies
-remain accessible to their holders. Native trust and erasure remain open.
+remain accessible to their holders. Separate permanent erasure now uses the protocol
+and limits in ADR 0007. Native trust remains open.
 See ../ARCHITECTURE-PHASE-9.md and ../VERIFICATION-PHASE-9.md. Earlier
 feasibility-only wording below is historical where superseded.
 

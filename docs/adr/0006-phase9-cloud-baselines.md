@@ -32,6 +32,10 @@ journal retention. Encryption policy is independent of an unlocked session key.
 Plain sync precedes optional Argon2id/AES-GCM full-content protection. Foreign legacy
 files remain separate and unchanged; metadata revision changes require cutover review.
 Browser public-client tokens and content keys are memory-only. Trusted native keys,
-rotation/erasure workflows, real account/device rehearsal and independent review remain
+native trust, real account/device rehearsal and independent review remain
 unverified/unimplemented as detailed in Phase 9 status. Do not infer production readiness
 from the protocol choice or synthetic tests. No Phase 10 or deployment is authorized.
+
+Subsequent Phase 9 follow-ups implement credential/content-key rotation and separate
+permanent local/cloud erasure. See ADR 0007 for the retained content-free deletion marker,
+local write fence, revision-bound owned-file removal and offline/legacy-client limits.

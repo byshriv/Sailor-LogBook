@@ -188,3 +188,63 @@ Final artifact cache: `slb-production-9a43185990e30c8a`, 28 assets.
 Index SHA-256 `5bbf04a524de31ae7109dba145ad3ec446e2733b61337d2f4700f9515cfc4f37`;
 worker SHA-256 `9a77fcfaa679c11399a39d96a7b4a2f40edfe4c233ac9839a022bd99ab3c60bf`.
 All commits remain local. Phase 9 owner/live exit acceptance is pending.
+
+## Permanent erasure follow-up — 29 October 2026
+
+Source review commits: core `ab248d7`, screens/browser tests `dac7c53`; documentation follows.
+Implemented separate Erase local data and Delete logbook everywhere. Selection/cancellation
+is read-only; typed scope confirmation, no-Undo acknowledgement and the cloud legacy-writer
+acknowledgement precede changes. Current sync is aborted/drained before review, minute checks
+stop, and active drafts block entry. A confirmed persistent job fences all normal writes/sync.
+
+Cloud flow CAS-installs and reads back a content-free `slb-erased` generation marker, deletes
+only reviewed owned files with their exact `parent_rev`, re-lists the owned scope and verifies
+the unchanged marker before local clearing. Current production content/media is in its complete
+manifest; legacy data and reserved own media/backup paths are explicit targets. Unknown files,
+folders and unrelated data are never recursively removed. Partial/uncertain/offline results keep
+all local content/keys and a retryable job. Changed/recreated files require new explicit review.
+A late cooperative upload loses its old-revision CAS race; stale/fresh clients refuse the barrier.
+
+Local clearing atomically removes all production content, media, pending operations, receipts,
+trash, recovery/migration source archives and keys. The result retains only a blank actor /
+checkpoint, content-free receipt and handle epoch. Old handles cannot write after erasure or
+a new local restart. Completed-result reads verify a blank state, the exact allowed metadata
+keys and empty personal stores; inconsistent results fail for recovery instead of claiming
+success. Malformed/future/content-bearing deletion jobs fail closed. The UI reloads after clear
+to discard its old projection and session secrets, and suppresses first-run setup on the result.
+
+This is logical erasure, not a physical secure-wipe guarantee. Other profiles/devices, separate
+demo storage, downloaded backups and Dropbox-managed deleted files/history remain. Legacy demos
+can recreate their old file; malicious authorized provider writers are outside the cooperative
+protocol. Retire/revoke them manually. A deletion marker deliberately remains in Dropbox; new
+cloud initialization after erasure is not implemented. The restart offered here is local.
+See [ADR 0007](adr/0007-phase9-permanent-erasure.md) for scope/ownership/API details.
+No real owner data, account, deployment or native Phase 10 work was touched.
+
+Validation:
+
+- `npm run verify:foundation`: typecheck, boundaries, **107 foundation cases** and build pass.
+- Eleven new core cases cover preview/cancellation, current-copy races, complete local clearing,
+  old-handle fencing, cloud marker/ownership, stale/fresh devices, an in-flight upload race,
+  partial/offline/uncertain results, legacy recreation, atomic quota rollback, paginated provider
+  inventory/conditional deletion and malformed/residual-data integrity guards.
+- Full Chromium/WebKit suite: **120 pass**, zero fail/skip before the final malformed-job/result
+  integrity checks and deletion-status copy hardening. Report: `build/browser-phase9-erasure-full.json`.
+- After those narrow follow-ups: final erasure Chromium/WebKit **6 pass**, zero skip;
+  final production PWA **2 pass**, zero skip. Reports: `build/browser-phase9-erasure-final.json`
+  and `build/pwa-results.json`. The final source adds only clearer inventory-limit error wording
+  after the focused run; its exact rebuilt artifact passes both final production PWA cases.
+- `npm test`: all **85** unchanged demo cases pass (`build/demo-erasure.log`).
+- Formatting, whitespace, narrow secret scan and all 37 frozen hashes pass. Owner README/DEPLOY
+  hashes still match the preceding records exactly and remain uncommitted/excluded.
+- The first erasure-only browser run had five passes and one fixture read racing the intentional
+  post-erasure reload. Explicit navigation waits corrected the fixture; no page error or assertion
+  was suppressed. The subsequent 120-case full run passes.
+- No new Firefox, real Dropbox, physical-device, malicious-writer prevention or independent audit
+  result is inferred. Existing platform/security/live exit gates remain open.
+
+Final rebuilt artifact cache: `slb-production-ba4304af72641721`, 28 assets.
+Index SHA-256 `070e806acf563f55c215f82c875b0348b00bdab063b90c25bd4540d1d1c68cdd`;
+worker SHA-256 `adb4dff8ffbc798c7bf2f647fd65256f3984fcf3c6f322efd1dabed7dcc616ff`.
+Commits are local only; no PR publication or hosted checks are claimed. Phase 9 acceptance is
+still pending. Do not advance to Phase 10 or deploy.

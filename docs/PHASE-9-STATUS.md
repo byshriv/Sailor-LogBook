@@ -29,7 +29,10 @@ are implemented as a combined verified rewrap flow. Keep the same passphrase whe
 only replacing the recovery kit. Content-key replacement now creates a new master and
 cloud generation after verifying an external backup and new recovery kit. A lost-device
 guide links to Dropbox access controls; revoking device/app access remains a manual
-provider action, not a claim made by this app. Delete everywhere
-requires its own generation/tombstone and partial-failure evidence. Native trusted
+provider action, not a claim made by this app. Separate local erasure and Delete logbook
+everywhere now provide typed previews, persistent write/sync fencing, revision-checked
+owned-file deletion, a content-free cloud barrier and verified local clearing. Offline
+copies and provider-managed retention remain; legacy/malicious writers can recreate files.
+Native trusted
 unlock belongs to the authorized-later Phase 10 adapter and is not claimed here.
 Do not label the Phase 9 launch gate complete based on synthetic tests alone.

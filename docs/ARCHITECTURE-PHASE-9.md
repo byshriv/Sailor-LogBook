@@ -118,9 +118,10 @@ backups can unlock with their original passphrase/recovery code without Dropbox 
 current session key. Unlocking an old backup does not replace current sync key policy.
 
 Lock forgets this tab's key; it does not encrypt/hide IndexedDB or clear local content.
-Disconnect only forgets this tab's provider token. No local/cloud erasure flow is shipped.
+Disconnect only forgets this tab's provider token. The separate erasure flows below
+require explicit permanent-deletion confirmation.
 Content-key replacement is implemented as described below. Dropbox access revocation
-remains manual, and Delete everywhere is unimplemented. The code refuses
+remains manual. The code refuses
 unreviewed remote generation changes; explicit device rejoin needs a matching external
 backup, verified local recovery, typed JOIN and retained old sync journal. Encryption
 policy remains enforced. Phase 8 damaged-store rescue clears sync metadata and creates
@@ -161,6 +162,37 @@ valid provider token can permit malicious file replacement/deletion outside this
 protocol. Key rotation protects new ciphertext, not old cloud revisions, backups, plaintext
 local databases or offline copies. No remote wipe or successful provider revocation is
 inferred from the in-app acknowledgement. No personal account was modified during testing.
+
+## Permanent erasure
+
+Settings now separates Erase local data and Delete logbook everywhere from Lock and
+Disconnect. Each starts with a read-only preview and a typed, no-Undo confirmation.
+Active drafts block entry. Opening erasure stops minute checks and aborts/drains current
+sync before preparing its preview. After confirmation, a persistent local fence blocks
+normal mutations and synchronization until completion, including after a reload.
+
+Cloud deletion first CAS-installs and reads back a content-free `slb-erased` generation
+barrier at the production path. The barrier deliberately remains; both old strict-format
+clients and current clients refuse automatic recreation. The legacy file and explicitly
+owned media/backup files are removed individually using their reviewed revisions. A full
+owned-scope re-list and barrier read-back must succeed before local clearing. Changed or
+reappearing files require another explicit review. Partial/offline/uncertain results retain
+all local content/keys and a retryable job, with no stored credentials or journal payload
+in that job. A matching uncertain marker upload can resume without another write.
+
+Local clearing atomically removes content, media, receipts/tails, trash, recovery/migration
+archives, sync state and key wrappers; installs a blank actor/checkpoint; and retains a
+content-free result/fence. A changed handle epoch prevents pre-erasure store handles from
+writing even after the user explicitly starts a new local session. The completed app
+reloads to drop its projection and memory-only credentials. Separate demo storage, other
+profiles/devices, downloaded backups and application-shell caches are preserved.
+
+No physical secure-wipe or Dropbox history purge is claimed. Cooperative stale uploads
+lose the old-revision race or refuse the barrier. Legacy demos can recreate their old
+file later; malicious authorized writers can also alter cloud files outside this protocol.
+Retire/revoke those writers manually. New-cloud initialization after this erasure barrier
+is not implemented; the offered restart is a new local logbook. Exact ownership grammar,
+limits and verification sequence are in [ADR 0007](adr/0007-phase9-permanent-erasure.md).
 
 ## Compatibility and limits
 

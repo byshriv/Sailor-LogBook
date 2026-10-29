@@ -85,8 +85,8 @@ Local Firefox previously fails before app launch; record fresh verification hone
 
 Passphrase/recovery-kit changes and content-key replacement are implemented in the
 follow-ups below. Provider access revocation is a manual Dropbox action; erasure remains open.
-Delete everywhere/local erase are not shipped; erasure must prove generation barriers and
-partial failures before making stale-device guarantees. Trusted native Android unlock
+Separate local/cloud erasure is implemented in the follow-up below, with explicit
+legacy/malicious-writer limits. Trusted native Android unlock
 requires the later Phase 10 adapter; no Keystore/trust behavior is simulated here.
 Full-screen automatic scheduling/large streaming transfers are also not implemented.
 Continue Phase 9 review/gaps only. Phase 13 owner review and Phase 14 deployment remain.
@@ -156,3 +156,37 @@ checks 4/4; production PWA 2/2. Typecheck, boundaries, formatting, whitespace, n
 scan and all 37 frozen hashes pass. Reports and final hashes are in VERIFICATION-PHASE-9.
 Current cache: `slb-production-9a43185990e30c8a`. Only README.md/DEPLOY.md should remain
 dirty after documentation is committed; their owner hashes are unchanged. Local commits only.
+
+## Permanent erasure follow-up — 29 October 2026
+
+Core `ab248d7` and UI/browser `dac7c53` implement separate Erase local data and Delete
+logbook everywhere, using read-only/typed previews and explicit no-Undo scope acknowledgement.
+Current checks/uploads abort/drain before review; drafts block entry. A confirmed persistent
+job fences writes/sync across reloads. Cloud deletion retains a content-free generation barrier,
+uses exact-revision individual deletion of explicitly owned files, and independently re-lists /
+reads back before clearing local content. Offline/partial/uncertain results keep local data/keys;
+resume handles missing files and demands fresh review for changed/recreated ones.
+
+Local clear atomically removes content, blobs, pending operations, receipts, trash, all recovery /
+source archives, sync state and key wrappers. A blank actor/checkpoint, content-free receipt and
+new handle epoch remain. Old store handles stay unable to write after an explicit new local
+session. Completed result reads check blank state/allowed metadata/empty personal stores and
+fail closed on inconsistencies; malformed deletion intents cannot upload a content-bearing marker.
+The UI reloads to drop old projections/tokens/keys and avoids stacking first-run onboarding.
+
+No real user/account deletion was performed. Separate demo storage, other profiles/offline devices,
+downloaded backups and provider-managed deleted files/revisions remain. Legacy demos can recreate
+their old file later, and malicious authorized writers are outside this protocol. Stop/revoke those
+clients manually. Logical erasure is not forensic secure wipe. The content-free Dropbox marker
+intentionally remains; a new cloud-logbook initialization flow is not implemented. The offered
+restart is a new local logbook. See docs/adr/0007-phase9-permanent-erasure.md for exact ownership.
+
+Evidence: 107 foundation tests; 120-case full Chromium/WebKit run; after final narrow integrity
+checks, six focused erasure browser checks and both final production PWA checks pass. All 85
+unchanged demo tests, typecheck, boundaries, formatting, whitespace, narrow secret scan and 37
+frozen hashes pass. Exact separate reports/build hashes are in docs/VERIFICATION-PHASE-9.md.
+Current cache: `slb-production-ba4304af72641721`. README/DEPLOY remain byte-identical owner edits.
+Local commits only; Phase 9 owner/live exit acceptance remains pending. Continue Phase 9 only.
+Remaining work includes explicit new-cloud initialization after erasure, broader sync scheduling,
+real multi-device Dropbox rehearsal, physical/resource/security review and later native trust.
+No Phase 10 or deployment.
