@@ -10,12 +10,93 @@ export interface CloudPort {
   write(raw: string, revision: string | null, signal?: AbortSignal): Promise<string>;
 }
 export const productionPath = '/sailor-logbook/v2/logbook.json';
+export interface OwnedFile {
+  path: string;
+  revision: string;
+}
+export interface ErasurePort extends CloudPort {
+  inventory(signal?: AbortSignal): Promise<OwnedFile[]>;
+  remove(file: OwnedFile, signal?: AbortSignal): Promise<void>;
+}
+export function ownedDataPath(path: string) {
+  return (
+    path === '/sailors-logbook.json' ||
+    /^\/sailor-logbook\/v2\/(?:media|attachments)\/[a-f0-9]{64}(?:\.bin)?$/.test(path) ||
+    /^\/sailor-logbook\/v2\/backups\/[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}\.json$/.test(
+      path,
+    )
+  );
+}
 export class DropboxPort implements CloudPort {
   private token: () => string;
   private http: Http;
   constructor(token: () => string, http: Http) {
     this.token = token;
     this.http = http;
+  }
+  async inventory(signal?: AbortSignal): Promise<OwnedFile[]> {
+    const files: OwnedFile[] = [],
+      seen = new Set<string>();
+    let cursor: string | undefined;
+    for (let page = 0; page < 100; page++) {
+      const r = await this.http(
+        'https://api.dropboxapi.com/2/files/' + (cursor ? 'list_folder/continue' : 'list_folder'),
+        {
+          method: 'POST',
+          signal,
+          headers: { Authorization: 'Bearer ' + this.token(), 'Content-Type': 'application/json' },
+          body: JSON.stringify(
+            cursor
+              ? { cursor }
+              : {
+                  path: '',
+                  recursive: true,
+                  include_deleted: false,
+                  include_mounted_folders: false,
+                  limit: 1000,
+                },
+          ),
+        },
+      );
+      if (!r.ok)
+        throw Error('Dropbox deletion inventory failed (' + r.status + '); reconnect or retry');
+      const value = await r.json();
+      if (!Array.isArray(value.entries) || typeof value.has_more !== 'boolean')
+        throw Error('Invalid Dropbox deletion inventory');
+      for (const entry of value.entries) {
+        if (entry?.['.tag'] !== 'file') continue;
+        const path = entry.path_lower;
+        if (typeof path !== 'string' || (path !== productionPath && !ownedDataPath(path))) continue;
+        if (seen.has(path) || typeof entry.rev !== 'string')
+          throw Error('Invalid Dropbox deletion inventory');
+        seen.add(path);
+        files.push({ path, revision: entry.rev });
+        if (files.length > 10000)
+          throw Error('Deletion inventory limit; review the remaining scope manually');
+      }
+      if (!value.has_more) return files.sort((a, b) => a.path.localeCompare(b.path));
+      if (typeof value.cursor !== 'string' || value.cursor === cursor)
+        throw Error('Invalid deletion inventory cursor');
+      cursor = value.cursor;
+    }
+    throw Error('Deletion inventory pagination limit; review the remaining scope manually');
+  }
+  async remove(file: OwnedFile, signal?: AbortSignal) {
+    if (!ownedDataPath(file.path) || !file.revision)
+      throw Error('Unowned Dropbox deletion refused');
+    const r = await this.http('https://api.dropboxapi.com/2/files/delete_v2', {
+      method: 'POST',
+      signal,
+      headers: { Authorization: 'Bearer ' + this.token(), 'Content-Type': 'application/json' },
+      body: JSON.stringify({ path: file.path, parent_rev: file.revision }),
+    });
+    if (r.status === 409) {
+      const e = await r.json();
+      if (e?.error?.['.tag'] === 'path_lookup' && e.error.path_lookup?.['.tag'] === 'not_found')
+        return;
+    }
+    if (!r.ok)
+      throw Error('Dropbox deletion incomplete (' + r.status + '); review changed files and retry');
   }
   async read(signal?: AbortSignal): Promise<CloudFile | null> {
     const r = await this.http('https://content.dropboxapi.com/2/files/download', {

@@ -8,6 +8,7 @@ import type { CloudFile, CloudPort } from '../../../packages/sync-providers/src/
 import { decryptContent, encryptContent } from '../../../packages/crypto/src/content.ts';
 import type { ContentSetup } from '../../../packages/crypto/src/content.ts';
 import { textDigest } from '../../../packages/persistence/src/media.ts';
+import { erasureMarker } from '../../../packages/sync-core/src/erasure.ts';
 
 export interface Manifest {
   format: 'slb-sync';
@@ -53,6 +54,7 @@ export interface SyncPreview {
 }
 export function readManifest(raw: string): Manifest {
   if (new TextEncoder().encode(raw).length > 96 * 1024 * 1024) throw Error('Cloud transfer limit');
+  if (erasureMarker(raw)) throw Error('Cloud logbook erased; automatic recreation blocked');
   const m = JSON.parse(raw);
   if (
     m?.format !== 'slb-sync' ||
@@ -76,6 +78,7 @@ export class SyncEngine {
     this.port = port;
   }
   async preview(key?: CryptoKey, signal?: AbortSignal): Promise<SyncPreview> {
+    await this.db.syncAllowed();
     const actor = await this.db.actor();
     const journal = (await this.db.syncJournal()) as Journal | undefined;
     const file = await this.port.read(signal);
