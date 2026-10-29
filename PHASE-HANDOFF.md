@@ -226,3 +226,40 @@ Next Phase 9 work: broader sync scheduling, real multi-device Dropbox grant/expi
 offline/migration rehearsal, owner interaction acceptance and physical-device/resource /
 security review. Firefox and real Safari evidence remain pending. Native trusted unlock
 belongs to later Phase 10 and is unstarted. Phase 9 is not yet accepted; do not deploy.
+
+## Scheduling and repository-review continuation — 29 October 2026
+
+Source `0076922` adds opt-in checks after durable local saves, tab/network return and a
+visible/eligible minute interval. Three-second coalescing, monotonic deadlines, no overlap,
+draft/dialog/offline/hidden guards, cancellation and three bounded transient-read retries
+replace the minute-only timer. Retry-After uses server Date for HTTP dates; delays over
+five minutes pause checks instead of violating the requested delay. Authentication /
+conflict/protocol/key failures stop checks. Automatic review never applies a merge/upload.
+
+The shared Ctrl/Cmd S panel on all production screens now reads local pending operations
+and erasure fencing, links to Dropbox review and never infers fresh cloud state from a
+zero pending count. Cross-screen continuous transfer remains unavailable: full navigation
+or reload drops the in-memory token/key, so reconnect and enable checks again in Settings.
+No persistent-credential workaround or Phase 10 native adapter was introduced.
+
+A live acceptance procedure is in `docs/PHASE-9-LIVE-REHEARSAL.md`. It is **not run** and
+must not be presented as real Dropbox/device/security evidence. Real grant/expiry/CORS /
+scope and two-device/migration/network rehearsal, physical Safari/Android/resource budgets,
+independent security review and owner Phase 9 acceptance remain open. Existing repository
+release gates #2/#3 remain open, including later native trusted unlock. No deployment.
+
+Main was fetched and remains equal to origin/main, including merged PR #17. All Phase 9
+implementation commits are on `codex/phase-9-sync`; the owner requested repository review
+publication. Preserve README/DEPLOY edits: their hashes are unchanged and excluded.
+Latest verified source has 122 foundation passes, the focused scheduling/status browsers
+6/6, production PWA 2/2 and unchanged demo 85/85. Full browser and hosted review evidence
+is recorded in the verification follow-up; pending checks must not be called passed.
+
+Final local full browser regression: **130/130 Chromium/WebKit pass**, zero failure/skip /
+flaky, after the scheduling fixes. Report: `build/browser-phase9-review-full.json`.
+Published as [draft PR #19](https://github.com/byshriv/Sailor-LogBook/pull/19), branch
+`codex/phase-9-sync` against `main`, with original local commits intact. No force push,
+merge, deployment or Phase 10 work. Final hosted CI/CodeQL evidence belongs to the final
+pushed head and remains pending until actually returned. Review the PR and live rehearsal
+before owner Phase 9 acceptance; no real-data cutover is approved. Only the unchanged
+README.md/DEPLOY.md owner edits should remain dirty after this handoff commit.

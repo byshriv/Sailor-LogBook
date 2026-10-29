@@ -89,8 +89,9 @@ CAS races, quota and expired auth keep operations pending. An uncertain successf
 upload can recover its receipt from byte-exact read-back after restart; a timeout
 alone cannot acknowledge anything. No blind automatic overwrite/retry loop exists.
 
-Sync is manual by default. Optional minute checks run only on this open Settings
-screen, stop for drafts/modals and open a preview. They never apply a nonempty merge
+Sync is manual by default. Optional checks on this open Settings screen debounce durable
+local saves and tab/network return, run periodically while eligible, stop for drafts/modals
+and open a preview. They never apply a nonempty merge
 without review. There is no closed-app/background transfer guarantee. Other screens
 continue local editing; they do not secretly sync. Parent draft/navigation guards and
 mutual data-tool/sync busy guards protect active drafts. Closing/OS killing an unsaved
@@ -231,3 +232,25 @@ verification precede the atomic anchor receipt; no local operation IDs are ackno
 Later local edits remain pending for separate sync review. Known old-generation devices
 stay blocked and keep their unsynced edits. This replaces the earlier local-only restart
 limitation; [ADR 0008](adr/0008-phase9-explicit-cloud-restart.md) defines the boundary.
+
+## Bounded automatic review scheduling
+
+The projection publishes a separate event only after a successful local durable save;
+refresh/remote replay does not schedule local editing effects. The Settings scheduler
+coalesces that event and visible/online return with a three-second editing pause, uses
+monotonic deadlines and a minute interval, and never runs two checks together. Drafts,
+dialogs, erasure and hidden/offline state inhibit checks; in-flight scheduled requests
+are canceled on draft entry/offline/hide. Teardown aborts outstanding requests.
+
+Only transient read/network errors get three delayed retries (5/15/60 seconds, increased
+by Retry-After). Server Date anchors HTTP-date delays to avoid local clock skew. Provider
+delays over five minutes pause automatic checks instead of retrying earlier than requested.
+Permanent auth/conflict/protocol/key failures require manual review/reconnect. Neither
+edit bursts nor focus/network events bypass an active retry deadline. Automatic actions
+never apply a merge or upload; a verified receipt may recover an exact existing intent.
+
+The shared Ctrl/Cmd S panel reads local pending state and erasure fencing on every
+production screen, without a cloud request or Synced claim. Screen navigation/reload still
+drops memory-only token/key state; users reconnect in Settings. Cross-screen continuous
+or closed-app sync is not promised. Live evidence is tracked in
+[the rehearsal](PHASE-9-LIVE-REHEARSAL.md), distinct from mock/browser regressions.

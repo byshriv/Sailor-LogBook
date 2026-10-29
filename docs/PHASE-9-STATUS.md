@@ -56,3 +56,31 @@ Remaining Phase 9 work: broader sync scheduling, real multi-device Dropbox OAuth
 race/offline/migration rehearsal, owner acceptance and physical-device/resource/security
 review. Firefox and real Safari evidence remain pending. No live account, Phase 10 or
 deployment work was performed. Final test evidence/build hashes are in VERIFICATION-PHASE-9.
+
+## Scheduling and review publication follow-up — 29 October 2026
+
+Open Settings scheduling now debounces committed local saves and tab/network return,
+checks periodically while visible and eligible, and pauses for drafts/dialogs/offline.
+It uses monotonic deadlines, non-overlapping cycles, three bounded retries for transient
+reads, and provider Retry-After handling using server dates. Authentication/conflict /
+protocol/key errors stop automatic checks; long provider delays pause them. Automatic
+checks prepare review only. No merge/upload is automatic and manual sync remains default.
+
+All production screens now expose accurate local pending status through Ctrl/Cmd S and
+a link to Dropbox review. A zero pending count does not claim fresh cloud state. Full
+screen navigation/reload still requires reconnecting and re-enabling checks: credentials
+stay in memory, and cross-screen/closed-app continuous transfer is not implemented.
+Changing that session/navigation architecture remains a review decision, not a hidden
+credential-persistence workaround.
+
+[Live rehearsal](PHASE-9-LIVE-REHEARSAL.md) records the real OAuth/two-device, interruption,
+legacy migration, key rotation, erasure and replacement-generation checks still required.
+It is a procedure, not executed evidence. Physical Safari/Android/resource budgets,
+independent security review and owner Phase 9 acceptance remain pending. Native trusted
+unlock remains Phase 10. This branch is being published for repository review only;
+publication does not authorize merge, real-data cutover or deployment.
+
+Published for review: [draft PR #19](https://github.com/byshriv/Sailor-LogBook/pull/19).
+Final local evidence is **122 foundation**, **130 Chromium/WebKit**, **2 production PWA**
+and **85 unchanged demo** passes. Hosted final-head checks/CodeQL remain pending; review
+publication is not phase acceptance or deployment approval. Cache: `slb-production-94c80a408981ebb4`.

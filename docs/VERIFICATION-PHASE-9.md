@@ -293,3 +293,50 @@ Final artifact cache: `slb-production-ccb88786f62c6cd6`, 28 assets.
 Index SHA-256 `ab2b39f3d03765fdbb3733b579ee32f0e17d76b4a843003d21aed8dc2f447441`;
 worker SHA-256 `59de7a03a435ac0219b06b3a4795ac636dfcaa885274f48b57f5a8ada3fbaf32`.
 Local commits only. No PR publication, deployment or Phase 10 work.
+
+## Scheduling and review publication validation — 29 October 2026
+
+Source `0076922` adds guarded automatic review scheduling and accurate local pending status
+on every production screen. Main was fetched/current, zero ahead/behind with origin/main
+at PR #17 merge `df2310d`. Phase 8 remains accepted; Phase 9 owner/live acceptance is pending.
+
+- `npm run verify:foundation`: typecheck, boundaries, **122 foundation cases** and build pass.
+  Log: `build/phase9-review-foundation.log`.
+- Six new core cases cover opt-in/debounce/eligibility, bounded retries/provider delays,
+  burst resistance, long-delay/permanent-error pause, nonoverlap/disposal, server-date
+  clock-skew handling and committed-only scheduling (failed saves/refresh do not trigger).
+- Focused scheduling/status Chromium/WebKit: **6 pass**, zero failure/skip. Report:
+  `build/browser-phase9-scheduling-focused.json`. Initial browser run caught incorrect
+  native timer receiver binding; wrapper functions fixed the implementation. Cross-screen
+  shortcut fixtures now wait for the screen to mount, and allow legitimately different
+  pending counts after local achievement effects. Assertions/page-error checks remain.
+- Final production offline/update Chromium/WebKit: **2 pass**, zero failure/skip. Report:
+  `build/pwa-results.json`. Final artifact is restored after update simulation.
+- Existing demo suite **85 pass**, zero failure/skip (`build/phase9-review-demo.log`).
+  Syntax/manifests/offline assets, formatting, whitespace, narrow secret scan and all 37
+  frozen hashes pass. Owner README/DEPLOY hashes remain unchanged and excluded.
+- Registry audit (`build/phase9-review-audit.json`) reports **0 high/critical**, **3 moderate**
+  dependency nodes: pinned development `@capacitor/cli` → `xcode` → `uuid`, with advisory
+  GHSA-w5hq-g745-h8pq and an available CLI update. The existing upstream toolchain alert
+  is retained for review; this is not a zero-vulnerability claim or an independent audit.
+  No Phase 10 toolchain/native feature migration is included.
+
+Final artifact cache: `slb-production-94c80a408981ebb4`, 28 assets.
+Index SHA-256 `fa41c8c53fa0ee1a38eea2dd34983894f6f7854b69363ca259cafad648015d90`;
+worker SHA-256 `e4f683c4b4afb08439fb4e4f7af13b72101062f4ece2b05eee67b0c43785c6c9`.
+
+[Live rehearsal](PHASE-9-LIVE-REHEARSAL.md) is a required procedure, not executed evidence.
+Tokens/keys remain memory-only. Navigation/reload requires reconnecting; cross-screen
+continuous transfer and closed-app sync remain unavailable. No new actual Firefox,
+physical Safari/Android, live account or independent security result is inferred. All
+existing acceptance gates remain open. Publication is for review, not merge/deployment.
+
+Final full Chromium/WebKit regression: **130 pass**, zero failure/skip/flaky, across all
+production screens and Phase 9 workflows. Report: `build/browser-phase9-review-full.json`.
+This final run follows the timer-binding/readiness fixes and uses source `0076922`.
+
+Published for owner-authorized review as [draft PR #19](https://github.com/byshriv/Sailor-LogBook/pull/19),
+`codex/phase-9-sync` → `main`. Original local commit history is pushed intact; no Git-data
+snapshot rewrite, force push, merge or deployment occurred. Final documentation is pushed
+with the handoff. Hosted jobs/CodeQL must be checked on that final head; local passes do
+not establish hosted Firefox, Android-proof or CodeQL results. Phase 9 remains unaccepted.
