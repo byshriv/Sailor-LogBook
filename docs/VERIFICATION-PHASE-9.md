@@ -139,3 +139,52 @@ Final follow-up artifact cache: `slb-production-0bc79a32554be5f1` (28 assets).
 `d5790e4540247599fa6a134ada4fdd84007e90919895a25fc082fdc6c0cbf19d`.
 No deployment or Phase 10 work. Content-key rotation/lost-device and erasure workflows,
 physical-resource/security review and live Dropbox rehearsal remain open.
+
+## Content-key / lost-device follow-up — 29 October 2026
+
+Source commit `81ec0c7` adds independent content-master replacement and a guided
+lost-device flow. The old passphrase/recovery code authenticates the current wrapper;
+a current external backup, explicit provider-access review, typed ROTATE and a saved,
+verified new kit are required. New passphrase unlock is verified during preparation.
+The replacement master, key ID and cloud generation are independent of the old key.
+The complete verified shared backup/media is re-encrypted before CAS replacement.
+
+The common change engine retains local recovery and the old incoming source, persists
+an exact-byte transition intent, and verifies provider revision/bytes plus decrypted
+content/media before atomically updating policy/anchor. Ordinary old-generation clients
+cannot auto-upload. Only the originating actor's matching exact-byte intent can recover
+an uncertain generation transition, and it must authenticate the new ciphertext first.
+Edits saved after the upload stay pending locally; rotation recovery acknowledges none
+of those edits. Missing/wrong new keys cannot advance the policy. Backup/source/media,
+legacy revision and CAS protections remain. Old backups keep their old unlock routes.
+
+The provider-security guide uses Dropbox's current official guidance:
+[Secure devices, sessions and connected apps](https://help.dropbox.com/security/unknown-device-linked).
+No provider account/device list was read or modified. The acknowledgement records the
+user's review, not verified token revocation. A still-authorized malicious Dropbox
+writer may replace/delete provider files outside this cooperative protocol. New keys
+cannot retroactively protect old copies, local plaintext stores or historical revisions.
+Erasure is still unimplemented. No Phase 10 work, deployment or independent audit.
+
+Follow-up validation:
+
+- `npm run verify:foundation`: typecheck, boundaries, **96 foundation tests** and build pass.
+- Five new core cases cover exact media/full-state re-encryption, old-backup readability,
+  old-generation blocking/fresh-device joining, uncertain transition with later local edits,
+  wrong/stale recovery inputs, reused-master rejection, CAS and final-transaction quota failure.
+- Sync/backup browser suite: **20 pass** across Chromium/WebKit. It exercises the new
+  backup/provider-review/ROTATE/kit guards, generation change, and independent old-backup
+  recovery followed by current-key unlock. Report:
+  `build/browser-phase9-content-key-sync-backup.json`.
+- After adding the strict new-key-ID guard and explicit new-passphrase verification:
+  final credential/content-key browser checks **4 pass**; final production PWA **2 pass**.
+  Reports: `build/browser-phase9-content-key-final.json`, `build/pwa-results.json`.
+- Formatting, whitespace, narrow secret scan and all 37 frozen hashes pass.
+- README/DEPLOY hashes still match the earlier owner-edit record exactly and remain excluded.
+- Earlier full-suite/Firefox evidence is historical; this follow-up does not claim a fresh
+  full 110-case run, Firefox pass, physical-device measurement or real Dropbox integration.
+
+Final artifact cache: `slb-production-9a43185990e30c8a`, 28 assets.
+Index SHA-256 `5bbf04a524de31ae7109dba145ad3ec446e2733b61337d2f4700f9515cfc4f37`;
+worker SHA-256 `9a77fcfaa679c11399a39d96a7b4a2f40edfe4c233ac9839a022bd99ab3c60bf`.
+All commits remain local. Phase 9 owner/live exit acceptance is pending.

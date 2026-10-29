@@ -26,8 +26,10 @@ Before phase acceptance: real two-device Dropbox OAuth/expiry/race/offline/migra
 rehearsal, owner interaction review, physical-device/WASM/storage budgets and Firefox
 evidence. Independent security review is unavailable. Passphrase/recovery-kit changes
 are implemented as a combined verified rewrap flow. Keep the same passphrase when
-only replacing the recovery kit. Content-key rotation and lost-device workflows
-remain a Phase 9 security gap; Delete everywhere
+only replacing the recovery kit. Content-key replacement now creates a new master and
+cloud generation after verifying an external backup and new recovery kit. A lost-device
+guide links to Dropbox access controls; revoking device/app access remains a manual
+provider action, not a claim made by this app. Delete everywhere
 requires its own generation/tombstone and partial-failure evidence. Native trusted
 unlock belongs to the authorized-later Phase 10 adapter and is not claimed here.
 Do not label the Phase 9 launch gate complete based on synthetic tests alone.

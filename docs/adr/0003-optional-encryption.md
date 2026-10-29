@@ -5,8 +5,13 @@ encryption and a combined passphrase/recovery-kit rewrap flow. Current credentia
 authentication, verified replacement passphrase/recovery, local recovery, CAS manifest
 replacement and independent read-back precede atomic local policy/anchor replacement.
 Uncertain commits recover from the durable exact-byte intent. The master stays the
-same; this does not revoke lost-device keys/tokens. Content-key rotation/native trust
-remain open. See ../ARCHITECTURE-PHASE-9.md and ../VERIFICATION-PHASE-9.md. Earlier
+same; this does not revoke lost-device keys/tokens. A subsequent content-key replacement
+flow now authenticates the current wrapper, verifies a current external backup and new
+kit, then re-encrypts the complete shared backup under an independent master/new cloud
+generation using CAS/read-back and a recoverable transition intent. Stale generations
+cannot automatically upload. Provider token/device revocation remains manual; old copies
+remain accessible to their holders. Native trust and erasure remain open.
+See ../ARCHITECTURE-PHASE-9.md and ../VERIFICATION-PHASE-9.md. Earlier
 feasibility-only wording below is historical where superseded.
 
 Accepted contract; hash-wasm 4.12.0 Argon2id is the selected feasibility candidate as of

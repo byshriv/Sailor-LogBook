@@ -119,8 +119,8 @@ current session key. Unlocking an old backup does not replace current sync key p
 
 Lock forgets this tab's key; it does not encrypt/hide IndexedDB or clear local content.
 Disconnect only forgets this tab's provider token. No local/cloud erasure flow is shipped.
-Content-key rotation, lost-device revocation and Delete everywhere remain unimplemented
-security requirements, not implied guarantees. The code refuses
+Content-key replacement is implemented as described below. Dropbox access revocation
+remains manual, and Delete everywhere is unimplemented. The code refuses
 unreviewed remote generation changes; explicit device rejoin needs a matching external
 backup, verified local recovery, typed JOIN and retained old sync journal. Encryption
 policy remains enforced. Phase 8 damaged-store rescue clears sync metadata and creates
@@ -141,6 +141,26 @@ wrappers and original unlock routes. This changes credentials, not the content k
 cached keys, provider tokens and historical ciphertext remain accessible to their holders.
 Interrupting or canceling after upload is not a rollback; reconnect/preview using the
 newly saved kit to determine the outcome.
+
+For content-key replacement/lost-device recovery, authenticate the old wrapper, verify
+a current external backup, review provider access, type ROTATE, and create/verify a new
+passphrase/recovery kit. The master, key ID and cloud generation are all new. Every byte
+of the verified shared backup—including retained media—is re-encrypted under the new
+master before a single CAS manifest replacement. The old master cannot decrypt the new
+payload. The same durable intent/read-back/atomic-policy path handles failures, with a
+content-key transition marker allowing only that device's exact upload to cross the old
+generation barrier. An uncertain transition validates the new ciphertext and media using
+the new key before committing its receipt. Local edits saved after upload remain pending;
+they are neither acknowledged nor overwritten by transition recovery. Old/rescued devices
+without the matching intent require normal explicit join/review and the new secret.
+
+The provider guide links to [Dropbox's device/account security guidance](https://help.dropbox.com/security/unknown-device-linked).
+Users must review/revoke untrusted devices, sessions and connected apps there and reconnect
+as needed. The app cannot enumerate or selectively revoke other devices' tokens. Keeping a
+valid provider token can permit malicious file replacement/deletion outside this cooperative
+protocol. Key rotation protects new ciphertext, not old cloud revisions, backups, plaintext
+local databases or offline copies. No remote wipe or successful provider revocation is
+inferred from the in-app acknowledgement. No personal account was modified during testing.
 
 ## Compatibility and limits
 

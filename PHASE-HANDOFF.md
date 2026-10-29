@@ -83,8 +83,8 @@ app-folder permissions/CORS, expiry/offline/races and owner interaction review r
 Physical Android/Safari/WASM/memory/storage and independent security review are unverified.
 Local Firefox previously fails before app launch; record fresh verification honestly.
 
-Passphrase/recovery-kit changes are implemented in the follow-up below. Content-key
-rotation and lost-device workflows remain unimplemented.
+Passphrase/recovery-kit changes and content-key replacement are implemented in the
+follow-ups below. Provider access revocation is a manual Dropbox action; erasure remains open.
 Delete everywhere/local erase are not shipped; erasure must prove generation barriers and
 partial failures before making stale-device guarantees. Trusted native Android unlock
 requires the later Phase 10 adapter; no Keystore/trust behavior is simulated here.
@@ -133,3 +133,26 @@ whitespace, narrow secret scan and all 37 frozen hashes pass. Exact separate rep
 final build hashes are in docs/VERIFICATION-PHASE-9.md. Current cache is
 `slb-production-0bc79a32554be5f1`. Owner README/DEPLOY diffs remain byte-identical and
 excluded. This follow-up is local; Phase 9 owner/live exit acceptance remains pending.
+
+## Content-key replacement follow-up — 29 October 2026
+
+Source `81ec0c7` completes the next Phase 9 implementation step: independent master/key ID
+and cloud generation, authenticated current credentials, current external-backup verification,
+manual Dropbox access-review guidance, typed ROTATE, and a verified replacement recovery kit.
+Complete encrypted sync first. The same CAS/read-back/recovery/atomic-policy path re-encrypts
+all verified content/media. Old clients cannot automatically upload across the generation
+barrier. Exact matching local transition intents can recover uncertain success using the new
+key; later local edits remain pending and are preserved. Old backups retain their own kits.
+
+Dropbox revocation remains manual: the app cannot enumerate/revoke another device's token,
+prove the user's provider review, remotely erase an offline copy or prevent a still-authorized
+malicious provider writer. Follow the linked official guidance, revoke untrusted access and
+reconnect as needed before rotating. No live account was modified. Erasure, live multi-device
+Dropbox rehearsal, physical-device/resource/security review and native trust remain open.
+Continue Phase 9 only; do not start Phase 10 or deploy.
+
+Evidence: 96 foundation tests; 20 sync/backup Chromium/WebKit checks; final focused rotation
+checks 4/4; production PWA 2/2. Typecheck, boundaries, formatting, whitespace, narrow secret
+scan and all 37 frozen hashes pass. Reports and final hashes are in VERIFICATION-PHASE-9.
+Current cache: `slb-production-9a43185990e30c8a`. Only README.md/DEPLOY.md should remain
+dirty after documentation is committed; their owner hashes are unchanged. Local commits only.
