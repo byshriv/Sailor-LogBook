@@ -22,6 +22,9 @@ import { readManifest, SyncEngine } from './sync-engine.ts';
 import type { SyncPreview } from './sync-engine.ts';
 import styles from './management.module.css';
 import { ErasureTools } from './erasure-tools.tsx';
+import { NewCloudEngine } from './new-cloud-engine.ts';
+import type { NewCloudPreview } from './new-cloud-engine.ts';
+import { erasureMarker } from '../../../packages/sync-core/src/erasure.ts';
 
 let access: { token: string; expires: number } | null = null;
 export function SyncTools({
@@ -42,6 +45,11 @@ export function SyncTools({
     ),
     [client, setClient] = useState(String(import.meta.env.VITE_DROPBOX_APP_KEY ?? '')),
     [preview, setPreview] = useState<SyncPreview | null>(null),
+    [cloudErased, setCloudErased] = useState(false),
+    [newCloudPending, setNewCloudPending] = useState(false),
+    [newCloudPreview, setNewCloudPreview] = useState<NewCloudPreview | null>(null),
+    [newCloudWord, setNewCloudWord] = useState(''),
+    [newCloudAcknowledged, setNewCloudAcknowledged] = useState(false),
     [choices, setChoices] = useState<Record<string, 'local' | 'cloud'>>({}),
     [legacyReviewed, setLegacyReviewed] = useState(false),
     [rejoin, setRejoin] = useState(false),
@@ -80,7 +88,8 @@ export function SyncTools({
   const running = useRef(false),
     controller = useRef<AbortController | null>(null),
     initialized = useRef(false);
-  const active = busy || !!preview || wizard || !!unlock || rejoin || erasureActive;
+  const active =
+    busy || !!preview || !!newCloudPreview || wizard || !!unlock || rejoin || erasureActive;
   useEffect(() => {
     onActive(active);
     return () => onActive(false);
@@ -90,13 +99,13 @@ export function SyncTools({
       if (
         !intentionalNavigation.current &&
         !erasureComplete &&
-        (busy || preview || wizard || unlock || rejoin || erasureBusy)
+        (busy || preview || newCloudPreview || wizard || unlock || rejoin || erasureBusy)
       )
         e.preventDefault();
     };
     window.addEventListener('beforeunload', guard);
     return () => window.removeEventListener('beforeunload', guard);
-  }, [busy, preview, wizard, unlock, rejoin, erasureBusy, erasureComplete]);
+  }, [busy, preview, newCloudPreview, wizard, unlock, rejoin, erasureBusy, erasureComplete]);
   useEffect(() => {
     let previous = canonical(projection.store.getState());
     return projection.store.subscribe(() => {
@@ -108,10 +117,10 @@ export function SyncTools({
     });
   }, [projection]);
   useEffect(() => {
-    void projection.db
-      .keyPolicy()
-      .then((p) => {
+    void Promise.all([projection.db.keyPolicy(), projection.db.syncJournal()])
+      .then(([p, journal]) => {
         setPolicy(p ?? null);
+        setNewCloudPending(journal?.intent?.transition === 'new-cloud');
         setPolicyReady(true);
       })
       .catch(() =>
@@ -133,20 +142,26 @@ export function SyncTools({
       await fn(controller.current.signal);
     } catch (error) {
       const message = error instanceof Error ? error.message : '';
-      const action = /erased|Erasure/.test(message)
-        ? 'A deletion barrier is active; automatic cloud recreation and erased-session uploads are blocked. Finish the deletion review or continue with a new local logbook.'
-        : /generation/.test(message)
-          ? 'Cloud/local generation changed; preserve a backup and use Review device join.'
-          : /Legacy/.test(message)
-            ? 'Legacy Dropbox changed or metadata access failed; review old-device backups and reconnect with metadata access.'
-            : /session expired|authorization/.test(message)
-              ? 'Dropbox authorization expired or failed; reconnect.'
-              : /recovery|Recovery|decrypt|encoded|key size/.test(message)
-                ? 'Unlock/recovery verification failed; check the saved secret.'
-                : 'Operation failed, canceled, locked or Dropbox changed. Retry preview or reconnect.';
+      const action = /new.cloud|New.cloud|fresh empty|Retire and review/.test(message)
+        ? 'New-cloud setup requires a fresh local session and the same clean deletion barrier. Verify the pending request, or preserve a backup and use Review device join if another client created a copy.'
+        : /erased|Erasure/.test(message)
+          ? 'A deletion barrier is active; automatic cloud recreation and erased-session uploads are blocked. Finish the deletion review or continue with a new local logbook.'
+          : /generation/.test(message)
+            ? 'Cloud/local generation changed; preserve a backup and use Review device join.'
+            : /Legacy/.test(message)
+              ? 'Legacy Dropbox changed or metadata access failed; review old-device backups and reconnect with metadata access.'
+              : /session expired|authorization/.test(message)
+                ? 'Dropbox authorization expired or failed; reconnect.'
+                : /recovery|Recovery|decrypt|encoded|key size/.test(message)
+                  ? 'Unlock/recovery verification failed; check the saved secret.'
+                  : 'Operation failed, canceled, locked or Dropbox changed. Retry preview or reconnect.';
       setStatus('Not synced · ' + action + ' Existing data and review are retained.');
     } finally {
       await projection.refresh().catch(() => {});
+      setNewCloudPending(
+        (await projection.db.syncJournal().catch(() => undefined))?.intent?.transition ===
+          'new-cloud',
+      );
       running.current = false;
       setBusy(false);
       for (const resolve of stoppedWaiters.current.splice(0)) resolve();
@@ -172,7 +187,22 @@ export function SyncTools({
   const check = () =>
     run(async (signal) => {
       setStatus('Checking Dropbox · not synced');
+      if ((await projection.db.syncJournal())?.intent?.transition === 'new-cloud') {
+        setNewCloudPending(true);
+        setStatus(
+          'New cloud creation is awaiting explicit verification. Review the pending new-cloud request; ordinary sync is paused.',
+        );
+        return;
+      }
       const cloud = await port().read(signal);
+      if (cloud && erasureMarker(cloud.raw)) {
+        setCloudErased(true);
+        setStatus(
+          'Cloud deletion barrier found · ordinary sync is blocked. Explicit new-cloud setup requires a fresh empty local logbook.',
+        );
+        return;
+      }
+      setCloudErased(false);
       const m = cloud ? readManifest(cloud.raw) : null;
       if (
         m?.mode === 'encrypted' &&
@@ -202,6 +232,9 @@ export function SyncTools({
   const close = () => {
     if (!busy) {
       setPreview(null);
+      setNewCloudPreview(null);
+      setNewCloudWord('');
+      setNewCloudAcknowledged(false);
       setWizard(false);
       setUnlock(null);
       setBackupToUnlock(null);
@@ -301,9 +334,32 @@ export function SyncTools({
           </button>
         </>
       )}
+      {connected && (cloudErased || newCloudPending) && (
+        <>
+          <p>
+            {newCloudPending
+              ? 'An unfinished request can only publish its originally reviewed empty baseline. Local edits stay on this device until a separate sync preview.'
+              : 'The erased cloud will stay blocked until you explicitly create a new, empty cloud logbook.'}
+          </p>
+          <button
+            disabled={blocked || active}
+            onClick={() =>
+              void run(async (signal) => {
+                const p = await new NewCloudEngine(projection.db, port()).preview(signal);
+                setNewCloudPreview(p);
+                setNewCloudWord('');
+                setNewCloudAcknowledged(false);
+                setStatus('Preview only · this review made no cloud changes');
+              })
+            }
+          >
+            Review new cloud logbook
+          </button>
+        </>
+      )}
       {!policy && (
         <button
-          disabled={blocked || active || !!encryption || !policyReady}
+          disabled={blocked || active || !!encryption || !policyReady || newCloudPending}
           onClick={() => setWizard(true)}
         >
           Set up optional encryption
@@ -437,7 +493,7 @@ export function SyncTools({
       <ErasureTools
         projection={projection}
         port={connected ? port() : undefined}
-        blocked={blocked || !!preview || wizard || !!unlock || rejoin}
+        blocked={blocked || !!preview || !!newCloudPreview || wizard || !!unlock || rejoin}
         onActive={setErasureActive}
         onBusy={setErasureBusy}
         prepare={async () => {
@@ -458,6 +514,86 @@ export function SyncTools({
           requestAnimationFrame(() => location.replace('/?phase=9&tool=help'));
         }}
       />
+      {newCloudPreview && (
+        <Modal title="New cloud logbook preview" close={close}>
+          <p role="status">{status}</p>
+          <p>
+            This explicitly replaces the reviewed deletion barrier with a new empty logbook and a
+            fresh cloud generation. It does not restore old data or merge old copies. Other devices
+            must explicitly join the new generation.
+          </p>
+          <p>
+            {newCloudPreview.retry
+              ? `Retry/verification of the original empty request. Current local records: ${newCloudPreview.records}; those records will not be uploaded by this action.`
+              : 'Local content and retained history are empty. The cloud baseline will be empty.'}
+          </p>
+          <p>
+            {newCloudPreview.policy
+              ? 'The new cloud will use configured content encryption. Unlock its key before confirming.'
+              : 'The new empty cloud starts without encryption. Dropbox can read future plaintext content unless you enable optional encryption.'}
+          </p>
+          <p>
+            Offline copies, downloaded backups and Dropbox history remain. Retire legacy writers and
+            revoke untrusted provider access separately. No unrelated file will be removed by this
+            action.
+          </p>
+          <label>
+            <input
+              type="checkbox"
+              checked={newCloudAcknowledged}
+              disabled={busy}
+              onChange={(e) => setNewCloudAcknowledged(e.target.checked)}
+            />
+            I want a new empty cloud logbook; do not restore old data
+          </label>
+          <label>
+            Type NEW CLOUD to confirm
+            <input
+              value={newCloudWord}
+              disabled={busy}
+              onChange={(e) => setNewCloudWord(e.target.value)}
+            />
+          </label>
+          {newCloudPreview.policy && !encryption && (
+            <p>Cancel this preview and use Unlock configured key, then review again.</p>
+          )}
+          <button
+            disabled={
+              busy ||
+              !newCloudAcknowledged ||
+              newCloudWord !== 'NEW CLOUD' ||
+              (!!newCloudPreview.policy && !encryption)
+            }
+            onClick={() =>
+              void run(async (signal) => {
+                const result = await new NewCloudEngine(projection.db, port()).create(
+                  newCloudPreview,
+                  encryption,
+                  signal,
+                );
+                setNewCloudPreview(null);
+                setCloudErased(false);
+                setNewCloudPending(false);
+                setNewCloudWord('');
+                setNewCloudAcknowledged(false);
+                setStatus(
+                  result.localPending
+                    ? 'New empty cloud verified · local edits remain pending; use sync preview.'
+                    : 'New empty cloud verified · new generation and local receipt committed.',
+                );
+              })
+            }
+          >
+            Create or verify new cloud logbook
+          </button>
+          <button disabled={busy} onClick={close}>
+            Cancel new-cloud preview
+          </button>
+          {busy && (
+            <button onClick={() => controller.current?.abort()}>Interrupt new-cloud setup</button>
+          )}
+        </Modal>
+      )}
       {preview && plan && (
         <Modal title="Dropbox sync preview" close={close}>
           <p role="status">{status}</p>

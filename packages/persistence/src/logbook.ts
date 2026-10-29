@@ -371,6 +371,9 @@ export async function openLogbook(
       }),
     saveKeyPolicy: (value: unknown) =>
       transaction('readwrite', async (tx) => {
+        const intent = (await req(tx.objectStore('meta').get('sync-v2')))?.intent;
+        if (intent?.transition === 'new-cloud' && canonical(value) !== canonical(intent.policy))
+          throw Error('New cloud creation pending; encryption policy changes are paused');
         tx.objectStore('meta').put(structuredClone(value), 'content-key-v1');
         if (canonical(await req(tx.objectStore('meta').get('content-key-v1'))) !== canonical(value))
           throw Error('Key policy persistence failed');
@@ -398,10 +401,27 @@ export async function openLogbook(
           )
           .map((v) => ({ id: v.id as string, source: v.source as string })),
       ),
-    saveSyncJournal: (value: unknown, expectedActor: string) =>
+    saveSyncJournal: (value: unknown, expectedActor: string, freshCloudPolicy?: unknown) =>
       transaction('readwrite', async (tx) => {
-        if ((await verify(tx)).actor !== expectedActor)
-          throw Error('Local generation changed; join again');
+        const head = await verify(tx);
+        if (head.actor !== expectedActor) throw Error('Local generation changed; join again');
+        if (freshCloudPolicy !== undefined) {
+          const meta = tx.objectStore('meta');
+          if (
+            head.revision ||
+            Object.keys(head.clock).length ||
+            canonical(head.state) !== canonical(blankLogbook()) ||
+            (await req(meta.get('sync-v2'))) ||
+            canonical((await req(meta.get('content-key-v1'))) ?? null) !==
+              canonical(freshCloudPolicy)
+          )
+            throw Error(
+              'Fresh local copy or encryption policy changed; review new-cloud setup again',
+            );
+          for (const name of ['blobs', 'tail', 'receipts', 'recovery', 'migration'])
+            if (await req(tx.objectStore(name).count()))
+              throw Error('Retained history changed; review new-cloud setup again');
+        }
         tx.objectStore('meta').put(structuredClone(value), 'sync-v2');
       }),
     finishSync: (
@@ -410,11 +430,18 @@ export async function openLogbook(
       expectedState: string,
       ids: string[],
       keyPolicy?: unknown,
+      expectedKeyPolicy?: unknown,
     ) =>
       transaction('readwrite', async (tx) => {
         const head = await verify(tx);
         if (head.actor !== expectedActor || canonical(head.state) !== expectedState)
           throw Error('Local copy changed; sync again');
+        if (
+          expectedKeyPolicy !== undefined &&
+          canonical((await req(tx.objectStore('meta').get('content-key-v1'))) ?? null) !==
+            canonical(expectedKeyPolicy)
+        )
+          throw Error('Encryption policy changed; verify the cloud request again');
         if (keyPolicy !== undefined) {
           const previous = await req(tx.objectStore('meta').get('content-key-v1'));
           const id = 'key-policy:' + crypto.randomUUID();

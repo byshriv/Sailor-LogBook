@@ -38,8 +38,8 @@ interface Journal {
     encrypted: boolean;
     legacyRevision?: string | null;
     base: Logbook;
-    policy?: ContentSetup;
-    transition?: 'content-key';
+    policy?: ContentSetup | null;
+    transition?: 'content-key' | 'new-cloud';
   };
 }
 export interface SyncPreview {
@@ -81,6 +81,8 @@ export class SyncEngine {
     await this.db.syncAllowed();
     const actor = await this.db.actor();
     const journal = (await this.db.syncJournal()) as Journal | undefined;
+    if (journal?.intent?.transition === 'new-cloud')
+      throw Error('New cloud creation pending; use explicit new-cloud verification');
     const file = await this.port.read(signal);
     const legacyRevision = (await this.port.legacyRevision?.(signal)) ?? null;
     const manifest = file ? readManifest(file.raw) : null;

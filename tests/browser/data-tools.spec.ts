@@ -30,6 +30,7 @@ test('download, cancel, replace, recovery and restart retain data', async ({ pag
   await page.getByRole('button', { name: 'Download plaintext backup' }).click();
   const file = await (await download).path();
   expect(file).toBeTruthy();
+  await expect(page.getByLabel('Preview import')).toBeEnabled();
   await page.getByLabel('Preview import').setInputFiles(file!);
   const modal = page.getByRole('dialog', { name: 'Import preview' });
   await expect(modal).toContainText('Version 1 backup');

@@ -31,6 +31,8 @@ async function state(page: any) {
       policy: await db.keyPolicy(),
       job: await db.erasureStatus(),
       points: await db.recoveryPoints(),
+      sync: await db.syncJournal(),
+      pending: await db.pending(),
       demo: localStorage.getItem('slb1'),
     };
     db.close();
@@ -57,17 +59,30 @@ async function connect(page: any) {
     'Connected · preview required',
   );
 }
-async function mockCloud(page: any) {
+async function mockCloud(page: any, erased = false) {
   const errors: string[] = [];
   page.on('pageerror', (e: Error) => errors.push(e.message));
-  let raw: string | null = null,
-    revision = 0,
-    fail = false;
-  const files = new Map([
-    ['/sailors-logbook.json', 'legacy-1'],
-    ['/sailor-logbook/v2/backups/11111111-1111-4111-8111-111111111111.json', 'backup-1'],
-    ['/unrelated.txt', 'keep'],
-  ]);
+  let raw: string | null = erased
+      ? JSON.stringify({
+          format: 'slb-erased',
+          protocol: 2,
+          reader: 2,
+          generation: crypto.randomUUID(),
+          at: new Date().toISOString(),
+        })
+      : null,
+    revision = erased ? 1 : 0,
+    fail = false,
+    uncertain = false;
+  const files = new Map(
+    erased
+      ? [['/unrelated.txt', 'keep']]
+      : [
+          ['/sailors-logbook.json', 'legacy-1'],
+          ['/sailor-logbook/v2/backups/11111111-1111-4111-8111-111111111111.json', 'backup-1'],
+          ['/unrelated.txt', 'keep'],
+        ],
+  );
   await page.route('https://api.dropboxapi.com/oauth2/token', (r: any) =>
     r.fulfill({ json: { access_token: 'synthetic-token', expires_in: 3600 } }),
   );
@@ -127,9 +142,20 @@ async function mockCloud(page: any) {
       return r.fulfill({ status: 409, body: 'conflict' });
     raw = r.request().postData();
     revision++;
+    if (uncertain) {
+      uncertain = false;
+      return r.abort('failed');
+    }
     return r.fulfill({ json: { rev: String(revision) } });
   });
-  return { errors, files, get: () => raw, fail: (value: boolean) => (fail = value) };
+  return {
+    errors,
+    files,
+    get: () => raw,
+    fail: (value: boolean) => (fail = value),
+    uncertain: () => (uncertain = true),
+    revision: () => revision,
+  };
 }
 
 test('local erasure guards drafts, cancels without mutation, clears retained state and starts only a new local session', async ({
@@ -250,4 +276,120 @@ test('opening local erasure aborts an outstanding sync check before preparing it
   expect(await page.evaluate(() => (window as any).downloadAborted)).toBeTruthy();
   await page.getByRole('button', { name: 'Cancel deletion preview' }).click();
   expect((await state(page)).job).toBeUndefined();
+});
+
+test('new cloud after erasure requires explicit empty-generation review and cannot restore the old logbook', async ({
+  page,
+}) => {
+  const cloud = await mockCloud(page);
+  await seed(page);
+  await connect(page);
+  await page.getByRole('button', { name: 'Delete logbook everywhere', exact: true }).click();
+  await page.getByRole('checkbox', { name: /I understand this is permanent/ }).check();
+  await page.getByRole('checkbox', { name: /I stopped legacy writers/ }).check();
+  await page.getByLabel('Type DELETE EVERYWHERE to confirm').fill('DELETE EVERYWHERE');
+  await Promise.all([
+    page.waitForEvent('domcontentloaded'),
+    page.getByRole('button', { name: 'Confirm permanent erasure' }).click(),
+  ]);
+  await expect(page.getByRole('region', { name: 'Erasure result' })).toBeVisible();
+  const deleted = cloud.get()!;
+  await page.getByRole('button', { name: 'Start a new local logbook' }).click();
+  await expect(page.getByRole('button', { name: 'Edit profile', exact: true })).toBeEnabled();
+  await connect(page);
+  await page.getByRole('button', { name: 'Preview Dropbox sync' }).click();
+  await expect(page.getByRole('region', { name: 'Dropbox synchronization' })).toContainText(
+    'Cloud deletion barrier found',
+  );
+  expect(cloud.get()).toBe(deleted);
+  await page.getByRole('button', { name: 'Edit profile', exact: true }).click();
+  await page.getByLabel('Your name').fill('unsaved draft');
+  await expect(page.getByRole('button', { name: 'Review new cloud logbook' })).toBeDisabled();
+  await page.getByRole('dialog').getByRole('button', { name: 'Cancel', exact: true }).click();
+  await page.getByRole('button', { name: 'Review new cloud logbook' }).click();
+  await expect(page.getByRole('dialog', { name: 'New cloud logbook preview' })).toContainText(
+    'starts without encryption',
+  );
+  await page.getByRole('button', { name: 'Cancel new-cloud preview' }).click();
+  expect(cloud.get()).toBe(deleted);
+  await page.getByRole('button', { name: 'Review new cloud logbook' }).click();
+  await expect(
+    page.getByRole('button', { name: 'Create or verify new cloud logbook' }),
+  ).toBeDisabled();
+  await page.getByLabel('I want a new empty cloud logbook; do not restore old data').check();
+  await page.getByLabel('Type NEW CLOUD to confirm').fill('NEW CLOUD');
+  await page.getByRole('button', { name: 'Create or verify new cloud logbook' }).click();
+  await expect(page.getByRole('region', { name: 'Dropbox synchronization' })).toContainText(
+    'New empty cloud verified',
+  );
+  const next = JSON.parse(cloud.get()!);
+  expect(next.generation).not.toBe(JSON.parse(deleted).generation);
+  expect(JSON.parse(next.payload).payload.state.entities).toEqual({});
+  expect(cloud.get()).not.toContain('synthetic retained journal');
+  expect((await state(page)).state.entities).toEqual({});
+  expect(cloud.files.has('/unrelated.txt')).toBeTruthy();
+  expect(cloud.errors).toEqual([]);
+});
+
+test('encrypted new-cloud request survives a lost response and reload without acknowledging newer local edits', async ({
+  page,
+}) => {
+  const cloud = await mockCloud(page, true);
+  await connect(page);
+  await page.getByRole('button', { name: 'Set up optional encryption' }).click();
+  await page.getByLabel('New encryption passphrase').fill('synthetic fresh cloud passphrase');
+  await page.getByRole('button', { name: 'Create recovery kit' }).click();
+  const code = await page.getByLabel('Printable recovery code').inputValue();
+  await page.getByLabel('I saved the file or printed the code privately').check();
+  await page.getByLabel('Re-enter saved recovery code').fill(code);
+  await page.getByRole('button', { name: 'Verify recovery and use key' }).click();
+  await page.getByRole('button', { name: 'Preview Dropbox sync' }).click();
+  await page.getByRole('button', { name: 'Review new cloud logbook' }).click();
+  await page.getByLabel('I want a new empty cloud logbook; do not restore old data').check();
+  await page.getByLabel('Type NEW CLOUD to confirm').fill('NEW CLOUD');
+  cloud.uncertain();
+  await page.getByRole('button', { name: 'Create or verify new cloud logbook' }).click();
+  await expect(page.getByRole('dialog')).toContainText('Not synced');
+  expect((await state(page)).sync.intent.transition).toBe('new-cloud');
+  expect(JSON.parse(cloud.get()!).mode).toBe('encrypted');
+  await page.getByRole('button', { name: 'Cancel new-cloud preview' }).click();
+  await expect(page.getByRole('button', { name: 'Set up optional encryption' })).not.toBeVisible();
+  await page.getByRole('button', { name: 'Edit profile', exact: true }).click();
+  await page.getByLabel('Your name').fill('Later local profile');
+  await page.getByRole('button', { name: 'Save profile', exact: true }).click();
+  await expect(page.getByRole('dialog')).not.toBeVisible();
+  await page.reload();
+  await expect(page.getByRole('button', { name: 'Unlock configured key' })).toBeVisible();
+  await connect(page);
+  await page.getByRole('button', { name: 'Review new cloud logbook' }).click();
+  await page.getByLabel('I want a new empty cloud logbook; do not restore old data').check();
+  await page.getByLabel('Type NEW CLOUD to confirm').fill('NEW CLOUD');
+  await expect(
+    page.getByRole('button', { name: 'Create or verify new cloud logbook' }),
+  ).toBeDisabled();
+  await page.getByRole('button', { name: 'Cancel new-cloud preview' }).click();
+  await page.getByRole('button', { name: 'Unlock configured key' }).click();
+  await page
+    .getByLabel('Encryption passphrase', { exact: true })
+    .fill('synthetic fresh cloud passphrase');
+  await page.getByRole('button', { name: 'Unlock for this tab' }).click();
+  await page.getByRole('button', { name: 'Review new cloud logbook' }).click();
+  await expect(page.getByRole('dialog')).toContainText('those records will not be uploaded');
+  await page.getByLabel('I want a new empty cloud logbook; do not restore old data').check();
+  await page.getByLabel('Type NEW CLOUD to confirm').fill('NEW CLOUD');
+  const revision = cloud.revision();
+  await page.getByRole('button', { name: 'Create or verify new cloud logbook' }).click();
+  await expect(page.getByRole('region', { name: 'Dropbox synchronization' })).toContainText(
+    'local edits remain pending',
+  );
+  expect(cloud.revision()).toBe(revision);
+  expect((await state(page)).pending.length).toBeGreaterThan(0);
+  expect((await state(page)).sync.anchor.base.entities).toEqual({});
+  await page.getByRole('button', { name: 'Preview Dropbox sync' }).click();
+  await page.getByRole('button', { name: 'Apply reviewed sync' }).click();
+  await expect(page.getByRole('region', { name: 'Dropbox synchronization' })).toContainText(
+    'Synced ·',
+  );
+  expect((await state(page)).pending).toHaveLength(0);
+  expect(cloud.errors).toEqual([]);
 });
