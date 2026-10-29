@@ -80,3 +80,13 @@ No closed-app Dropbox sync, remote wipe, malicious-provider-writer protection or
 unsaved-draft survival after OS kill. Native reminders are inexact and OS/OEM constrained.
 Earlier phase acceptance does not waive final Phase 13 owner review. Continue Phase 10
 validation/review only; do not start Phase 11, publish or deploy.
+## GitHub review publication — 29 October 2026
+
+Published for owner-authorized review as [draft PR #20](https://github.com/byshriv/Sailor-LogBook/pull/20),
+`codex/phase-10-android` → `main`. Implementation commit `c513b53` was pushed intact;
+there was no snapshot rewrite, force push, merge, release publication or deployment.
+Final fetch confirms `main == origin/main` at `0ec4f8c`, zero ahead/behind.
+README/DEPLOY owner hashes remain unchanged and excluded. This publication supersedes
+prior local-only/hosted-not-published statements; hosted CI/CodeQL is pending until
+actually returned for the final pushed head. Physical-device, live Dropbox, protected
+signing setup and all carried release gates remain open. Continue Phase 10 only.

@@ -86,3 +86,13 @@ Owner README/DEPLOY edits remain excluded and byte-identical to the Phase 9 reco
 README SHA-256 `cdf4694d0cbf3e53394ef3a4c7a4e6edfdd57d1af1b5feacf06f5a8d036265cb`;
 DEPLOY SHA-256 `e242138dd63b994c439e3a64814d780781cd49433b350155eb39476aa8d6d844`.
 No artifact is promoted. Phase 10 owner/native/signing acceptance remains pending.
+
+## GitHub review publication — 29 October 2026
+
+Implementation `c513b53` is published intact as [draft PR #20](https://github.com/byshriv/Sailor-LogBook/pull/20),
+`codex/phase-10-android` → `main`. Main remains fetched/current at merged PR #19 `0ec4f8c`.
+Documentation follows on the same branch; hosted checks must refer to the final pushed head.
+No force push, merge, release publication, deployment, personal-data use or Phase 11 work.
+Local verification above remains evidence for the unchanged implementation. Hosted CI and
+CodeQL are pending until actually observed. Native instrumentation compilation is not an
+executed-device pass; real-device and signed-upgrade/signing-environment gates remain open.
