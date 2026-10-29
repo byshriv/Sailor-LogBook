@@ -21,6 +21,7 @@ import type { ContentSetup } from '../../../packages/crypto/src/content.ts';
 import { readManifest, SyncEngine } from './sync-engine.ts';
 import type { SyncPreview } from './sync-engine.ts';
 import styles from './management.module.css';
+import { ErasureTools } from './erasure-tools.tsx';
 
 let access: { token: string; expires: number } | null = null;
 export function SyncTools({
@@ -71,21 +72,31 @@ export function SyncTools({
     } | null>(null),
     [useRecovery, setUseRecovery] = useState(false),
     [schedule, setSchedule] = useState(false);
+  const [erasureActive, setErasureActive] = useState(!!projection.erasure),
+    [erasureBusy, setErasureBusy] = useState(false),
+    [erasureComplete, setErasureComplete] = useState(projection.erasure?.phase === 'complete');
+  const stoppedWaiters = useRef<(() => void)[]>([]);
+  const intentionalNavigation = useRef(false);
   const running = useRef(false),
     controller = useRef<AbortController | null>(null),
     initialized = useRef(false);
-  const active = busy || !!preview || wizard || !!unlock || rejoin;
+  const active = busy || !!preview || wizard || !!unlock || rejoin || erasureActive;
   useEffect(() => {
     onActive(active);
     return () => onActive(false);
   }, [active, onActive]);
   useEffect(() => {
     const guard = (e: BeforeUnloadEvent) => {
-      if (active) e.preventDefault();
+      if (
+        !intentionalNavigation.current &&
+        !erasureComplete &&
+        (busy || preview || wizard || unlock || rejoin || erasureBusy)
+      )
+        e.preventDefault();
     };
     window.addEventListener('beforeunload', guard);
     return () => window.removeEventListener('beforeunload', guard);
-  }, [active]);
+  }, [busy, preview, wizard, unlock, rejoin, erasureBusy, erasureComplete]);
   useEffect(() => {
     let previous = canonical(projection.store.getState());
     return projection.store.subscribe(() => {
@@ -122,20 +133,23 @@ export function SyncTools({
       await fn(controller.current.signal);
     } catch (error) {
       const message = error instanceof Error ? error.message : '';
-      const action = /generation/.test(message)
-        ? 'Cloud/local generation changed; preserve a backup and use Review device join.'
-        : /Legacy/.test(message)
-          ? 'Legacy Dropbox changed or metadata access failed; review old-device backups and reconnect with metadata access.'
-          : /session expired|authorization/.test(message)
-            ? 'Dropbox authorization expired or failed; reconnect.'
-            : /recovery|Recovery|decrypt|encoded|key size/.test(message)
-              ? 'Unlock/recovery verification failed; check the saved secret.'
-              : 'Operation failed, canceled, locked or Dropbox changed. Retry preview or reconnect.';
+      const action = /erased|Erasure/.test(message)
+        ? 'A deletion barrier is active; automatic cloud recreation and erased-session uploads are blocked. Finish the deletion review or continue with a new local logbook.'
+        : /generation/.test(message)
+          ? 'Cloud/local generation changed; preserve a backup and use Review device join.'
+          : /Legacy/.test(message)
+            ? 'Legacy Dropbox changed or metadata access failed; review old-device backups and reconnect with metadata access.'
+            : /session expired|authorization/.test(message)
+              ? 'Dropbox authorization expired or failed; reconnect.'
+              : /recovery|Recovery|decrypt|encoded|key size/.test(message)
+                ? 'Unlock/recovery verification failed; check the saved secret.'
+                : 'Operation failed, canceled, locked or Dropbox changed. Retry preview or reconnect.';
       setStatus('Not synced · ' + action + ' Existing data and review are retained.');
     } finally {
       await projection.refresh().catch(() => {});
       running.current = false;
       setBusy(false);
+      for (const resolve of stoppedWaiters.current.splice(0)) resolve();
     }
   };
   useEffect(() => {
@@ -228,11 +242,21 @@ export function SyncTools({
             <input value={client} onChange={(e) => setClient(e.target.value)} />
           </label>
           <button
-            disabled={blocked || active}
+            disabled={
+              blocked ||
+              busy ||
+              erasureBusy ||
+              erasureComplete ||
+              !!preview ||
+              wizard ||
+              !!unlock ||
+              rejoin
+            }
             onClick={() =>
               void run(async () => {
                 const auth = await beginDropbox(client, location.origin + '/?phase=9&tool=help');
                 sessionStorage.setItem('slb-dropbox-pkce', JSON.stringify(auth));
+                intentionalNavigation.current = true;
                 location.assign(auth.url);
               })
             }
@@ -256,7 +280,16 @@ export function SyncTools({
             Check every minute while this screen is open; changes require review
           </label>
           <button
-            disabled={blocked || active}
+            disabled={
+              blocked ||
+              busy ||
+              erasureBusy ||
+              erasureComplete ||
+              !!preview ||
+              wizard ||
+              !!unlock ||
+              rejoin
+            }
             onClick={() => {
               access = null;
               setConnected(false);
@@ -401,6 +434,30 @@ export function SyncTools({
           Cancel sync/check
         </button>
       )}
+      <ErasureTools
+        projection={projection}
+        port={connected ? port() : undefined}
+        blocked={blocked || !!preview || wizard || !!unlock || rejoin}
+        onActive={setErasureActive}
+        onBusy={setErasureBusy}
+        prepare={async () => {
+          setSchedule(false);
+          controller.current?.abort();
+          if (running.current)
+            await new Promise<void>((resolve) => stoppedWaiters.current.push(resolve));
+          setPreview(null);
+        }}
+        onErased={() => {
+          access = null;
+          sessionStorage.removeItem('slb-dropbox-pkce');
+          setConnected(false);
+          setEncryption(undefined);
+          setPolicy(null);
+          setErasureComplete(true);
+          intentionalNavigation.current = true;
+          requestAnimationFrame(() => location.replace('/?phase=9&tool=help'));
+        }}
+      />
       {preview && plan && (
         <Modal title="Dropbox sync preview" close={close}>
           <p role="status">{status}</p>

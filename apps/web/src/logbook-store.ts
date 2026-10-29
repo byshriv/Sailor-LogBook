@@ -21,6 +21,7 @@ export async function createLogbookProjection(db: LogbookStore, schedule: () => 
   );
   return {
     db,
+    erasure: await db.erasureStatus(),
     refresh: async () => store.dispatch(projection.actions.durable(await db.load())),
     store,
     pipeline,

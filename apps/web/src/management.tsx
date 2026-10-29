@@ -129,6 +129,7 @@ function Management({ projection }: { projection: Projection }) {
   const [welcome, setWelcome] = useState(() => {
       const route = new URLSearchParams(location.search);
       return (
+        !projection.erasure &&
         !Object.keys(state.entities).length &&
         !['tour', 'tool', 'new', 'editDeck', 'editPreset', 'deck'].some((key) => route.has(key))
       );
@@ -146,7 +147,7 @@ function Management({ projection }: { projection: Projection }) {
     [priorities, setPriorities] = useState<string[]>(['home']);
   const saving = useRef(false),
     initial = useRef(false);
-  const [syncActive, setSyncActive] = useState(false),
+  const [syncActive, setSyncActive] = useState(!!projection.erasure),
     [dataActive, setDataActive] = useState(false);
   const [decrypted, setDecrypted] = useState<{ raw: string } | null>(null);
   const dirty =
@@ -604,7 +605,7 @@ function Management({ projection }: { projection: Projection }) {
                   Secondary cloud/backup protection is available in Dropbox synchronization.
                   Unencrypted Dropbox content can be read by Dropbox. Browser unlock is
                   session-only; trusted Android unlock requires platform protection. Lock,
-                  Disconnect, Erase local and Delete logbook everywhere are distinct later flows.
+                  Disconnect, Erase local and Delete logbook everywhere are distinct actions.
                 </p>
               </details>
             </section>
