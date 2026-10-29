@@ -1,3 +1,6 @@
+import { nativeOAuthReturn } from '../../../packages/platform/src/native.ts';
+import { device, trustContent, restoreTrust } from './native-production.ts';
+import { isNative } from './native.ts';
 import { useEffect, useRef, useState } from 'react';
 import type { Projection } from './management-ui.tsx';
 import { Modal } from './management-ui.tsx';
@@ -41,6 +44,7 @@ export function SyncTools({
   onActive: (active: boolean) => void;
   onBackup: (copy: { raw: string }) => void;
 }) {
+  const [trustDevice, setTrustDevice] = useState(false);
   const [connected, setConnected] = useState(!!access),
     [busy, setBusy] = useState(false),
     [status, setStatus] = useState(
@@ -93,6 +97,7 @@ export function SyncTools({
     scheduledReview = useRef<() => Promise<ReviewResult>>(async () => ({ kind: 'stop' })),
     draftBlocked = useRef(blocked);
   draftBlocked.current = blocked;
+  const pendingNativeOAuth = useRef(false);
   const running = useRef(false),
     controller = useRef<AbortController | null>(null),
     initialized = useRef(false);
@@ -130,6 +135,8 @@ export function SyncTools({
         setPolicy(p ?? null);
         setNewCloudPending(journal?.intent?.transition === 'new-cloud');
         setPolicyReady(true);
+        if (isNative() && p && new URLSearchParams(location.search).has('nativeUnlock'))
+          setUnlock(p);
       })
       .catch(() =>
         setStatus('Not synced · encryption policy could not be read; reopen recovery tools'),
@@ -180,6 +187,10 @@ export function SyncTools({
       running.current = false;
       setBusy(false);
       for (const resolve of stoppedWaiters.current.splice(0)) resolve();
+      if (isNative() && pendingNativeOAuth.current && !draftBlocked.current) {
+        pendingNativeOAuth.current = false;
+        queueMicrotask(() => window.dispatchEvent(new Event('slb-oauth-return')));
+      }
     }
   };
   useEffect(() => {
@@ -199,6 +210,34 @@ export function SyncTools({
       setStatus('Connected · preview required; no journal data transferred');
     });
   }, []);
+
+  useEffect(() => {
+    if (!isNative()) return;
+    const receive = () => {
+      if (draftBlocked.current || running.current) {
+        pendingNativeOAuth.current = true;
+        return;
+      }
+      pendingNativeOAuth.current = false;
+      void run(async () => {
+        const value = await device.takeOAuth();
+        if (!value.url) return;
+        const callback = nativeOAuthReturn(value.url);
+        if (!value.pending || callback.canceled) throw Error('Authorization canceled');
+        access = await finishDropbox(
+          value.pending,
+          callback.code,
+          callback.state,
+          globalThis.fetch.bind(globalThis),
+        );
+        setConnected(true);
+        setStatus('Connected · preview required; no journal data transferred');
+      });
+    };
+    receive();
+    window.addEventListener('slb-oauth-return', receive);
+    return () => window.removeEventListener('slb-oauth-return', receive);
+  }, [blocked]);
   const check = () =>
     run(async (signal) => {
       setStatus('Checking Dropbox · not synced');
@@ -330,6 +369,34 @@ export function SyncTools({
         runs while the app is closed.
       </p>
       <p role="status">{status}</p>
+      {isNative() && policy && (
+        <>
+          <button
+            disabled={blocked || active}
+            onClick={() =>
+              void run(async () => {
+                const key = await restoreTrust(policy);
+                setEncryption({ setup: policy, key });
+                setStatus('Trusted key restored on this unlocked device · preview required');
+              })
+            }
+          >
+            Unlock with trusted device
+          </button>
+          <button
+            disabled={blocked || active}
+            onClick={() =>
+              void run(async () => {
+                await device.forget();
+                setEncryption(undefined);
+                setStatus('Device trust forgotten · use your passphrase or recovery code');
+              })
+            }
+          >
+            Forget device trust
+          </button>
+        </>
+      )}
       {!connected && (
         <>
           <label>
@@ -349,7 +416,16 @@ export function SyncTools({
             }
             onClick={() =>
               void run(async () => {
-                const auth = await beginDropbox(client, location.origin + '/?phase=9&tool=help');
+                const auth = await beginDropbox(
+                  client,
+                  isNative()
+                    ? 'sailorlogbook://oauth/dropbox'
+                    : location.origin + '/?phase=9&tool=help',
+                );
+                if (isNative()) {
+                  await device.beginOAuth({ pending: auth });
+                  return;
+                }
                 sessionStorage.setItem('slb-dropbox-pkce', JSON.stringify(auth));
                 intentionalNavigation.current = true;
                 location.assign(auth.url);
@@ -464,10 +540,13 @@ export function SyncTools({
           </p>
           <button
             disabled={blocked || active}
-            onClick={() => {
-              setEncryption(undefined);
-              setStatus('Locked · session key forgotten; local database remains plaintext');
-            }}
+            onClick={() =>
+              void run(async () => {
+                setEncryption(undefined);
+                if (isNative()) await device.lock();
+                setStatus('Locked · session key forgotten; local database remains plaintext');
+              })
+            }
           >
             Lock logbook
           </button>
@@ -476,7 +555,7 @@ export function SyncTools({
             onClick={() =>
               void run(async () => {
                 const generation = crypto.randomUUID();
-                downloadText(
+                await downloadText(
                   JSON.stringify({
                     format: 'slb-encrypted-backup',
                     version: 1,
@@ -543,9 +622,9 @@ export function SyncTools({
       <p>
         Legacy v8: stop editing on old devices, download and verify their latest backups, then use
         Storage & data to preview/merge each copy. The production file is separate; old clients
-        cannot follow it. Never run both as live logbooks. Trusted Android unlock requires the later
-        native adapter; browser unlock is session-only. Local points and Dropbox revision history do
-        not replace an external backup.
+        cannot follow it. Never run both as live logbooks. Android trust is optional and requires a
+        secure screen lock; browser unlock is session-only. Local points and Dropbox revision
+        history do not replace an external backup.
       </p>
       {busy && (
         <button
@@ -584,6 +663,7 @@ export function SyncTools({
       {newCloudPreview && (
         <Modal title="New cloud logbook preview" close={close}>
           <p role="status">{status}</p>
+
           <p>
             This explicitly replaces the reviewed deletion barrier with a new empty logbook and a
             fresh cloud generation. It does not restore old data or merge old copies. Other devices
@@ -664,6 +744,7 @@ export function SyncTools({
       {preview && plan && (
         <Modal title="Dropbox sync preview" close={close}>
           <p role="status">{status}</p>
+
           {!!plan.featureReview.length && (
             <p>
               All moment text will be retained in Notebook. Choose up to four featured moments in
@@ -765,6 +846,7 @@ export function SyncTools({
       {rejoin && (
         <Modal title="Review device join" close={close}>
           <p role="status">{status}</p>
+
           <p>
             Use this only after a cloud generation/account change. Verify a current external backup
             first. The previous sync journal stays archived, pending operations remain local, and
@@ -830,6 +912,7 @@ export function SyncTools({
       {wizard && (
         <Modal title="Protect cloud content" close={close}>
           <p role="status">{status}</p>
+
           {changingCredentials && !changingContentKey && (
             <p>
               Change credentials after completing a reviewed encrypted sync. The old recovery code
@@ -1001,13 +1084,15 @@ export function SyncTools({
                 <textarea readOnly value={pending.code} />
               </label>
               <button
-                onClick={() => {
-                  downloadText(
-                    JSON.stringify({ format: 'slb-recovery', version: 1, code: pending.code }),
-                    'sailor-logbook-recovery.json',
-                  );
-                  setSavedRecovery(true);
-                }}
+                onClick={() =>
+                  void run(async () => {
+                    await downloadText(
+                      JSON.stringify({ format: 'slb-recovery', version: 1, code: pending.code }),
+                      'sailor-logbook-recovery.json',
+                    );
+                    setSavedRecovery(true);
+                  })
+                }
               >
                 Download recovery file
               </button>
@@ -1097,6 +1182,7 @@ export function SyncTools({
       {unlock && (
         <Modal title="Unlock encrypted Dropbox" close={close}>
           <p role="status">{status}</p>
+
           <label>
             <input
               type="checkbox"
@@ -1118,7 +1204,14 @@ export function SyncTools({
             disabled={busy || !recovery}
             onClick={() =>
               void run(async () => {
-                const key = await unlockContent(unlock, recovery, useRecovery);
+                const key = await unlockContent(
+                  unlock,
+                  recovery,
+                  useRecovery,
+                  isNative() && trustDevice && !backupToUnlock
+                    ? (raw) => trustContent(unlock, raw)
+                    : undefined,
+                );
                 if (backupToUnlock) {
                   const raw = await decryptContent(
                     backupToUnlock.payload,
@@ -1140,11 +1233,27 @@ export function SyncTools({
                 setUnlock(null);
                 setRecovery('');
                 setStatus('Unlocked for this tab · preview Dropbox sync again');
+                if (isNative()) {
+                  const action = sessionStorage.getItem('slb-native-after-unlock');
+                  sessionStorage.removeItem('slb-native-after-unlock');
+                  if (action === 'quick-log') location.assign('/?phase=3&new=log');
+                  if (action === 'today') location.assign('/?phase=3');
+                }
               })
             }
           >
             Unlock for this tab
           </button>
+          {isNative() && !backupToUnlock && (
+            <label>
+              <input
+                type="checkbox"
+                checked={trustDevice}
+                onChange={(e) => setTrustDevice(e.target.checked)}
+              />
+              Trust this Android device after confirming screen unlock
+            </label>
+          )}
           <button disabled={busy} onClick={close}>
             Cancel unlock
           </button>

@@ -1,7 +1,9 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">Logbook Proof</string>
-    <string name="title_activity_main">Logbook Proof</string>
+    <string name="app_name">Logbook</string>
+    <string name="title_activity_main">Logbook</string>
     <string name="package_name">work.shriv.sailorlogbook.proof</string>
     <string name="custom_url_scheme">work.shriv.sailorlogbook.proof</string>
+    <string name="quick_log_widget">Quick log</string>
+    <string name="today_widget">Today / best thing</string>
 </resources>

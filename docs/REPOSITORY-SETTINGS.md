@@ -25,3 +25,12 @@ admin action remains. The steps below are retained as maintenance/reference inst
 
 Repository: [byshriv/Sailor-LogBook](https://github.com/byshriv/Sailor-LogBook).
 Foundation review: [PR #1](https://github.com/byshriv/Sailor-LogBook/pull/1).
+
+## Phase 10 signing environment — configuration pending
+
+`android-signed.yml` now implements manual main-only signed review artifacts, with a
+required `android-signing` environment and a fail-closed API check for reviewers and
+protected-branch policy. Existing main protection is unchanged. No signing environment,
+reviewer, secret, certificate or workflow run was configured by this task. Follow
+[the Phase 10 setup and rehearsal](PHASE-10-DEVICE-REHEARSAL.md). Environment YAML does
+not establish server-side protection, and review artifacts do not authorize publication.

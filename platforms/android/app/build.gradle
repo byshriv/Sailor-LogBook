@@ -5,11 +5,11 @@ android {
     namespace = "work.shriv.sailorlogbook.proof"
     compileSdk = rootProject.ext.compileSdkVersion
     defaultConfig {
-        applicationId "work.shriv.sailorlogbook.proof"
+        applicationId "work.shriv.sailorlogbook"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 1
-        versionName "0.1.0-phase1"
+        versionCode = (System.getenv('SLB_VERSION_CODE') ?: '1').toInteger()
+        versionName "0.1.0-phase10"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
@@ -22,8 +22,20 @@ android {
         targetCompatibility JavaVersion.VERSION_21
     }
     kotlinOptions { jvmTarget = '21' }
+    signingConfigs {
+        protectedRelease {
+            if (System.getenv('SLB_SIGNING_STORE')) {
+                storeFile file(System.getenv('SLB_SIGNING_STORE'))
+                storePassword System.getenv('SLB_SIGNING_STORE_PASSWORD')
+                keyAlias System.getenv('SLB_SIGNING_ALIAS')
+                keyPassword System.getenv('SLB_SIGNING_KEY_PASSWORD')
+            }
+        }
+    }
     buildTypes {
+        debug { applicationIdSuffix '.debug' }
         release {
+            signingConfig signingConfigs.protectedRelease
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
@@ -58,4 +70,13 @@ try {
     }
 } catch(Exception e) {
     logger.info("google-services.json not found, google-services plugin not applied. Push Notifications won't work")
+}
+
+// Fail closed: release builds never silently use debug signing or an unsigned artifact.
+gradle.taskGraph.whenReady { graph ->
+    if (graph.allTasks.any { it.name.toLowerCase().contains('release') }) {
+        ['SLB_SIGNING_STORE','SLB_SIGNING_STORE_PASSWORD','SLB_SIGNING_ALIAS','SLB_SIGNING_KEY_PASSWORD'].each {
+            if (!System.getenv(it)) throw new GradleException('Protected signing inputs required')
+        }
+    }
 }

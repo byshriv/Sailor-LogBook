@@ -1,13 +1,15 @@
 # Phase 1 product preservation specification
 
-## Current acceptance — Phase 9 continuation
+## Current acceptance — Phase 10 Android
 
-Phase 8 is accepted and complete by explicit owner instruction on 29 October 2026.
-Fetched origin and fast-forwarded local `main == origin/main`, zero ahead/behind,
-at `df2310d7d6cc9dd09830724fc1d37bcc3ad48007`, PR #17's merge, including final
-head `9d01b6c09bb9d0275ff83f021e38ed0d10abad34`. Only Phase 9 is authorized.
-Implementation/review status: [Phase 9](PHASE-9-STATUS.md). Phase 10+, real-data
-cutover and deployment remain gated. Earlier pending-acceptance text is historical.
+Phase 9 implementation is accepted by explicit owner instruction on 29 October 2026.
+Fetched origin and fast-forwarded `main == origin/main`, zero ahead/behind, to
+`0ec4f8c9e56e7f3c3fb20575d2a9fcb790a7bbbc`, merged PR #19, containing final head
+`ade5f36`. Phase 10 only is authorized on `codex/phase-10-android`.
+See [Phase 10](PHASE-10-STATUS.md). Phase 9 live Dropbox, device/resource,
+Firefox/Safari and independent-security release gates remain open; implementation
+acceptance does not assert those results. Phase 11+, cutover, deployment and release
+publication remain gated. Earlier pending-acceptance text is historical.
 
 Authority: LAUNCH-DECISIONS.md and LAUNCH-PLAN.md section 3. The accepted decisions override
 historical questionnaire recommendations. All demo features remain required at 1.0.
@@ -111,3 +113,10 @@ See [Phase 8 status](PHASE-8-STATUS.md) for scope, review instructions and remai
 platform evidence. Production offline updates wait for all old tabs to close; data tools
 provide versioned plaintext backups, Merge/Replace preview and verified recovery before
 mutation. Phase 8 is accepted and complete. Phase 9 is implemented for review; see its status and verification for remaining gates.
+
+Phase 10 native adapters are implemented for review; see [status](PHASE-10-STATUS.md).
+Android loads all existing production screens against canonical storage, with guarded
+native return/Quick log, optional Keystore trust, inexact reminders, verified document
+backups and both native widgets. Widget text defaults off per device. No service worker
+runs in the packaged APK. Actual devices, signed install/upgrade and live-account/security
+acceptance remain gates; Phase 11 and release/deployment are not authorized.

@@ -1,3 +1,5 @@
+import { isNative } from './native.ts';
+import { device } from './native-production.ts';
 import styles from './management.module.css';
 import { useEffect, useState } from 'react';
 import type { Entity } from '../../../packages/domain/src/logbook.ts';
@@ -37,7 +39,11 @@ function describe(entity: Entity | undefined): string {
       ? 'Reflection'
       : 'Saved history';
 }
-export function downloadText(raw: string, name: string) {
+export async function downloadText(raw: string, name: string) {
+  if (isNative()) {
+    await device.saveBackup({ raw, name });
+    return;
+  }
   const url = URL.createObjectURL(new Blob([raw], { type: 'application/json' })),
     a = document.createElement('a');
   a.href = url;
@@ -117,8 +123,12 @@ export function DataTools({
         disabled={blocked || busy || !!incoming || !!restore}
         onClick={() =>
           void run(async () => {
-            downloadText(await exportBackup(db), 'sailor-logbook-v1.json');
-            setStatus('Verified backup prepared · check your Downloads');
+            await downloadText(await exportBackup(db), 'sailor-logbook-v1.json');
+            setStatus(
+              isNative()
+                ? 'Backup saved and read back · reopen it through Preview import to verify recovery.'
+                : 'Verified backup prepared · check your Downloads',
+            );
           })
         }
       >

@@ -34,7 +34,7 @@ class ProjectionStore(private val context: Context) {
         val clean = JSONObject().put("schema", 1).put("revision", revision)
             .put("wallDate", day).put("loggedMinutes", minutes).put("bestCount", count)
             .put("updatedAt", updated)
-        if (preferences.getBoolean("showPersonalText", false)) {
+        if (preferences.getBoolean("showPersonalText", false) && !preferences.getBoolean("locked", false)) {
             val text = input.optString("personalText", "").take(500)
             if (text.isNotEmpty()) clean.put("personalText", text)
         }
@@ -44,7 +44,19 @@ class ProjectionStore(private val context: Context) {
         true
     }
 
-    fun clear() = synchronized(LOCK) { file.delete() }
+    fun publishCurrent(input: JSONObject): Boolean = synchronized(LOCK) {
+        input.put("revision", (read()?.optLong("revision", -1) ?: -1) + 1)
+        publish(input)
+    }
+    fun textVisibility() = preferences.getBoolean("showPersonalText", false)
+    fun privacyLock(locked: Boolean) {
+        require(preferences.edit().putBoolean("locked", locked).commit())
+        clear()
+    }
+    fun clear() = synchronized(LOCK) {
+        file.delete()
+        require(!file.baseFile.exists() && !File(file.baseFile.path + ".bak").exists() && !File(file.baseFile.path + ".new").exists())
+    }
     fun setTextVisibility(show: Boolean) = synchronized(LOCK) {
         require(preferences.edit().putBoolean("showPersonalText", show).commit())
         // Clear the old projection on either transition; only a fresh commit can republish.

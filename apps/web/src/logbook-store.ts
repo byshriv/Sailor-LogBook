@@ -1,3 +1,4 @@
+import { bindNativeProjection } from './native-production.ts';
 import { configureStore, createSlice } from '@reduxjs/toolkit';
 import type { PayloadAction } from '@reduxjs/toolkit';
 import { blankLogbook } from '../../../packages/domain/src/logbook.ts';
@@ -23,7 +24,7 @@ export async function createLogbookProjection(db: LogbookStore, schedule: () => 
       schedule();
     },
   );
-  return {
+  const result = {
     db,
     onDurable: (listener: () => void) => {
       durability.addEventListener('saved', listener);
@@ -37,4 +38,6 @@ export async function createLogbookProjection(db: LogbookStore, schedule: () => 
     save: (command: EditCommand, attachments: { id: string; digest: string; blob: Blob }[] = []) =>
       pipeline.save(command, undefined, attachments),
   };
+  bindNativeProjection(result);
+  return result;
 }

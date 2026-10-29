@@ -47,3 +47,15 @@ Sources checked 27 October 2026:
 - https://capacitorjs.com/docs/getting-started/environment-setup
 - https://developer.android.com/develop/ui/views/appwidgets/overview
 - https://vite.dev/guide/build
+
+## Phase 10 implementation — 29 October 2026
+
+Owner accepted Phase 9 implementation after merged PR #19. Production ID is now
+`work.shriv.sailorlogbook`, installed name Logbook, debug suffix `.debug`; the old
+`.proof` namespace remains only for source/class compatibility and historical proof
+installations. The production packaged entry uses canonical `slb-phase2`. See
+[Phase 10 architecture](../ARCHITECTURE-PHASE-10.md) for native lifecycle, strict OAuth,
+Keystore, reminders, backup and privacy behavior and the protected signing workflow.
+This supersedes earlier unassigned-ID / proof-only statements, not their evidence limits.
+Physical launcher/device, signed upgrade, live Dropbox and independent security gates
+remain unverified; no old proof result is promoted to current native acceptance.

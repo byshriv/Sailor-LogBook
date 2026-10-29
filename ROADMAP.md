@@ -1,13 +1,15 @@
 # Sailor Logbook roadmap
 
-## Current acceptance — Phase 9 continuation
+## Current acceptance — Phase 10 Android
 
-Phase 8 is accepted and complete by explicit owner instruction on 29 October 2026.
-Fetched origin and fast-forwarded local `main == origin/main`, zero ahead/behind,
-at `df2310d7d6cc9dd09830724fc1d37bcc3ad48007`, PR #17's merge, including final
-head `9d01b6c09bb9d0275ff83f021e38ed0d10abad34`. Only Phase 9 is authorized.
-Implementation/review status: [Phase 9](docs/PHASE-9-STATUS.md). Phase 10+, real-data
-cutover and deployment remain gated. Earlier pending-acceptance text is historical.
+Phase 9 implementation is accepted by explicit owner instruction on 29 October 2026.
+Fetched origin and fast-forwarded `main == origin/main`, zero ahead/behind, to
+`0ec4f8c9e56e7f3c3fb20575d2a9fcb790a7bbbc`, merged PR #19, containing final head
+`ade5f36`. Phase 10 only is authorized on `codex/phase-10-android`.
+See [Phase 10](docs/PHASE-10-STATUS.md). Phase 9 live Dropbox, device/resource,
+Firefox/Safari and independent-security release gates remain open; implementation
+acceptance does not assert those results. Phase 11+, cutover, deployment and release
+publication remain gated. Earlier pending-acceptance text is historical.
 
 
 | Phase | Goal | Status |
@@ -22,8 +24,8 @@ cutover and deployment remain gated. Earlier pending-acceptance text is historic
 | 6 | Tasks and Planner port: must-do, rollover, statuses and Voyage progress | accepted and complete by owner instruction; PR #15 merged as 9debb35; see docs/PHASE-6-STATUS.md |
 | 7 | Settings/profile, decks/presets, onboarding/tours, reminders, search, accessibility and capability copy | accepted and complete; PR #16 merged as 887fcdd; Phase 8 only authorized |
 | 8 | PWA hardening: offline updates, backup, export and import | accepted and complete by owner instruction; PR #17 merged as df2310d |
-| 9 | Production Dropbox sync first; optional E2EE content, passphrase/recovery key, trusted Android unlock, conflict review and cross-version safety | implemented for review at /?phase=9; live-account and platform exit gates pending |
-| 10 | Signed Android APK via GitHub Actions; native lifecycle/reminders; Quick log and Today / best thing widgets | required for 1.0 |
+| 9 | Production Dropbox sync first; optional E2EE content, passphrase/recovery key, trusted Android unlock, conflict review and cross-version safety | implementation accepted; PR #19 merged as 0ec4f8c; live-account/platform/security release gates remain open |
+| 10 | Signed Android APK via GitHub Actions; native lifecycle/reminders; Quick log and Today / best thing widgets | in progress; native/device/signing evidence tracked in docs/PHASE-10-STATUS.md |
 | 11 | Owner-led UI/usability refinement and bug fixing; browser/device tests, accessibility, performance, security and RC soak | required; owner feedback tracked throughout earlier phases too |
 | 12 | Documentation, privacy/security/support, third-party notices, contributor/repository polish and release preparation | planned |
 | 13 | Final owner-dictated review: errors, bugs, UI/UX changes, missing behavior and Demo v8 parity; implement, retest and repeat until accepted | required before deployment; see docs/PRE-RELEASE-OWNER-REVIEW.md |

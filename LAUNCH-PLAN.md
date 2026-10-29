@@ -1,13 +1,15 @@
 # Sailor Logbook — open-source 1.0 launch plan
 
-## Current acceptance — Phase 9 continuation
+## Current acceptance — Phase 10 Android
 
-Phase 8 is accepted and complete by explicit owner instruction on 29 October 2026.
-Fetched origin and fast-forwarded local `main == origin/main`, zero ahead/behind,
-at `df2310d7d6cc9dd09830724fc1d37bcc3ad48007`, PR #17's merge, including final
-head `9d01b6c09bb9d0275ff83f021e38ed0d10abad34`. Only Phase 9 is authorized.
-Implementation/review status: [Phase 9](docs/PHASE-9-STATUS.md). Phase 10+, real-data
-cutover and deployment remain gated. Earlier pending-acceptance text is historical.
+Phase 9 implementation is accepted by explicit owner instruction on 29 October 2026.
+Fetched origin and fast-forwarded `main == origin/main`, zero ahead/behind, to
+`0ec4f8c9e56e7f3c3fb20575d2a9fcb790a7bbbc`, merged PR #19, containing final head
+`ade5f36`. Phase 10 only is authorized on `codex/phase-10-android`.
+See [Phase 10](docs/PHASE-10-STATUS.md). Phase 9 live Dropbox, device/resource,
+Firefox/Safari and independent-security release gates remain open; implementation
+acceptance does not assert those results. Phase 11+, cutover, deployment and release
+publication remain gated. Earlier pending-acceptance text is historical.
 
 
 Planning baseline: 27 October 2026; execution updated 28 October 2026. Owner: **byshriv**.
@@ -59,8 +61,8 @@ The demo remains **Demo v8**, with final cache revision `slb-v8-r3`. The final S
 | 6 | Tasks/Planner port: day columns, moves, timed/untimed tasks, Must-do, rollover/skipped states, Waiting on, Low energy and Voyage progress. | No duplicate/lost tasks after moves, rollover, drag cancellation or date changes. | Accepted and complete by owner instruction; PR #15 merged as 9debb35 |
 | 7 | Settings/profile/deck/preset management, onboarding, normal and keyboard walkthroughs, reminders, global search, accessibility and platform-specific capability copy. | Every setting persists correctly; no replayed animations or dead controls; optional flows are understandable. | Accepted and complete; PR #16 merged as 887fcdd |
 | 8 | Production PWA/offline/update behavior, versioned backups, export/import, local recovery and storage health. | Install/offline/reopen/update/restore works with real data and active drafts; upgrade failure leaves a recoverable version. | Accepted and complete by owner instruction; PR #17 merged as df2310d; physical platform limits stay documented |
-| 9 | Production Dropbox operation transport, optional full-content encryption after initial sync, guided key/recovery setup, first-device join, conflict review and mixed-version migration. | Real multi-device, race, expiry, offline, recovery and encryption scenarios pass; no false Synced status. | Implemented for review; live-account/device/security exit evidence pending; see docs/PHASE-9-STATUS.md |
-| 10 | Android Capacitor shell, app links/OAuth return, native reminders, secure unlock, backups and required native widgets; GitHub Actions signed APK builds. | APK installs/upgrades and both widgets work on real Android devices, including offline and process restart. | Required for 1.0 |
+| 9 | Production Dropbox operation transport, optional full-content encryption after initial sync, guided key/recovery setup, first-device join, conflict review and mixed-version migration. | Real multi-device, race, expiry, offline, recovery and encryption scenarios pass; no false Synced status. | Implementation accepted; PR #19 merged as 0ec4f8c; live-account/device/security release gates remain open |
+| 10 | Android Capacitor shell, app links/OAuth return, native reminders, secure unlock, backups and required native widgets; GitHub Actions signed APK builds. | APK installs/upgrades and both widgets work on real Android devices, including offline and process restart. | Phase 10 in progress; acceptance/device/signing gates open |
 | 11 | Dedicated owner-led UI refinement, bug fixing and release hardening: browser/device matrix, accessibility, performance, storage stress, dependency/security review and soak tests. | Owner accepts the experience; no unresolved release blockers or known broken required flows. | Planned; feedback tracked throughout all phases |
 | 12 | Launch documentation, MIT/third-party notices, privacy/security/support material, repository polish, migration guide and signed release assets. | Fresh contributor can build; user can install, recover data and report issues; all links/assets are real. | Planned |
 | 13 | Final owner-dictated review of the complete app: errors, bugs, UI/UX changes, missing additions and Demo v8 differences, including feedback not previously discussed. Capture, implement, retest and repeat using the review register. | All review items resolved and owner-accepted or explicitly deferred by the owner; required demo flows and release blockers cannot be waived; owner accepts the final reviewed build. | Required before deployment; see docs/PRE-RELEASE-OWNER-REVIEW.md |

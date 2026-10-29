@@ -13,7 +13,9 @@ function visit(dir) {
     if (excluded.has(entry.name)) continue;
     const file = path.join(dir, entry.name);
     if (entry.isDirectory()) visit(file);
-    else if (/\.(?:[cm]?js|tsx?|json|html|css|md|yml)$/.test(entry.name)) {
+    else if (
+      /\.(?:[cm]?js|tsx?|json|html|css|md|yml|kt|java|gradle|xml|properties)$/.test(entry.name)
+    ) {
       const source = fs.readFileSync(file, 'utf8');
       if (patterns.some((pattern) => pattern.test(source)))
         throw Error(`Potential secret: inspect ${file}`);

@@ -1,13 +1,15 @@
 # Accepted launch decisions — 27 October 2026
 
-## Current acceptance — Phase 9 continuation
+## Current acceptance — Phase 10 Android
 
-Phase 8 is accepted and complete by explicit owner instruction on 29 October 2026.
-Fetched origin and fast-forwarded local `main == origin/main`, zero ahead/behind,
-at `df2310d7d6cc9dd09830724fc1d37bcc3ad48007`, PR #17's merge, including final
-head `9d01b6c09bb9d0275ff83f021e38ed0d10abad34`. Only Phase 9 is authorized.
-Implementation/review status: [Phase 9](docs/PHASE-9-STATUS.md). Phase 10+, real-data
-cutover and deployment remain gated. Earlier pending-acceptance text is historical.
+Phase 9 implementation is accepted by explicit owner instruction on 29 October 2026.
+Fetched origin and fast-forwarded `main == origin/main`, zero ahead/behind, to
+`0ec4f8c9e56e7f3c3fb20575d2a9fcb790a7bbbc`, merged PR #19, containing final head
+`ade5f36`. Phase 10 only is authorized on `codex/phase-10-android`.
+See [Phase 10](docs/PHASE-10-STATUS.md). Phase 9 live Dropbox, device/resource,
+Firefox/Safari and independent-security release gates remain open; implementation
+acceptance does not assert those results. Phase 11+, cutover, deployment and release
+publication remain gated. Earlier pending-acceptance text is historical.
 
 
 All 24 launch questions are answered. This register records the owner's answers and the choices delegated by “your call.” **It supersedes earlier proposals wherever they differ.** Phase 1 subsequently started at the owner's request; current execution status is in [docs/PHASE-1-STATUS.md](docs/PHASE-1-STATUS.md).

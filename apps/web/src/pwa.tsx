@@ -1,7 +1,9 @@
+import { isNative } from './native.ts';
 import { useEffect, useState } from 'react';
 let registration: Promise<ServiceWorkerRegistration> | undefined;
 export function prepareOffline() {
   return (registration ??= (async () => {
+    if (isNative()) throw Error('Android uses packaged offline assets');
     if (!('serviceWorker' in navigator)) throw Error('Service workers unavailable');
     const previous = await navigator.serviceWorker.getRegistration('/');
     if (
@@ -16,16 +18,18 @@ export function prepareOffline() {
 }
 export function PwaStatus() {
   const [status, setStatus] = useState(
-      import.meta.env.PROD
-        ? 'Checking offline availability…'
-        : 'Offline installation is available in the production build.',
+      isNative()
+        ? 'Offline assets are packaged in this Android app. Updates require an APK signed by the same maintainer.'
+        : import.meta.env.PROD
+          ? 'Checking offline availability…'
+          : 'Offline installation is available in the production build.',
     ),
     [online, setOnline] = useState(navigator.onLine);
   useEffect(() => {
     const network = () => setOnline(navigator.onLine);
     window.addEventListener('online', network);
     window.addEventListener('offline', network);
-    if (import.meta.env.PROD && 'serviceWorker' in navigator)
+    if (!isNative() && import.meta.env.PROD && 'serviceWorker' in navigator)
       void (async () => {
         const r = await prepareOffline();
         const check = () =>
@@ -55,7 +59,7 @@ export function PwaStatus() {
           }
         }
       })().catch((e) => setStatus('Offline setup unavailable: ' + (e as Error).message));
-    else if (import.meta.env.PROD)
+    else if (!isNative() && import.meta.env.PROD)
       setStatus('Offline installation is unavailable in this browser.');
     return () => {
       window.removeEventListener('online', network);
