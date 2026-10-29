@@ -11,6 +11,7 @@ import {
 } from '../../../packages/sync-providers/src/dropbox.ts';
 import {
   setupContent,
+  rewrapContent,
   unlockContent,
   encryptContent,
   decryptContent,
@@ -46,6 +47,10 @@ export function SyncTools({
     [joinWord, setJoinWord] = useState(''),
     [encryption, setEncryption] = useState<{ setup: ContentSetup; key: CryptoKey } | undefined>(),
     [wizard, setWizard] = useState(false),
+    [changingCredentials, setChangingCredentials] = useState(false),
+    [currentCredential, setCurrentCredential] = useState(''),
+    [currentRecovery, setCurrentRecovery] = useState(false),
+    [confirmPass, setConfirmPass] = useState(''),
     [pass, setPass] = useState(''),
     [pending, setPending] = useState<Awaited<ReturnType<typeof setupContent>> | null>(null),
     [recovery, setRecovery] = useState(''),
@@ -189,6 +194,10 @@ export function SyncTools({
       setRejoin(false);
       setJoinBackup('');
       setJoinWord('');
+      setChangingCredentials(false);
+      setCurrentCredential('');
+      setCurrentRecovery(false);
+      setConfirmPass('');
     }
   };
   return (
@@ -265,6 +274,15 @@ export function SyncTools({
       )}
       {encryption && (
         <>
+          <button
+            disabled={blocked || active || !connected}
+            onClick={() => {
+              setChangingCredentials(true);
+              setWizard(true);
+            }}
+          >
+            Change passphrase and recovery kit
+          </button>
           <p>
             Content key unlocked for this tab. Encryption takes effect on Dropbox only after Apply
             reviewed sync.
@@ -533,6 +551,15 @@ export function SyncTools({
       {wizard && (
         <Modal title="Protect cloud content" close={close}>
           <p role="status">{status}</p>
+          {changingCredentials && (
+            <p>
+              Change credentials after completing a reviewed encrypted sync. The old recovery code
+              will not unlock the new cloud manifest. Keep old kits for old backups. This keeps the
+              same content key: it does not revoke a lost device, its token, or its cached copies.
+              Cancel does not undo a possible cloud commit after an interruption; preview again and
+              use the newly saved kit.
+            </p>
+          )}
           <p>
             AES-GCM protects journal content, drawings and media on future uploads. Local IndexedDB,
             earlier plaintext Dropbox revisions and downloaded plaintext files stay readable. Keep
@@ -541,6 +568,27 @@ export function SyncTools({
           </p>
           {!pending ? (
             <>
+              {changingCredentials && (
+                <>
+                  <label>
+                    <input
+                      type="checkbox"
+                      checked={currentRecovery}
+                      onChange={(e) => setCurrentRecovery(e.target.checked)}
+                    />
+                    Authenticate with current recovery code
+                  </label>
+                  <label>
+                    Current passphrase or recovery code
+                    <input
+                      type="password"
+                      autoComplete="off"
+                      value={currentCredential}
+                      onChange={(e) => setCurrentCredential(e.target.value)}
+                    />
+                  </label>
+                </>
+              )}
               <label>
                 New encryption passphrase
                 <input
@@ -550,12 +598,38 @@ export function SyncTools({
                   onChange={(e) => setPass(e.target.value)}
                 />
               </label>
+              {changingCredentials && (
+                <label>
+                  Confirm new passphrase
+                  <input
+                    type="password"
+                    autoComplete="new-password"
+                    value={confirmPass}
+                    onChange={(e) => setConfirmPass(e.target.value)}
+                  />
+                </label>
+              )}
               <button
-                disabled={busy || pass.length < 12}
+                disabled={
+                  busy ||
+                  pass.length < 12 ||
+                  (changingCredentials && (!currentCredential || confirmPass !== pass))
+                }
                 onClick={() =>
                   void run(async () => {
-                    setPending(await setupContent(pass));
+                    setPending(
+                      changingCredentials && encryption
+                        ? await rewrapContent(
+                            encryption.setup,
+                            currentCredential,
+                            currentRecovery,
+                            pass,
+                          )
+                        : await setupContent(pass),
+                    );
                     setPass('');
+                    setCurrentCredential('');
+                    setConfirmPass('');
                   })
                 }
               >
@@ -594,7 +668,7 @@ export function SyncTools({
               <button
                 disabled={busy || !savedRecovery || !confirmation}
                 onClick={() =>
-                  void run(async () => {
+                  void run(async (signal) => {
                     const key = await unlockContent(pending.setup, confirmation, true);
                     const probe = await encryptContent(
                       'recovery verification',
@@ -607,14 +681,27 @@ export function SyncTools({
                       'recovery verification'
                     )
                       throw Error('Recovery verification failed');
-                    await projection.db.saveKeyPolicy(pending.setup);
+                    if (changingCredentials) {
+                      if (!encryption) throw Error('Unlock current credentials first');
+                      await new SyncEngine(projection.db, port()).rotateCredentials(
+                        encryption,
+                        { setup: pending.setup, key },
+                        signal,
+                      );
+                    } else await projection.db.saveKeyPolicy(pending.setup);
                     setPolicy(pending.setup);
                     setEncryption({ setup: pending.setup, key });
                     setWizard(false);
                     setPending(null);
                     setConfirmation('');
                     setSavedRecovery(false);
-                    setStatus('Recovery verified · preview sync to enable encrypted uploads');
+                    setStatus(
+                      changingCredentials
+                        ? 'Credential change verified on Dropbox · new passphrase and recovery kit active'
+                        : 'Recovery verified · preview sync to enable encrypted uploads',
+                    );
+                    setChangingCredentials(false);
+                    setCurrentRecovery(false);
                   })
                 }
               >
@@ -625,6 +712,9 @@ export function SyncTools({
           <button disabled={busy} onClick={close}>
             Cancel encryption setup
           </button>
+          {busy && changingCredentials && pending && (
+            <button onClick={() => controller.current?.abort()}>Interrupt credential update</button>
+          )}
         </Modal>
       )}
       {unlock && (

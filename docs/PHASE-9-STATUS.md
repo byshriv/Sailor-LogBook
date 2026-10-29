@@ -24,8 +24,10 @@ not implemented. Limits: 64 MiB backup / 96 MiB encrypted wire; memory based.
 
 Before phase acceptance: real two-device Dropbox OAuth/expiry/race/offline/migration
 rehearsal, owner interaction review, physical-device/WASM/storage budgets and Firefox
-evidence. Independent security review is unavailable. Passphrase/recovery/content-key
-rotation and lost-device workflows remain a Phase 9 security gap; Delete everywhere
+evidence. Independent security review is unavailable. Passphrase/recovery-kit changes
+are implemented as a combined verified rewrap flow. Keep the same passphrase when
+only replacing the recovery kit. Content-key rotation and lost-device workflows
+remain a Phase 9 security gap; Delete everywhere
 requires its own generation/tombstone and partial-failure evidence. Native trusted
 unlock belongs to the authorized-later Phase 10 adapter and is not claimed here.
 Do not label the Phase 9 launch gate complete based on synthetic tests alone.

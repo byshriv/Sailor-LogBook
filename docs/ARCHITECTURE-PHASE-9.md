@@ -119,12 +119,28 @@ current session key. Unlocking an old backup does not replace current sync key p
 
 Lock forgets this tab's key; it does not encrypt/hide IndexedDB or clear local content.
 Disconnect only forgets this tab's provider token. No local/cloud erasure flow is shipped.
-Passphrase/recovery/content-key rotation UI, lost-device revocation and Delete everywhere
-remain unimplemented security requirements, not implied guarantees. The code refuses
+Content-key rotation, lost-device revocation and Delete everywhere remain unimplemented
+security requirements, not implied guarantees. The code refuses
 unreviewed remote generation changes; explicit device rejoin needs a matching external
 backup, verified local recovery, typed JOIN and retained old sync journal. Encryption
 policy remains enforced. Phase 8 damaged-store rescue clears sync metadata and creates
 a new actor; returning rescued data always enters first-join/tombstone review.
+
+The combined passphrase/recovery-kit change authenticates the current passphrase or
+recovery code, verifies the new passphrase, and requires saved recovery-code reentry.
+It rewraps the same master using fresh salt/nonces and a new recovery secret. Users
+can keep their passphrase when only replacing their recovery kit. Current encrypted
+copies must already have a reviewed, verified sync with no pending local operations.
+The change verifies local recovery, retains the old incoming copy, persists an upload
+intent, and revision-checks a complete re-encrypted manifest. Independent read-back and
+payload/media validation precede one local transaction updating policy and anchor while
+archiving the old policy. Failure retains old policy and a retryable intent; exact
+read-back recovers an uncertain successful change without another write. Other devices
+cannot upload using old wrappers over the new manifest. Old backups retain their own
+wrappers and original unlock routes. This changes credentials, not the content key:
+cached keys, provider tokens and historical ciphertext remain accessible to their holders.
+Interrupting or canceling after upload is not a rollback; reconnect/preview using the
+newly saved kit to determine the outcome.
 
 ## Compatibility and limits
 

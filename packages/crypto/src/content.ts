@@ -110,6 +110,41 @@ export async function unlockContent(setup: ContentSetup, value: string, recovery
     bytes.fill(0);
   }
 }
+// Rewrap the existing master. This changes credentials, not the content key or device access.
+export async function rewrapContent(
+  setup: ContentSetup,
+  credential: string,
+  recovery: boolean,
+  newPass: string,
+) {
+  validate(setup);
+  if (newPass.length < 12) throw Error('Use a passphrase of at least 12 characters');
+  const master = await open(
+    recovery ? setup.recovery : setup.passphrase,
+    recovery ? await aes(await parseRecovery(credential)) : await passKey(credential, setup.salt),
+    (recovery ? 'slb-wrap-recovery:' : 'slb-wrap-pass:') + setup.id,
+  );
+  const secret = random(32);
+  try {
+    if (master.length !== 32) throw Error('Invalid content key');
+    const salt = encode64(random(16));
+    const next: ContentSetup = {
+      ...setup,
+      salt,
+      passphrase: await seal(master, await passKey(newPass, salt), 'slb-wrap-pass:' + setup.id),
+      recovery: await seal(master, await aes(secret), 'slb-wrap-recovery:' + setup.id),
+    };
+    const key = await aes(master),
+      check = await unlockContent(next, newPass);
+    const probe = await encryptContent('verified credential change', key, next, next.id);
+    if ((await decryptContent(probe, check, next, next.id)) !== 'verified credential change')
+      throw Error('New passphrase verification failed');
+    return { setup: next, key, code: await recoveryCode(secret) };
+  } finally {
+    master.fill(0);
+    secret.fill(0);
+  }
+}
 async function recoveryCode(secret: Uint8Array<ArrayBuffer>) {
   const hash = new Uint8Array(await crypto.subtle.digest('SHA-256', secret));
   return (

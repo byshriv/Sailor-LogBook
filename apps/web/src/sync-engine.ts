@@ -37,6 +37,7 @@ interface Journal {
     encrypted: boolean;
     legacyRevision?: string | null;
     base: Logbook;
+    policy?: ContentSetup;
   };
 }
 export interface SyncPreview {
@@ -109,6 +110,7 @@ export class SyncEngine {
         actor,
         i.baseline,
         i.ids,
+        i.policy,
       );
     }
     if (manifest?.mode === 'encrypted' && !key)
@@ -212,6 +214,102 @@ export class SyncEngine {
       error = (e as Error).message;
     }
     return { state, conflicts: merged.conflicts, error, featureReview };
+  }
+  async rotateCredentials(
+    current: { setup: ContentSetup; key: CryptoKey },
+    replacement: { setup: ContentSetup; key: CryptoKey },
+    signal?: AbortSignal,
+  ) {
+    const p = await this.preview(current.key, signal);
+    if (!p.file || !p.manifest || !p.cloud || p.manifest.mode !== 'encrypted' || !p.anchor)
+      throw Error('Complete a reviewed encrypted sync before changing credentials');
+    // An uncertain earlier upload is recovered by preview's byte-exact intent read-back.
+    if (
+      canonical(p.manifest.setup) === canonical(replacement.setup) &&
+      canonical(await this.db.keyPolicy()) === canonical(replacement.setup)
+    )
+      return { revision: p.file.revision, state: p.local.state };
+    if (
+      canonical(p.manifest.setup) !== canonical(current.setup) ||
+      replacement.setup.id !== current.setup.id ||
+      canonical(await this.db.keyPolicy()) !== canonical(current.setup) ||
+      p.anchor.revision !== p.file.revision ||
+      canonical(p.anchor.base) !== canonical(p.cloud.state) ||
+      canonical(p.local.state.entities) !== canonical(p.cloud.state.entities) ||
+      canonical(p.local.state.archive) !== canonical(p.cloud.state.archive) ||
+      (await this.db.pending()).length
+    )
+      throw Error('Sync and review current copies before changing credentials');
+    const probe = await encryptContent(
+      'same content key',
+      current.key,
+      current.setup,
+      p.manifest.generation,
+    );
+    if (
+      (await decryptContent(probe, replacement.key, current.setup, p.manifest.generation)) !==
+      'same content key'
+    )
+      throw Error('Replacement must preserve the verified content key');
+    const id = 'credentials:' + crypto.randomUUID();
+    await this.db.recovery(id, 'before passphrase/recovery change');
+    if (canonical(await this.db.recoverySnapshot(id)) !== p.baseline)
+      throw Error('Recovery verification failed');
+    await this.db.retainSyncSource(p.cloud.source);
+    const next: Manifest = {
+      ...p.manifest,
+      setup: replacement.setup,
+      payload: await encryptContent(
+        p.cloud.source,
+        replacement.key,
+        replacement.setup,
+        p.manifest.generation,
+      ),
+    };
+    const raw = JSON.stringify(next);
+    await this.db.saveSyncJournal(
+      {
+        anchor: p.anchor,
+        incoming: p.cloud.source,
+        intent: {
+          actor: p.actor,
+          raw,
+          baseline: p.baseline,
+          ids: [],
+          generation: p.manifest.generation,
+          encrypted: true,
+          base: p.cloud.state,
+          legacyRevision: p.legacyRevision,
+          policy: replacement.setup,
+        },
+      },
+      p.actor,
+    );
+    if (
+      signal?.aborted ||
+      ((await this.port.legacyRevision?.(signal)) ?? null) !== p.legacyRevision
+    )
+      throw Error('Credential change interrupted; retry');
+    const revision = await this.port.write(raw, p.file.revision, signal);
+    const check = await this.port.read(signal);
+    if (
+      signal?.aborted ||
+      check?.raw !== raw ||
+      check.revision !== revision ||
+      ((await this.port.legacyRevision?.(signal)) ?? null) !== p.legacyRevision
+    )
+      throw Error('Credential change not verified; retry');
+    await previewBackup(
+      await decryptContent(next.payload, replacement.key, replacement.setup, next.generation),
+    );
+    await this.db.finishSync(
+      { anchor: { ...p.anchor, revision }, incoming: p.cloud.source },
+      p.actor,
+      p.baseline,
+      [],
+      replacement.setup,
+    );
+    return { revision, state: p.local.state };
   }
   async apply(
     p: SyncPreview,

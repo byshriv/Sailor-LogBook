@@ -255,11 +255,36 @@ export async function openLogbook(
           throw Error('Local generation changed; join again');
         tx.objectStore('meta').put(structuredClone(value), 'sync-v2');
       }),
-    finishSync: (value: unknown, expectedActor: string, expectedState: string, ids: string[]) =>
+    finishSync: (
+      value: unknown,
+      expectedActor: string,
+      expectedState: string,
+      ids: string[],
+      keyPolicy?: unknown,
+    ) =>
       transaction('readwrite', async (tx) => {
         const head = await verify(tx);
         if (head.actor !== expectedActor || canonical(head.state) !== expectedState)
           throw Error('Local copy changed; sync again');
+        if (keyPolicy !== undefined) {
+          const previous = await req(tx.objectStore('meta').get('content-key-v1'));
+          const id = 'key-policy:' + crypto.randomUUID();
+          tx.objectStore('migration').add(
+            {
+              id,
+              previous,
+              replacement: structuredClone(keyPolicy),
+              reason: 'Verified credential rotation',
+            },
+            id,
+          );
+          tx.objectStore('meta').put(structuredClone(keyPolicy), 'content-key-v1');
+          if (
+            canonical(await req(tx.objectStore('meta').get('content-key-v1'))) !==
+            canonical(keyPolicy)
+          )
+            throw Error('Key policy persistence failed');
+        }
         for (const id of ids) {
           const r = await req(tx.objectStore('receipts').get(id));
           if (!r) throw Error('Unknown sync acknowledgement');

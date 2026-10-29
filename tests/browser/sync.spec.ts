@@ -235,3 +235,61 @@ test('fresh browser unlocks an encrypted cloud and joins without encryption down
     await context.close();
   }
 });
+
+test('credential change authenticates current key, verifies replacement kit and commits only after review', async ({
+  page,
+}) => {
+  const cloud = await mocked(page);
+  await connect(page);
+  const region = page.getByRole('region', { name: 'Dropbox synchronization' });
+  await page.getByRole('button', { name: 'Set up optional encryption' }).click();
+  await page.getByLabel('New encryption passphrase').fill('synthetic original passphrase');
+  await page.getByRole('button', { name: 'Create recovery kit' }).click();
+  const originalCode = await page.getByLabel('Printable recovery code').inputValue();
+  await page.getByLabel('I saved the file or printed the code privately').check();
+  await page.getByLabel('Re-enter saved recovery code').fill(originalCode);
+  await page.getByRole('button', { name: 'Verify recovery and use key' }).click();
+  await page.getByRole('button', { name: 'Preview Dropbox sync' }).click();
+  await page.getByRole('button', { name: 'Apply reviewed sync' }).click();
+  await expect(region).toContainText('Synced ·');
+  const before = JSON.parse(cloud.read()!);
+  await page.getByRole('button', { name: 'Change passphrase and recovery kit' }).click();
+  await expect(page.getByRole('dialog')).toContainText('does not revoke a lost device');
+  await page.getByLabel('Current passphrase or recovery code').fill('incorrect');
+  await page.getByLabel('New encryption passphrase').fill('synthetic replacement passphrase');
+  await page.getByLabel('Confirm new passphrase').fill('synthetic replacement passphrase');
+  await page.getByRole('button', { name: 'Create recovery kit' }).click();
+  await expect(page.getByRole('dialog')).toContainText('Not synced');
+  expect(JSON.parse(cloud.read()!).setup).toEqual(before.setup);
+  await page
+    .getByLabel('Current passphrase or recovery code')
+    .fill('synthetic original passphrase');
+  await page.getByRole('button', { name: 'Create recovery kit' }).click();
+  const replacementCode = await page.getByLabel('Printable recovery code').inputValue();
+  expect(replacementCode).not.toBe(originalCode);
+  await page.getByLabel('I saved the file or printed the code privately').check();
+  await page.getByLabel('Re-enter saved recovery code').fill(originalCode);
+  await page.getByRole('button', { name: 'Verify recovery and use key' }).click();
+  await expect(page.getByRole('dialog')).toBeVisible();
+  expect(JSON.parse(cloud.read()!).setup).toEqual(before.setup);
+  await page.getByLabel('Re-enter saved recovery code').fill(replacementCode);
+  await page.getByRole('button', { name: 'Verify recovery and use key' }).click();
+  await expect(region).toContainText('Credential change verified on Dropbox');
+  const after = JSON.parse(cloud.read()!);
+  expect(after.generation).toBe(before.generation);
+  expect(after.setup.id).toBe(before.setup.id);
+  expect(after.setup.salt).not.toBe(before.setup.salt);
+  await page.getByRole('button', { name: 'Lock logbook', exact: true }).click();
+  await page.getByRole('button', { name: 'Unlock configured key' }).click();
+  await page
+    .getByLabel('Encryption passphrase', { exact: true })
+    .fill('synthetic original passphrase');
+  await page.getByRole('button', { name: 'Unlock for this tab' }).click();
+  await expect(page.getByRole('dialog')).toBeVisible();
+  await page
+    .getByLabel('Encryption passphrase', { exact: true })
+    .fill('synthetic replacement passphrase');
+  await page.getByRole('button', { name: 'Unlock for this tab' }).click();
+  await expect(page.getByRole('dialog')).not.toBeVisible();
+  expect(cloud.errors).toEqual([]);
+});

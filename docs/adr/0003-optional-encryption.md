@@ -1,5 +1,14 @@
 # ADR 0003: optional encryption, recovery and rotation
 
+Current implementation update, 29 October 2026: Phase 9 now provides full-content
+encryption and a combined passphrase/recovery-kit rewrap flow. Current credential
+authentication, verified replacement passphrase/recovery, local recovery, CAS manifest
+replacement and independent read-back precede atomic local policy/anchor replacement.
+Uncertain commits recover from the durable exact-byte intent. The master stays the
+same; this does not revoke lost-device keys/tokens. Content-key rotation/native trust
+remain open. See ../ARCHITECTURE-PHASE-9.md and ../VERIFICATION-PHASE-9.md. Earlier
+feasibility-only wording below is historical where superseded.
+
 Accepted contract; hash-wasm 4.12.0 Argon2id is the selected feasibility candidate as of
 28 October 2026. See docs/REVIEW-2026-10-28.md. Production format/device budgets remain open
 for the encryption phase; this is not an enabled encrypted-sync implementation.

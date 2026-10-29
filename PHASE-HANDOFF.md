@@ -83,7 +83,8 @@ app-folder permissions/CORS, expiry/offline/races and owner interaction review r
 Physical Android/Safari/WASM/memory/storage and independent security review are unverified.
 Local Firefox previously fails before app launch; record fresh verification honestly.
 
-Passphrase/recovery/content-key rotation UI and lost-device workflows are not implemented.
+Passphrase/recovery-kit changes are implemented in the follow-up below. Content-key
+rotation and lost-device workflows remain unimplemented.
 Delete everywhere/local erase are not shipped; erasure must prove generation barriers and
 partial failures before making stale-device guarantees. Trusted native Android unlock
 requires the later Phase 10 adapter; no Keystore/trust behavior is simulated here.
@@ -111,3 +112,24 @@ Shared deletion barriers survive empty joins and same-generation rollback requir
 When combined featured moments exceed four, every text is retained in Notebook and that
 day becomes unfeatured for the existing Home chooser; unrelated sync continues.
 README.md and DEPLOY.md should be the only dirty files after documentation is committed.
+
+## Credential-change follow-up — 29 October 2026
+
+Implemented the next Phase 9 code gap: combined passphrase/recovery-kit changes through
+current credential authentication, new passphrase verification and saved-code reentry.
+Use the same passphrase when replacing only the recovery kit. Complete reviewed encrypted
+sync before changing credentials. CAS/read-back and local recovery protect the change;
+policy/anchor update atomically and archive old wrappers. Uncertain success resumes from
+the durable upload intent. An interruption does not undo a possible cloud commit: use the
+new kit and preview again. Old backups remain readable with their original kit.
+
+This keeps the existing content master, key ID and logbook generation. It does not revoke
+a lost device's keys/tokens or protect earlier cached/provider copies. Content-key
+rotation, lost-device and erasure workflows remain Phase 9 work. No Phase 10/deployment.
+
+Verification: 91 foundation tests, 18 sync/backup Chromium/WebKit checks, final focused
+credential checks 2/2 and final production PWA 2/2 pass. Typecheck, boundaries, formatting,
+whitespace, narrow secret scan and all 37 frozen hashes pass. Exact separate reports and
+final build hashes are in docs/VERIFICATION-PHASE-9.md. Current cache is
+`slb-production-0bc79a32554be5f1`. Owner README/DEPLOY diffs remain byte-identical and
+excluded. This follow-up is local; Phase 9 owner/live exit acceptance remains pending.

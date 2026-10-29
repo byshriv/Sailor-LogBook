@@ -95,3 +95,47 @@ verification evidence, not an invented single full run at the later commit.
 Fresh final fetch still shows `main == origin/main`, zero ahead/behind at `df2310d`.
 Only the three source review commits and the final documentation commit are local.
 Phase 9 owner acceptance/live exit gates remain pending; do not start Phase 10 or deploy.
+
+## Credential-change follow-up — 29 October 2026
+
+The next scoped Phase 9 step implements combined passphrase/recovery-kit replacement.
+Settings → Dropbox synchronization → Change passphrase and recovery kit requires an
+unlocked key and connection. Complete a reviewed encrypted sync first. Authenticate
+with the current passphrase or recovery code, confirm the new passphrase, save the new
+kit and re-enter its code. Keep the same passphrase if only replacing the recovery kit.
+
+The master/key ID and logbook generation remain unchanged. Fresh salt/nonces/wrappers
+and recovery secret replace the credentials, and full content is re-encrypted because
+AAD binds the setup. The engine verifies that the replacement preserves the master.
+Before CAS upload it verifies local recovery, retains the old cloud source and persists
+an exact-byte intent. Independent provider read-back and content/media validation must
+succeed before policy and anchor change atomically, with the old policy retained in an
+unaged migration archive. Failed writes/transactions retain old policy; uncertain
+successful writes recover from exact read-back without another upload. An interruption
+is not a rollback. The newly saved kit/passphrase can unlock the updated cloud copy.
+Old-wrapper clients cannot upload over the new manifest through ordinary sync. Old
+backup files remain readable using their own old kit/passphrase. No key/token revocation,
+remote erasure, live Dropbox pass or independent security audit is implied.
+
+Validation for this follow-up:
+
+- `npm run verify:foundation`: typecheck, boundaries, **91 foundation tests** and build pass.
+- Six new foundation cases cover current/replacement secrets, unchanged master/old backups,
+  CAS conflicts, pending local edits, uncertain writes/cancellation, atomic quota rollback
+  and rejection of a different content master.
+- Sync and backup browser suite: **18 pass** across Chromium/WebKit, including the new
+  credential-change flow. Report: `build/browser-phase9-credentials-sync-backup.json`.
+- After adding the explicit interruption control: final focused credential browser tests
+  **2 pass**; production PWA **2 pass**. Reports: `build/browser-phase9-credentials-final.json`
+  and `build/pwa-results.json`. This is targeted follow-up evidence, not a new full 110-case run.
+- Formatting, whitespace, narrow secret scan and all 37 frozen hashes pass.
+- No fresh Firefox pass is claimed; its earlier pre-launch Windows failure remains.
+- Owner README/DEPLOY hashes match the preceding record exactly and remain excluded.
+
+Final follow-up artifact cache: `slb-production-0bc79a32554be5f1` (28 assets).
+`build/foundation/index.html` SHA-256:
+`e80f2484475dc0811beba0a45cdc472f985b77df3a6f9232be5d0d166f9834bc`.
+`build/foundation/sw-production.js` SHA-256:
+`d5790e4540247599fa6a134ada4fdd84007e90919895a25fc082fdc6c0cbf19d`.
+No deployment or Phase 10 work. Content-key rotation/lost-device and erasure workflows,
+physical-resource/security review and live Dropbox rehearsal remain open.
