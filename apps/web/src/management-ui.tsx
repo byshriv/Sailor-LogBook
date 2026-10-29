@@ -257,7 +257,7 @@ export const shortcutGroups = [
       ['← / →', 'Previous / next calendar period'],
       ['+ / − / 0', 'Zoom in / out / reset'],
       ['Ctrl + scroll', 'Zoom around pointer'],
-      ['Ctrl/Cmd S', 'Sync status (transport arrives in Phase 9)'],
+      ['Ctrl/Cmd S', 'Local pending status and Dropbox review'],
     ],
   ],
 ] as const;
@@ -379,6 +379,27 @@ export function GlobalTools({
     [notice, setNotice] = useState(''),
     [deleting, setDeleting] = useState<Entity | null>(null),
     [undo, setUndo] = useState('');
+  const [syncNotice, setSyncNotice] = useState('Checking local pending operations…');
+  useEffect(() => {
+    if (panel !== 'sync') return;
+    let canceled = false;
+    void Promise.all([projection.db.pending(), projection.db.erasureStatus()])
+      .then(([pending, erasure]) => {
+        if (!canceled)
+          setSyncNotice(
+            erasure
+              ? 'Erasure review is active. Ordinary synchronization is paused.'
+              : `${pending.length} local operation(s) pending. Cloud freshness has not been checked here.`,
+          );
+      })
+      .catch(() => {
+        if (!canceled)
+          setSyncNotice('Local pending status unavailable; open Settings recovery tools.');
+      });
+    return () => {
+      canceled = true;
+    };
+  }, [panel, projection, state]);
   const audio = useRef<AudioContext | null>(null);
   const saving = useRef(false),
     tour = Number(new URLSearchParams(location.search).get('tour'));
@@ -751,10 +772,13 @@ export function GlobalTools({
       )}
       {panel === 'sync' && (
         <Modal title="Sync status" close={() => setPanel('')}>
+          <p role="status">{syncNotice}</p>
           <p>
-            Saved on this device. Dropbox transport and existing-logbook joining arrive in Phase 9.
-            Sync will work before optional encryption setup. This review has no cloud connection.
+            Open Settings to connect Dropbox and review synchronization. Sync works before optional
+            encryption setup. Tokens and unlocked keys stay in memory; navigating to another screen
+            or reloading requires reconnecting. No transfer runs while this app is closed.
           </p>
+          <a href="/?phase=9&tool=help#sync">Open Dropbox synchronization</a>
         </Modal>
       )}
       {panel === 'shortcuts' && (

@@ -26,7 +26,9 @@ async function mocked(page: any, initial: string | null = null) {
   page.on('pageerror', (e: Error) => errors.push(e.message));
   let raw: string | null = initial,
     revision = initial ? 1 : 0,
-    rejectRead = false;
+    rejectRead = false,
+    failure = 503,
+    reads = 0;
   await page.route('https://api.dropboxapi.com/oauth2/token', (route: any) =>
     route.fulfill({ json: { access_token: 'synthetic-token', expires_in: 3600 } }),
   );
@@ -38,7 +40,8 @@ async function mocked(page: any, initial: string | null = null) {
   );
   await page.route('https://content.dropboxapi.com/2/files/**', async (route: any) => {
     if (route.request().url().endsWith('/download')) {
-      if (rejectRead) return route.fulfill({ status: 503, body: 'unavailable' });
+      reads++;
+      if (rejectRead) return route.fulfill({ status: failure, body: 'unavailable' });
       return raw === null
         ? route.fulfill({
             status: 409,
@@ -63,6 +66,11 @@ async function mocked(page: any, initial: string | null = null) {
   return {
     errors,
     read: () => raw,
+    reads: () => reads,
+    fail: (status: number) => {
+      rejectRead = true;
+      failure = status;
+    },
     offline: (value: boolean) => {
       rejectRead = value;
     },
@@ -360,5 +368,95 @@ test('lost-device key replacement verifies backup and new kit while old backups 
   await page.getByLabel('Recovery code', { exact: true }).fill(nextCode);
   await page.getByRole('button', { name: 'Unlock for this tab' }).click();
   await expect(page.getByRole('dialog')).not.toBeVisible();
+  expect(cloud.errors).toEqual([]);
+});
+
+test('scheduled checks wait for drafts, react only after durable saves and never upload without review', async ({
+  page,
+}) => {
+  const cloud = await mocked(page);
+  await connect(page);
+  await page.clock.install();
+  const checks = page.getByLabel(
+    'Check on return, after saved edits and every minute here; changes require review',
+  );
+  await checks.check();
+  await page.getByRole('button', { name: 'Edit profile', exact: true }).click();
+  await page.getByLabel('Your name').fill('Unsaved scheduled draft');
+  await page.clock.runFor(10000);
+  expect(cloud.reads()).toBe(0);
+  expect(cloud.read()).toBeNull();
+  await page.getByRole('button', { name: 'Save profile', exact: true }).click();
+  await expect(page.getByRole('dialog')).not.toBeVisible();
+  await page.clock.runFor(3000);
+  await expect(page.getByRole('dialog', { name: 'Dropbox sync preview' })).toBeVisible();
+  expect(cloud.read()).toBeNull();
+  await page.getByRole('button', { name: 'Cancel preview' }).click();
+  const reads = cloud.reads();
+  await page.evaluate(() => window.dispatchEvent(new Event('focus')));
+  await page.clock.runFor(3000);
+  await expect(page.getByRole('dialog', { name: 'Dropbox sync preview' })).toBeVisible();
+  expect(cloud.reads()).toBeGreaterThan(reads);
+  expect(cloud.read()).toBeNull();
+  expect(cloud.errors).toEqual([]);
+});
+
+test('temporary scheduled read failures back off and stop after bounded retries; authorization does not retry', async ({
+  page,
+}) => {
+  const cloud = await mocked(page);
+  await connect(page);
+  await page.clock.install();
+  const region = page.getByRole('region', { name: 'Dropbox synchronization' });
+  const checks = page.getByLabel(
+    'Check on return, after saved edits and every minute here; changes require review',
+  );
+  cloud.offline(true);
+  await checks.check();
+  for (const [index, delay] of [3000, 5000, 15000, 60000].entries()) {
+    await page.clock.runFor(delay);
+    await expect.poll(() => cloud.reads()).toBe(index + 1);
+    await expect(region).toContainText('Not synced');
+    await expect(checks).toBeEnabled();
+  }
+  await expect(checks).not.toBeChecked();
+  await expect(region).toContainText('Automatic checks paused');
+  await page.clock.runFor(300000);
+  expect(cloud.reads()).toBe(4);
+  cloud.fail(401);
+  await checks.check();
+  await page.clock.runFor(3000);
+  await expect.poll(() => cloud.reads()).toBe(5);
+  await expect(checks).not.toBeChecked();
+  await page.clock.runFor(300000);
+  expect(cloud.reads()).toBe(5);
+  expect(cloud.read()).toBeNull();
+  expect(cloud.errors).toEqual([]);
+});
+
+test('shared sync status reports local pending work and reconnect limits on every production screen', async ({
+  page,
+}) => {
+  const cloud = await mocked(page);
+  await connect(page);
+  await page.getByRole('button', { name: 'Edit profile', exact: true }).click();
+  await page.getByLabel('Your name').fill('Local pending status');
+  await page.getByRole('button', { name: 'Save profile', exact: true }).click();
+  await expect(page.getByRole('dialog')).not.toBeVisible();
+  for (const phase of ['3', '4', '5', '6', '9&tool=help']) {
+    await page.goto('/?phase=' + phase);
+    await expect(page.getByRole('button', { name: 'Search', exact: true })).toBeVisible();
+    await page.keyboard.press('Control+s');
+    const modal = page.getByRole('dialog', { name: 'Sync status' });
+    await expect(modal).toContainText(/[1-9]\d* local operation\(s\) pending/);
+    await expect(modal).toContainText('Cloud freshness has not been checked');
+    await expect(modal).toContainText('requires reconnecting');
+    await expect(modal.getByRole('link', { name: 'Open Dropbox synchronization' })).toHaveAttribute(
+      'href',
+      '/?phase=9&tool=help#sync',
+    );
+    await page.keyboard.press('Escape');
+  }
+  expect(cloud.reads()).toBe(0);
   expect(cloud.errors).toEqual([]);
 });

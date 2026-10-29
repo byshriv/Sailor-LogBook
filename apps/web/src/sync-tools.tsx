@@ -8,6 +8,7 @@ import {
   beginDropbox,
   finishDropbox,
   DropboxPort,
+  DropboxReadError,
 } from '../../../packages/sync-providers/src/dropbox.ts';
 import {
   setupContent,
@@ -25,6 +26,8 @@ import { ErasureTools } from './erasure-tools.tsx';
 import { NewCloudEngine } from './new-cloud-engine.ts';
 import type { NewCloudPreview } from './new-cloud-engine.ts';
 import { erasureMarker } from '../../../packages/sync-core/src/erasure.ts';
+import { ReviewScheduler } from './sync-scheduler.ts';
+import type { ReviewResult } from './sync-scheduler.ts';
 
 let access: { token: string; expires: number } | null = null;
 export function SyncTools({
@@ -85,6 +88,11 @@ export function SyncTools({
     [erasureComplete, setErasureComplete] = useState(projection.erasure?.phase === 'complete');
   const stoppedWaiters = useRef<(() => void)[]>([]);
   const intentionalNavigation = useRef(false);
+  const scheduler = useRef<ReviewScheduler | null>(null),
+    scheduledRunning = useRef(false),
+    scheduledReview = useRef<() => Promise<ReviewResult>>(async () => ({ kind: 'stop' })),
+    draftBlocked = useRef(blocked);
+  draftBlocked.current = blocked;
   const running = useRef(false),
     controller = useRef<AbortController | null>(null),
     initialized = useRef(false);
@@ -133,13 +141,14 @@ export function SyncTools({
         throw Error('Dropbox session expired; reconnect');
       return access.token;
     }, globalThis.fetch.bind(globalThis));
-  const run = async (fn: (signal: AbortSignal) => Promise<void>) => {
-    if (running.current) return;
+  const run = async (fn: (signal: AbortSignal) => Promise<void>): Promise<ReviewResult> => {
+    if (running.current) return { kind: 'stop' };
     running.current = true;
     setBusy(true);
     controller.current = new AbortController();
     try {
       await fn(controller.current.signal);
+      return { kind: 'done' };
     } catch (error) {
       const message = error instanceof Error ? error.message : '';
       const action = /new.cloud|New.cloud|fresh empty|Retire and review/.test(message)
@@ -156,6 +165,12 @@ export function SyncTools({
                   ? 'Unlock/recovery verification failed; check the saved secret.'
                   : 'Operation failed, canceled, locked or Dropbox changed. Retry preview or reconnect.';
       setStatus('Not synced · ' + action + ' Existing data and review are retained.');
+      if (controller.current.signal.aborted) return { kind: 'done' };
+      return error instanceof DropboxReadError && error.transient
+        ? { kind: 'retry', after: error.retryAfter }
+        : error instanceof TypeError && /fetch|network|load failed/i.test(message)
+          ? { kind: 'retry' }
+          : { kind: 'stop' };
     } finally {
       await projection.refresh().catch(() => {});
       setNewCloudPending(
@@ -195,6 +210,7 @@ export function SyncTools({
         return;
       }
       const cloud = await port().read(signal);
+      if (signal.aborted || draftBlocked.current) return;
       if (cloud && erasureMarker(cloud.raw)) {
         setCloudErased(true);
         setStatus(
@@ -218,16 +234,62 @@ export function SyncTools({
         return;
       }
       const p = await new SyncEngine(projection.db, port()).preview(encryption?.key, signal);
+      if (signal.aborted || draftBlocked.current) return;
       setPreview(p);
       setChoices({});
       setLegacyReviewed(false);
       setStatus('Preview only · review before uploading or merging');
     });
+  scheduledReview.current = async () => {
+    scheduledRunning.current = true;
+    try {
+      return await check();
+    } finally {
+      scheduledRunning.current = false;
+    }
+  };
   useEffect(() => {
-    if (!schedule || !connected || blocked || active) return;
-    const timer = setTimeout(() => void check(), 60000);
-    return () => clearTimeout(timer);
-  }, [schedule, connected, blocked, active]);
+    const review = new ReviewScheduler(
+      () => scheduledReview.current(),
+      () => {
+        setSchedule(false);
+        setStatus((s) => s + ' Automatic checks paused; review manually or enable checks again.');
+      },
+    );
+    scheduler.current = review;
+    const remove = projection.onDurable(() => review.request());
+    return () => {
+      remove();
+      review.dispose();
+      controller.current?.abort();
+    };
+  }, [projection]);
+  useEffect(() => {
+    const update = () => {
+      const eligible = !blocked && !active && !document.hidden && navigator.onLine;
+      scheduler.current?.update(schedule && connected && !erasureComplete, eligible);
+      if ((document.hidden || !navigator.onLine || blocked) && scheduledRunning.current)
+        controller.current?.abort();
+    };
+    const returned = () => {
+      update();
+      if (!document.hidden && navigator.onLine) scheduler.current?.request();
+    };
+    update();
+    window.addEventListener('online', returned);
+    window.addEventListener('offline', update);
+    window.addEventListener('focus', returned);
+    document.addEventListener('visibilitychange', returned);
+    return () => {
+      window.removeEventListener('online', returned);
+      window.removeEventListener('offline', update);
+      window.removeEventListener('focus', returned);
+      document.removeEventListener('visibilitychange', returned);
+    };
+  }, [schedule, connected, blocked, active, erasureComplete]);
+  useEffect(() => {
+    if (!blocked) scheduler.current?.request();
+  }, [blocked]);
   const plan = preview ? new SyncEngine(projection.db, port()).plan(preview, choices) : null;
   const close = () => {
     if (!busy) {
@@ -310,8 +372,13 @@ export function SyncTools({
               disabled={blocked || active}
               onChange={(e) => setSchedule(e.target.checked)}
             />
-            Check every minute while this screen is open; changes require review
+            Check on return, after saved edits and every minute here; changes require review
           </label>
+          <p>
+            Automatic checks wait for drafts and dialogs, pause offline or when hidden, and use up
+            to three delayed retries for temporary read failures. They never apply a merge. Reload
+            or screen navigation requires reconnecting and enabling checks again.
+          </p>
           <button
             disabled={
               blocked ||

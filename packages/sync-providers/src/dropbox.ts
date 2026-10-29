@@ -1,5 +1,22 @@
 // HTTP is injected: no browser globals, credentials on disk, or journal-bearing errors.
 export type Http = (input: string, init?: RequestInit) => Promise<Response>;
+export class DropboxReadError extends Error {
+  readonly retryAfter: number;
+  readonly status: number;
+  constructor(message: string, status: number, headers: Headers) {
+    super(message);
+    this.status = status;
+    const value = headers.get('Retry-After') ?? '';
+    // HTTP-date delays use the server's Date to avoid local wall-clock skew.
+    const delay = /^\d+$/.test(value)
+      ? Number(value) * 1000
+      : Date.parse(value) - Date.parse(headers.get('Date') ?? '');
+    this.retryAfter = Number.isFinite(delay) ? Math.max(0, delay) : 0;
+  }
+  get transient() {
+    return this.status === 429 || this.status >= 500;
+  }
+}
 export interface CloudFile {
   revision: string;
   raw: string;
@@ -111,7 +128,12 @@ export class DropboxPort implements CloudPort {
       const e = await r.json();
       if (e?.error?.['.tag'] === 'path' && e.error.path?.['.tag'] === 'not_found') return null;
     }
-    if (!r.ok) throw Error('Dropbox read failed (' + r.status + '); retry or reconnect');
+    if (!r.ok)
+      throw new DropboxReadError(
+        'Dropbox read failed (' + r.status + '); retry or reconnect',
+        r.status,
+        r.headers,
+      );
     const metadata = JSON.parse(r.headers.get('Dropbox-API-Result') ?? '{}');
     if (typeof metadata.rev !== 'string') throw Error('Dropbox revision missing');
     if (Number(r.headers.get('Content-Length')) > 96 * 1024 * 1024)
@@ -132,7 +154,12 @@ export class DropboxPort implements CloudPort {
       const e = await r.json();
       if (e?.error?.['.tag'] === 'path' && e.error.path?.['.tag'] === 'not_found') return null;
     }
-    if (!r.ok) throw Error('Legacy Dropbox revision check failed; reconnect with metadata access');
+    if (!r.ok)
+      throw new DropboxReadError(
+        'Legacy Dropbox revision check failed; reconnect with metadata access',
+        r.status,
+        r.headers,
+      );
     const m = await r.json();
     if (typeof m.rev !== 'string') throw Error('Legacy Dropbox revision missing');
     return m.rev;
