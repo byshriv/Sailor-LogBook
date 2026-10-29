@@ -145,6 +145,29 @@ export async function rewrapContent(
     secret.fill(0);
   }
 }
+export async function replaceContentKey(
+  setup: ContentSetup,
+  credential: string,
+  recovery: boolean,
+  newPass: string,
+) {
+  // Authenticate the old wrapper before generating a completely independent master/kit.
+  await unlockContent(setup, credential, recovery);
+  const next = await setupContent(newPass),
+    check = await unlockContent(next.setup, newPass);
+  const probe = await encryptContent(
+    'verified independent master',
+    next.key,
+    next.setup,
+    next.setup.id,
+  );
+  if (
+    (await decryptContent(probe, check, next.setup, next.setup.id)) !==
+    'verified independent master'
+  )
+    throw Error('New passphrase verification failed');
+  return next;
+}
 async function recoveryCode(secret: Uint8Array<ArrayBuffer>) {
   const hash = new Uint8Array(await crypto.subtle.digest('SHA-256', secret));
   return (

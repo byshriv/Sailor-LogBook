@@ -12,6 +12,7 @@ import {
 import {
   setupContent,
   rewrapContent,
+  replaceContentKey,
   unlockContent,
   encryptContent,
   decryptContent,
@@ -48,6 +49,10 @@ export function SyncTools({
     [encryption, setEncryption] = useState<{ setup: ContentSetup; key: CryptoKey } | undefined>(),
     [wizard, setWizard] = useState(false),
     [changingCredentials, setChangingCredentials] = useState(false),
+    [changingContentKey, setChangingContentKey] = useState(false),
+    [rotationBackup, setRotationBackup] = useState(''),
+    [providerReviewed, setProviderReviewed] = useState(false),
+    [rotationWord, setRotationWord] = useState(''),
     [currentCredential, setCurrentCredential] = useState(''),
     [currentRecovery, setCurrentRecovery] = useState(false),
     [confirmPass, setConfirmPass] = useState(''),
@@ -195,6 +200,10 @@ export function SyncTools({
       setJoinBackup('');
       setJoinWord('');
       setChangingCredentials(false);
+      setChangingContentKey(false);
+      setRotationBackup('');
+      setProviderReviewed(false);
+      setRotationWord('');
       setCurrentCredential('');
       setCurrentRecovery(false);
       setConfirmPass('');
@@ -282,6 +291,16 @@ export function SyncTools({
             }}
           >
             Change passphrase and recovery kit
+          </button>
+          <button
+            disabled={blocked || active || !connected}
+            onClick={() => {
+              setChangingCredentials(true);
+              setChangingContentKey(true);
+              setWizard(true);
+            }}
+          >
+            Replace content key / lost device
           </button>
           <p>
             Content key unlocked for this tab. Encryption takes effect on Dropbox only after Apply
@@ -551,7 +570,7 @@ export function SyncTools({
       {wizard && (
         <Modal title="Protect cloud content" close={close}>
           <p role="status">{status}</p>
-          {changingCredentials && (
+          {changingCredentials && !changingContentKey && (
             <p>
               Change credentials after completing a reviewed encrypted sync. The old recovery code
               will not unlock the new cloud manifest. Keep old kits for old backups. This keeps the
@@ -559,6 +578,83 @@ export function SyncTools({
               Cancel does not undo a possible cloud commit after an interruption; preview again and
               use the newly saved kit.
             </p>
+          )}
+          {changingContentKey && (
+            <>
+              <h3>Replace the content key</h3>
+              <p>
+                First review Dropbox access:{' '}
+                <a
+                  href="https://help.dropbox.com/security/unknown-device-linked"
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  secure devices, web sessions and connected apps
+                </a>
+                . Revoke untrusted access and reconnect this tab if needed. This app cannot identify
+                or revoke another device's token.
+              </p>
+              <p>
+                A new key and cloud generation will protect the next complete upload. Other devices
+                must unlock the new kit and explicitly rejoin. Local databases, old backups, cached
+                keys and earlier Dropbox versions remain accessible to their holders. This does not
+                erase a lost device or stop a still-authorized malicious Dropbox writer. Cancel
+                after an interrupted upload is not a rollback.
+              </p>
+              <label>
+                <input
+                  type="checkbox"
+                  checked={providerReviewed}
+                  disabled={busy}
+                  onChange={(e) => setProviderReviewed(e.target.checked)}
+                />
+                I reviewed untrusted Dropbox access and reconnected if needed
+              </label>
+              <label>
+                Verify current external backup for key replacement
+                <input
+                  type="file"
+                  accept="application/json,.json"
+                  disabled={busy || !!pending}
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    e.target.value = '';
+                    if (file)
+                      void run(async () => {
+                        if (file.size > 96 * 1024 * 1024) throw Error('Backup transfer limit');
+                        let raw = await file.text();
+                        const b = JSON.parse(raw);
+                        if (b.format === 'slb-encrypted-backup') {
+                          if (b.version !== 1 || !encryption)
+                            throw Error('Unlock current backup first');
+                          raw = await decryptContent(
+                            b.payload,
+                            encryption.key,
+                            b.setup,
+                            b.generation,
+                          );
+                        }
+                        const verified = await previewBackup(raw);
+                        if (
+                          verified.legacy ||
+                          canonical(verified.state) !== canonical(await projection.db.load())
+                        )
+                          throw Error('Backup must match current local copy');
+                        setRotationBackup(raw);
+                        setStatus('Current external backup verified for content-key replacement');
+                      });
+                  }}
+                />
+              </label>
+              <label>
+                Type ROTATE to replace the content key
+                <input
+                  value={rotationWord}
+                  disabled={busy}
+                  onChange={(e) => setRotationWord(e.target.value)}
+                />
+              </label>
+            </>
           )}
           <p>
             AES-GCM protects journal content, drawings and media on future uploads. Local IndexedDB,
@@ -613,13 +709,15 @@ export function SyncTools({
                 disabled={
                   busy ||
                   pass.length < 12 ||
-                  (changingCredentials && (!currentCredential || confirmPass !== pass))
+                  (changingCredentials && (!currentCredential || confirmPass !== pass)) ||
+                  (changingContentKey &&
+                    (!rotationBackup || !providerReviewed || rotationWord !== 'ROTATE'))
                 }
                 onClick={() =>
                   void run(async () => {
                     setPending(
                       changingCredentials && encryption
-                        ? await rewrapContent(
+                        ? await (changingContentKey ? replaceContentKey : rewrapContent)(
                             encryption.setup,
                             currentCredential,
                             currentRecovery,
@@ -666,7 +764,12 @@ export function SyncTools({
                 <textarea value={confirmation} onChange={(e) => setConfirmation(e.target.value)} />
               </label>
               <button
-                disabled={busy || !savedRecovery || !confirmation}
+                disabled={
+                  busy ||
+                  !savedRecovery ||
+                  !confirmation ||
+                  (changingContentKey && (!providerReviewed || rotationWord !== 'ROTATE'))
+                }
                 onClick={() =>
                   void run(async (signal) => {
                     const key = await unlockContent(pending.setup, confirmation, true);
@@ -683,11 +786,19 @@ export function SyncTools({
                       throw Error('Recovery verification failed');
                     if (changingCredentials) {
                       if (!encryption) throw Error('Unlock current credentials first');
-                      await new SyncEngine(projection.db, port()).rotateCredentials(
-                        encryption,
-                        { setup: pending.setup, key },
-                        signal,
-                      );
+                      if (changingContentKey)
+                        await new SyncEngine(projection.db, port()).rotateContentKey(
+                          encryption,
+                          { setup: pending.setup, key },
+                          rotationBackup,
+                          signal,
+                        );
+                      else
+                        await new SyncEngine(projection.db, port()).rotateCredentials(
+                          encryption,
+                          { setup: pending.setup, key },
+                          signal,
+                        );
                     } else await projection.db.saveKeyPolicy(pending.setup);
                     setPolicy(pending.setup);
                     setEncryption({ setup: pending.setup, key });
@@ -696,11 +807,17 @@ export function SyncTools({
                     setConfirmation('');
                     setSavedRecovery(false);
                     setStatus(
-                      changingCredentials
-                        ? 'Credential change verified on Dropbox · new passphrase and recovery kit active'
-                        : 'Recovery verified · preview sync to enable encrypted uploads',
+                      changingContentKey
+                        ? 'Content key replaced · cloud generation verified; other devices must rejoin. Old copies remain.'
+                        : changingCredentials
+                          ? 'Credential change verified on Dropbox · new passphrase and recovery kit active'
+                          : 'Recovery verified · preview sync to enable encrypted uploads',
                     );
                     setChangingCredentials(false);
+                    setChangingContentKey(false);
+                    setRotationBackup('');
+                    setProviderReviewed(false);
+                    setRotationWord('');
                     setCurrentRecovery(false);
                   })
                 }

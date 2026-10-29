@@ -38,6 +38,7 @@ interface Journal {
     legacyRevision?: string | null;
     base: Logbook;
     policy?: ContentSetup;
+    transition?: 'content-key';
   };
 }
 export interface SyncPreview {
@@ -80,22 +81,43 @@ export class SyncEngine {
     const file = await this.port.read(signal);
     const legacyRevision = (await this.port.legacyRevision?.(signal)) ?? null;
     const manifest = file ? readManifest(file.raw) : null;
+    const currentBaseline = canonical(await this.db.load());
+    const resumable =
+      journal?.intent &&
+      file?.raw === journal.intent.raw &&
+      actor === journal.intent.actor &&
+      (currentBaseline === journal.intent.baseline ||
+        (journal.intent.transition === 'content-key' && journal.intent.ids.length === 0));
     if (journal?.anchor && journal.anchor.actor !== actor)
       throw Error('Rescued local generation requires a new join');
-    if (journal?.anchor && (!manifest || manifest.generation !== journal.anchor.generation))
+    if (
+      journal?.anchor &&
+      (!manifest || manifest.generation !== journal.anchor.generation) &&
+      !resumable
+    )
       throw Error(
         'Cloud generation missing or changed; export local backup and explicitly join again',
       );
     if (journal?.anchor?.encrypted && manifest?.mode !== 'encrypted')
       throw Error('Encryption downgrade refused');
-    // An uncertain upload is acknowledged only after byte-exact provider read-back, never on timeout.
-    if (
-      journal?.intent &&
-      file?.raw === journal.intent.raw &&
-      actor === journal.intent.actor &&
-      canonical(await this.db.load()) === journal.intent.baseline
-    ) {
+    if (manifest?.mode === 'encrypted' && !key)
+      throw Error('Encrypted Dropbox copy is locked; unlock before joining');
+    const raw = manifest
+      ? manifest.mode === 'encrypted'
+        ? await decryptContent(manifest.payload, key!, manifest.setup!, manifest.generation)
+        : manifest.payload
+      : null;
+    const cloud = raw ? await previewBackup(raw) : null;
+    if (cloud?.legacy) throw Error('Legacy data requires the backup migration preview');
+    // Validate the exact incoming state/media before recovering an uncertain generation change.
+    if (resumable && journal?.intent && file && manifest) {
       const i = journal.intent;
+      if (
+        i.generation !== manifest.generation ||
+        canonical(i.base) !== canonical(cloud?.state) ||
+        (i.policy && canonical(i.policy) !== canonical(manifest.setup))
+      )
+        throw Error('Upload intent verification failed');
       await this.db.finishSync(
         {
           anchor: {
@@ -108,20 +130,11 @@ export class SyncEngine {
           },
         },
         actor,
-        i.baseline,
+        currentBaseline,
         i.ids,
         i.policy,
       );
     }
-    if (manifest?.mode === 'encrypted' && !key)
-      throw Error('Encrypted Dropbox copy is locked; unlock before joining');
-    const raw = manifest
-      ? manifest.mode === 'encrypted'
-        ? await decryptContent(manifest.payload, key!, manifest.setup!, manifest.generation)
-        : manifest.payload
-      : null;
-    const cloud = raw ? await previewBackup(raw) : null;
-    if (cloud?.legacy) throw Error('Legacy data requires the backup migration preview');
     const local = await previewBackup(await exportBackup(this.db));
     const current = await this.db.load();
     if (canonical(current) !== canonical(local.state))
@@ -220,18 +233,43 @@ export class SyncEngine {
     replacement: { setup: ContentSetup; key: CryptoKey },
     signal?: AbortSignal,
   ) {
-    const p = await this.preview(current.key, signal);
+    return this.changeEncryption(current, replacement, false, undefined, signal);
+  }
+  async rotateContentKey(
+    current: { setup: ContentSetup; key: CryptoKey },
+    replacement: { setup: ContentSetup; key: CryptoKey },
+    externalBackup: string,
+    signal?: AbortSignal,
+  ) {
+    return this.changeEncryption(current, replacement, true, externalBackup, signal);
+  }
+  private async changeEncryption(
+    current: { setup: ContentSetup; key: CryptoKey },
+    replacement: { setup: ContentSetup; key: CryptoKey },
+    newMaster: boolean,
+    externalBackup?: string,
+    signal?: AbortSignal,
+  ) {
+    if (newMaster && replacement.setup.id === current.setup.id)
+      throw Error('A new content key ID is required');
+    const remote = newMaster ? await this.port.read(signal) : null;
+    const useReplacement =
+      remote && canonical(readManifest(remote.raw).setup) === canonical(replacement.setup);
+    const p = await this.preview(useReplacement ? replacement.key : current.key, signal);
     if (!p.file || !p.manifest || !p.cloud || p.manifest.mode !== 'encrypted' || !p.anchor)
       throw Error('Complete a reviewed encrypted sync before changing credentials');
     // An uncertain earlier upload is recovered by preview's byte-exact intent read-back.
     if (
       canonical(p.manifest.setup) === canonical(replacement.setup) &&
+      (!newMaster || p.manifest.generation === replacement.setup.id) &&
       canonical(await this.db.keyPolicy()) === canonical(replacement.setup)
     )
       return { revision: p.file.revision, state: p.local.state };
     if (
       canonical(p.manifest.setup) !== canonical(current.setup) ||
-      replacement.setup.id !== current.setup.id ||
+      (newMaster
+        ? replacement.setup.id === current.setup.id
+        : replacement.setup.id !== current.setup.id) ||
       canonical(await this.db.keyPolicy()) !== canonical(current.setup) ||
       p.anchor.revision !== p.file.revision ||
       canonical(p.anchor.base) !== canonical(p.cloud.state) ||
@@ -240,32 +278,44 @@ export class SyncEngine {
       (await this.db.pending()).length
     )
       throw Error('Sync and review current copies before changing credentials');
+    if (newMaster) {
+      if (!externalBackup || canonical((await previewBackup(externalBackup)).state) !== p.baseline)
+        throw Error('Verify a current external backup before replacing the content key');
+    }
     const probe = await encryptContent(
       'same content key',
       current.key,
       current.setup,
       p.manifest.generation,
     );
-    if (
-      (await decryptContent(probe, replacement.key, current.setup, p.manifest.generation)) !==
-      'same content key'
-    )
-      throw Error('Replacement must preserve the verified content key');
+    let sameKey = false;
+    try {
+      sameKey =
+        (await decryptContent(probe, replacement.key, current.setup, p.manifest.generation)) ===
+        'same content key';
+    } catch {
+      /* An independent new master must fail authentication under the old master. */
+    }
+    if (newMaster ? sameKey : !sameKey)
+      throw Error('Replacement content key does not match the requested change');
     const id = 'credentials:' + crypto.randomUUID();
-    await this.db.recovery(id, 'before passphrase/recovery change');
+    await this.db.recovery(
+      id,
+      newMaster ? 'before content-key rotation' : 'before passphrase/recovery change',
+    );
     if (canonical(await this.db.recoverySnapshot(id)) !== p.baseline)
       throw Error('Recovery verification failed');
     await this.db.retainSyncSource(p.cloud.source);
+    const generation = newMaster ? replacement.setup.id : p.manifest.generation;
     const next: Manifest = {
       ...p.manifest,
       setup: replacement.setup,
-      payload: await encryptContent(
-        p.cloud.source,
-        replacement.key,
-        replacement.setup,
-        p.manifest.generation,
-      ),
+      generation,
+      payload: await encryptContent(p.cloud.source, replacement.key, replacement.setup, generation),
     };
+    await previewBackup(
+      await decryptContent(next.payload, replacement.key, replacement.setup, next.generation),
+    );
     const raw = JSON.stringify(next);
     await this.db.saveSyncJournal(
       {
@@ -276,11 +326,12 @@ export class SyncEngine {
           raw,
           baseline: p.baseline,
           ids: [],
-          generation: p.manifest.generation,
+          generation: next.generation,
           encrypted: true,
           base: p.cloud.state,
           legacyRevision: p.legacyRevision,
           policy: replacement.setup,
+          ...(newMaster ? { transition: 'content-key' } : {}),
         },
       },
       p.actor,
@@ -303,7 +354,7 @@ export class SyncEngine {
       await decryptContent(next.payload, replacement.key, replacement.setup, next.generation),
     );
     await this.db.finishSync(
-      { anchor: { ...p.anchor, revision }, incoming: p.cloud.source },
+      { anchor: { ...p.anchor, revision, generation: next.generation }, incoming: p.cloud.source },
       p.actor,
       p.baseline,
       [],
