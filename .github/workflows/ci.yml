@@ -70,10 +70,14 @@ jobs:
           arch: x86_64
           target: google_apis
           disable-animations: true
-          script: cd platforms/android && ./gradlew :app:connectedDebugAndroidTest --no-daemon
+          script: |
+            adb shell input keyevent 82
+            adb shell wm dismiss-keyguard
+            adb shell locksettings set-pin 123456
+            cd platforms/android && ./gradlew :app:connectedDebugAndroidTest --no-daemon
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
-          name: android-phase1-proof-${{ github.sha }}
+          name: android-phase10-debug-${{ github.sha }}
           path: |
             platforms/android/app/build/outputs/apk/debug/*.apk
             platforms/android/app/build/reports/androidTests/
@@ -95,4 +99,4 @@ jobs:
           build-mode: none
           config-file: ./.github/codeql-config.yml
       - uses: github/codeql-action/analyze@9b3254085494b55a0f7c4c2b3d2d52cc712ce370
-# No pull_request_target, deployment, credentials, signing keys or privileged follow-up.
+# Ordinary PR CI remains unprivileged and never signs releases.

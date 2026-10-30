@@ -230,7 +230,14 @@ export async function finishDropbox(
   state: string,
   http: Http,
 ) {
-  if (!pending || state !== pending.state || Date.now() - pending.at > 10 * 60 * 1000 || !code)
+  if (
+    !pending ||
+    !Number.isFinite(pending.at) ||
+    pending.at > Date.now() ||
+    state !== pending.state ||
+    Date.now() - pending.at > 10 * 60 * 1000 ||
+    !code
+  )
     throw Error('Dropbox authorization expired or state mismatch');
   const r = await http('https://api.dropboxapi.com/oauth2/token', {
     method: 'POST',

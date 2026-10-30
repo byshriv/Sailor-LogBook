@@ -3,6 +3,9 @@ import type { PluginListenerHandle } from '@capacitor/core';
 import type { WidgetProjection } from '../../../packages/platform/src/index.ts';
 
 interface NativeWidget {
+  publishCurrent(input: { projection: WidgetProjection }): Promise<{ written: boolean }>;
+  setTextVisibility(input: { show: boolean }): Promise<void>;
+  getTextVisibility(): Promise<{ show: boolean }>;
   publish(input: { projection: WidgetProjection }): Promise<{ written: boolean }>;
   clear(): Promise<void>;
   getLaunchAction(): Promise<{ action: string }>;
@@ -11,7 +14,7 @@ interface NativeWidget {
     listener: (value: { action: string }) => void,
   ): Promise<PluginListenerHandle>;
 }
-const native = registerPlugin<NativeWidget>('WidgetProjection');
+export const native = registerPlugin<NativeWidget>('WidgetProjection');
 export const isNative = () => Capacitor.isNativePlatform();
 export async function publishWidget(projection: WidgetProjection): Promise<void> {
   if (isNative()) await native.publish({ projection });

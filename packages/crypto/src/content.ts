@@ -96,7 +96,12 @@ export async function setupContent(pass: string) {
     secret.fill(0);
   }
 }
-export async function unlockContent(setup: ContentSetup, value: string, recovery = false) {
+export async function unlockContent(
+  setup: ContentSetup,
+  value: string,
+  recovery = false,
+  trust?: (raw: Uint8Array) => Promise<void>,
+) {
   validate(setup);
   const bytes = await open(
     recovery ? setup.recovery : setup.passphrase,
@@ -105,6 +110,7 @@ export async function unlockContent(setup: ContentSetup, value: string, recovery
   );
   try {
     if (bytes.length !== 32) throw Error('Invalid content key');
+    if (trust) await trust(bytes);
     return await aes(bytes);
   } finally {
     bytes.fill(0);

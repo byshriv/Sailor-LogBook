@@ -1,3 +1,5 @@
+import { isNative, native } from './native.ts';
+import { device } from './native-production.ts';
 import { RecoveryScreen } from './recovery-screen.tsx';
 import { DataTools } from './data-tools.tsx';
 import { SyncTools } from './sync-tools.tsx';
@@ -5,6 +7,7 @@ import React, { useEffect, useRef, useState, useSyncExternalStore } from 'react'
 import type { Root } from 'react-dom/client';
 import type { Deck, Edit, Json, Preset } from '../../../packages/domain/src/logbook.ts';
 import {
+  localDate,
   deckEdit,
   deckPath,
   deckRecords,
@@ -109,6 +112,14 @@ function Management({ projection }: { projection: Projection }) {
   const state = useSyncExternalStore(projection.store.subscribe, projection.store.getState),
     p = settings(state),
     profile = preferences(state);
+  const [widgetText, setWidgetText] = useState(false);
+  useEffect(() => {
+    if (isNative())
+      void native
+        .getTextVisibility()
+        .then((v) => setWidgetText(v.show))
+        .catch(() => {});
+  }, []);
   const [query, setQuery] = useState(''),
     [status, setStatus] = useState('Ready · saved on this device'),
     [busy, setBusy] = useState(false),
@@ -232,6 +243,19 @@ function Management({ projection }: { projection: Projection }) {
   };
   const notify = (message: string) => {
     setStatus(message);
+    if (isNative()) {
+      void device
+        .testReminder()
+        .then((v) =>
+          setStatus(
+            v.requested
+              ? 'Test notification requested from Android; check system notifications.'
+              : 'Android notifications are disabled; enable system notifications first.',
+          ),
+        )
+        .catch(() => setStatus('Android test notification unavailable; in-app reminder shown.'));
+      return;
+    }
     if ('Notification' in window && Notification.permission === 'granted')
       try {
         new Notification('Sailor Logbook', { body: message });
@@ -493,9 +517,9 @@ function Management({ projection }: { projection: Projection }) {
                   : 'Daily reminder is off.'}
               </p>
               <p>
-                Works while a logbook tab is open. Browsers may suspend background tabs. Closed-app
-                scheduling is unavailable in this review; Android native reminders arrive in Phase
-                10. Notification permission alone does not schedule reminders.
+                {isNative()
+                  ? 'Android schedules an inexact daily reminder, including while closed. The OS may delay delivery; force-stop blocks delivery until reopening. Logged days are skipped using the latest saved local projection.'
+                  : 'Works while a logbook tab is open. Browsers may suspend background tabs. Closed-app scheduling is unavailable in browsers.'}
               </p>
               <div className={styles.row}>
                 <button disabled={blocked} onClick={openPrefs}>
@@ -510,6 +534,32 @@ function Management({ projection }: { projection: Projection }) {
                 <button
                   disabled={blocked}
                   onClick={async () => {
+                    if (isNative()) {
+                      try {
+                        const result = await device.requestNotifications();
+                        const state = projection.store.getState(),
+                          p = settings(state);
+                        await device.reminders({
+                          enabled: !!p.rem,
+                          time: String(p.rt),
+                          logged: Object.values(state.entities).some(
+                            (e) =>
+                              e.kind === 'activity' &&
+                              e.segments.some((s) => s.date === localDate()),
+                          ),
+                        });
+                        setNotification(
+                          result.granted
+                            ? 'Android notifications enabled; daily reminder is inexact and may be delayed by the OS.'
+                            : 'Android notifications denied or disabled. Enable them in system Settings.',
+                        );
+                      } catch {
+                        setNotification(
+                          'Android notification permission or scheduling unavailable.',
+                        );
+                      }
+                      return;
+                    }
                     if (!('Notification' in window)) {
                       setNotification(
                         'System notifications unavailable. In-app reminders remain available.',
@@ -574,15 +624,35 @@ function Management({ projection }: { projection: Projection }) {
           ) && (
             <section id="capabilities">
               <h2>Platform capabilities</h2>
+              {isNative() && (
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={widgetText}
+                    disabled={blocked}
+                    onChange={(e) => {
+                      const show = e.target.checked;
+                      void native
+                        .setTextVisibility({ show })
+                        .then(() => {
+                          setWidgetText(show);
+                          return projection.refresh();
+                        })
+                        .catch(() => setStatus('Widget privacy setting failed; retry.'));
+                    }}
+                  />
+                  Show best-thing text on this device’s Today widget (off by default)
+                </label>
+              )}
               <p>
                 Web/PWA and iOS/iPadOS 17+ Safari/PWA are launch targets. The production build
                 provides offline installation and deferred updates in Storage & data. Native iOS
                 packaging is later. Actual Safari and phone verification remains pending.
               </p>
               <p>
-                Android 12+ is the product target; 4 GB RAM is recommended. Signed APK, native
-                reminders, protected keys, Quick log and private-by-default Today widgets arrive in
-                Phase 10. Browser previews are not native widgets.
+                Android 12+ is the product target; 4 GB RAM is recommended. Android includes native
+                reminders, optional trusted unlock, document backups and Quick log / Today widgets.
+                Physical-device acceptance remains pending. Browser previews are not native widgets.
               </p>
               <p>
                 Haptic API:{' '}

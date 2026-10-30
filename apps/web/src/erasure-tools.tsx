@@ -1,3 +1,5 @@
+import { isNative } from './native.ts';
+import { device } from './native-production.ts';
 import { useEffect, useRef, useState } from 'react';
 import type { Projection } from './management-ui.tsx';
 import { Modal } from './management-ui.tsx';
@@ -55,6 +57,17 @@ export function ErasureTools({
       running.current = false;
       setBusy(false);
       if (saved?.phase === 'complete') {
+        if (isNative()) {
+          try {
+            await device.forget();
+            await device.reminders({ enabled: false, time: '21:00', logged: false });
+          } catch {
+            setStatus(
+              'Local data cleared; native trust cleanup failed. Reopen to retry before starting a new logbook.',
+            );
+            return;
+          }
+        }
         await projection.refresh();
         onErased();
       }
@@ -89,13 +102,19 @@ export function ErasureTools({
         </p>
         <button
           onClick={() =>
-            void projection.db
-              .startAfterErasure(job.id)
-              .then(() => {
-                projection.db.close();
-                location.assign('/?phase=9&tool=help');
-              })
-              .catch(() => setStatus('New local session could not start; reopen this screen.'))
+            void (async () => {
+              if (isNative()) {
+                await device.forget();
+                await device.reminders({ enabled: false, time: '21:00', logged: false });
+              }
+              await projection.db.startAfterErasure(job.id);
+              projection.db.close();
+              location.assign('/?phase=9&tool=help');
+            })().catch(() =>
+              setStatus(
+                'New local session could not start; native cleanup and storage must succeed. Reopen to retry.',
+              ),
+            )
           }
         >
           Start a new local logbook

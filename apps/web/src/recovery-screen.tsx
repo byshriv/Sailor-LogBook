@@ -49,7 +49,7 @@ export function RecoveryScreen({ db }: { db: LogbookStore }) {
                 );
               return value;
             }
-            downloadText(
+            await downloadText(
               JSON.stringify({
                 format: 'sailor-retained-stores',
                 version: 1,

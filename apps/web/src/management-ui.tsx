@@ -1,3 +1,5 @@
+import { device, restoreTrust } from './native-production.ts';
+import { isNative } from './native.ts';
 import React, {
   createContext,
   useContext,
@@ -409,6 +411,76 @@ export function GlobalTools({
     tour >= 0 &&
     tour < walkthrough.length;
   const [tourOpen, setTourOpen] = useState(hasTour);
+  const nativeBusy = useRef(false),
+    nativePending = useRef('none');
+  const nativeBlocked = useRef(blocked || !!panel || tourOpen);
+  nativeBlocked.current = blocked || !!panel || tourOpen;
+  useEffect(() => {
+    if (!isNative()) return;
+    let disposed = false;
+    const receive = async () => {
+      if (disposed || nativeBlocked.current || nativeBusy.current) return;
+      nativeBusy.current = true;
+      try {
+        if (nativePending.current === 'none')
+          nativePending.current = (await device.takeLaunch()).action;
+        if (disposed || nativeBlocked.current) return;
+        const incoming = nativePending.current;
+        if (incoming === 'quick-log' || incoming === 'today') {
+          const policy = await projection.db.keyPolicy();
+          if (disposed || nativeBlocked.current) return;
+          if (policy) {
+            try {
+              await restoreTrust(policy);
+            } catch {
+              if (disposed || nativeBlocked.current) return;
+              sessionStorage.setItem('slb-native-after-unlock', incoming);
+              nativePending.current = 'none';
+              location.assign('/?phase=9&tool=help&nativeUnlock=1#sync');
+              return;
+            }
+          }
+          if (disposed || nativeBlocked.current) return;
+        }
+        nativePending.current = 'none';
+        if (incoming === 'quick-log') {
+          if (!action?.('new-log')) location.assign('/?phase=3&new=log');
+        } else if (incoming === 'today') {
+          if (!action?.('today')) location.assign('/?phase=3&date=' + localDate());
+        } else if (incoming === 'oauth') {
+          const params = new URLSearchParams(location.search);
+          if (params.get('phase') !== '9' || params.get('tool') !== 'help')
+            location.assign('/?phase=9&tool=help#sync');
+          else window.dispatchEvent(new Event('slb-oauth-return'));
+        } else if (incoming === 'back') {
+          if (history.length > 1) history.back();
+          else await device.minimize();
+        }
+      } catch {
+        setNotice('Native action unavailable; reopen Logbook to retry.');
+      } finally {
+        nativeBusy.current = false;
+        if (disposed && nativePending.current !== 'none')
+          window.dispatchEvent(new Event('slb-native-return'));
+      }
+    };
+    void receive();
+    const retry = () => void receive();
+    window.addEventListener('slb-native-return', retry);
+    const handle = device.addListener('return', retry);
+    return () => {
+      disposed = true;
+      window.removeEventListener('slb-native-return', retry);
+      void handle.then((h) => h.remove());
+    };
+  }, [blocked, panel, tourOpen, action]);
+  useEffect(() => {
+    const error = () =>
+      setNotice('Saved locally; native widget or reminder refresh failed. Reopen to retry.');
+    window.addEventListener('slb-native-error', error);
+    return () => window.removeEventListener('slb-native-error', error);
+  }, []);
+
   const p = settings(state);
   useEffect(() => {
     const remember = (e: PointerEvent) => {
@@ -522,6 +594,7 @@ export function GlobalTools({
   }, [tour, tourOpen]);
   useEffect(() => {
     const tick = async () => {
+      if (isNative()) return;
       const latest = projection.store.getState();
       if (blocked || panel || tourOpen || saving.current || !reminderDue(latest, new Date()))
         return;

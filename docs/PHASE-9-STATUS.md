@@ -1,5 +1,11 @@
 # Phase 9 status — 29 October 2026
 
+**Current acceptance:** Phase 9 implementation accepted by owner instruction on 29 October
+2026; PR #19 merged as `0ec4f8c` with final head `ade5f36`. All unresolved live-account,
+platform/resource/security release gates below carry forward. Phase 10 is authorized;
+this does not waive Phase 13 review or authorize release/deployment. Historical handoff:
+[Phase 9 handoff](PHASE-9-HANDOFF.md). Earlier pending-acceptance statements are historical.
+
 Implemented for review on `codex/phase-9-sync`, based on fetched/current main
 `df2310d7d6cc9dd09830724fc1d37bcc3ad48007` (merged PR #17, final head `9d01b6c`).
 Phase 8 is accepted and complete by explicit owner instruction. Phase 9 acceptance

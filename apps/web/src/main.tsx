@@ -185,7 +185,7 @@ if (
   new URLSearchParams(location.search).get('phase') === '7' ||
   new URLSearchParams(location.search).get('phase') === '8' ||
   new URLSearchParams(location.search).get('phase') === '9' ||
-  (import.meta.env.PROD && !isNative() && !new URLSearchParams(location.search).has('phase'))
+  ((import.meta.env.PROD || isNative()) && !new URLSearchParams(location.search).has('phase'))
 ) {
   void import('./management.tsx').then(({ startManagement }) => startManagement(root));
 } else if (new URLSearchParams(location.search).get('phase') === '6') {

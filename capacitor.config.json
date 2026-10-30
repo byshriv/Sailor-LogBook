@@ -1,6 +1,10 @@
 {
-  "appId": "work.shriv.sailorlogbook.proof",
-  "appName": "Logbook Proof",
+  "appId": "work.shriv.sailorlogbook",
+  "appName": "Logbook",
   "webDir": "build/foundation",
-  "android": { "path": "platforms/android" }
+  "android": {
+    "path": "platforms/android",
+    "webContentsDebuggingEnabled": false
+  },
+  "loggingBehavior": "none"
 }

@@ -21,6 +21,17 @@ class WidgetProjectionPlugin : Plugin() {
             call.resolve(JSObject().put("written", written))
         } catch (_: Exception) { call.reject("Invalid projection or native storage failure") }
     }
+    @PluginMethod fun publishCurrent(call: PluginCall) {
+        try {
+            val input = call.getObject("projection") ?: throw IllegalArgumentException()
+            val written = ProjectionStore(context).publishCurrent(input)
+            ProofWidgets.refresh(context)
+            call.resolve(JSObject().put("written", written))
+        } catch (_: Exception) { call.reject("Native projection unavailable") }
+    }
+    @PluginMethod fun getTextVisibility(call: PluginCall) {
+        call.resolve(JSObject().put("show", ProjectionStore(context).textVisibility()))
+    }
     @PluginMethod fun clear(call: PluginCall) {
         ProjectionStore(context).clear(); ProofWidgets.refresh(context); call.resolve()
     }
