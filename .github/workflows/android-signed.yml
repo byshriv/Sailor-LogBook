@@ -27,7 +27,7 @@ jobs:
         run: |
           gh api "repos/$GITHUB_REPOSITORY/environments/android-signing" > "$RUNNER_TEMP/environment.json"
           jq -e '.deployment_branch_policy.protected_branches == true and any(.protection_rules[]; .type == "required_reviewers" and (.reviewers | length) > 0)' "$RUNNER_TEMP/environment.json"
-      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
         with:
           node-version-file: .node-version
           cache: npm
